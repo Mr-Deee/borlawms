@@ -20,6 +20,7 @@ import 'dart:math';
 import '../Assistant/assistantmethods.dart';
 import '../configMaps.dart';
 import '../main.dart';
+import 'forgotpassword.dart';
 import 'homepage.dart';
 
 class signin extends StatefulWidget {
@@ -205,10 +206,15 @@ class _signinState extends State<signin> {
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                builder: (context) => ForgotPasswordPage(),
+                            ),);
                             HapticFeedback.lightImpact();
-                            Fluttertoast.showToast(
-                              msg: 'Forgotten password! button pressed',
-                            );
+                            // Fluttertoast.showToast(
+                            //   msg: 'Forgotten password! button pressed',
+                            // );
                           },
                       ),
                     ),
