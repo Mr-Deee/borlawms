@@ -1,5 +1,4 @@
-import 'package:borla_client/pages/progressdialog.dart';
-import 'package:borla_client/pages/signup.dart';
+
 // import 'package:borla_client/pages/smscode.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -10,8 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_signin_button/flutter_signin_button.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:flutter_sms/flutter_sms.dart';
 import 'package:permission_handler/permission_handler.dart';

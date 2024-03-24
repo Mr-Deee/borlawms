@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:borla_client/Model/WMSDB.dart';
-import 'package:borla_client/pages/progressdialog.dart';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -12,6 +11,7 @@ import 'package:provider/provider.dart';
 
 import '../Assistant/assistantmethods.dart';
 import '../Assistant/mapKitAssistant.dart';
+import '../Model/WMSDB.dart';
 import '../configMaps.dart';
 import '../main.dart';
 import 'CollectFareDialog.dart';
