@@ -2,7 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../Model/Client.dart';
+import '../Model/WMSDB.dart';
+
 
 class Profilepg extends StatefulWidget {
   const Profilepg({super.key});

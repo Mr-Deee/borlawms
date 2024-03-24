@@ -1,6 +1,7 @@
-import 'package:borla_client/pages/signin.dart';
+import 'package:borlawms/pages/signin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:introduction_screen/introduction_screen.dart';
 
 
 
@@ -39,7 +40,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   Widget build(BuildContext context) {
 
     const bodyStyle = TextStyle(fontSize: 15.0);
-    const pageDecoration = const PageDecoration(
+    const pageDecoration =  PageDecoration(
       pageColor: Colors.white,
       titleTextStyle: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w700),
       bodyTextStyle: bodyStyle,

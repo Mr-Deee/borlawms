@@ -55,6 +55,9 @@ dependencies:
   google_fonts: ^6.2.1
   flutter_polyline_points: ^2.0.0
   introduction_screen: ^3.1.14
+  animate_do: ^3.3.4
+  bouncing_widget: ^2.0.0
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_test:

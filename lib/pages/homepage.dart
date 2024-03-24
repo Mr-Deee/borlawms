@@ -14,8 +14,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../CustomDrawer.dart';
-import '../Model/Client.dart';
 import '../Model/Users.dart';
+import '../Model/WMSDB.dart';
 import '../Model/appstate.dart';
 import '../Model/otherUserModel.dart';
 import '../configMaps.dart';

@@ -1,5 +1,7 @@
 
 // import 'package:borla_client/pages/smscode.dart';
+import 'package:borlawms/pages/progressdialog.dart';
+import 'package:borlawms/pages/signup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -28,7 +30,6 @@ class signin extends StatefulWidget {
 }
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
-final GoogleSignIn googleSignIn = GoogleSignIn();
 final DatabaseReference _userRef =
     FirebaseDatabase.instance.reference().child('users');
 TextEditingController phoneNumberController = TextEditingController();
@@ -59,43 +60,7 @@ Future<void> verifyPhoneNumber() async {
   );
 }
 
-Future<User?> _handleGoogleSignIn(BuildContext context) async {
-  try {
-    final GoogleSignInAccount? googleSignInAccount =
-        await googleSignIn.signIn();
-    final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount!.authentication;
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication.accessToken,
-      idToken: googleSignInAuthentication.idToken,
-    );
 
-    final UserCredential authResult =
-        await _auth.signInWithCredential(credential);
-    final User? user = authResult.user;
-
-    if (user != null) {
-      // Check if the email already exists in the database
-      final emailExists =
-          await checkIfEmailExistsInDatabase(user.email.toString());
-
-      if (!emailExists) {
-        // If the email doesn't exist in the database, write it
-        writeEmailToDatabase(user.uid, user.email.toString());
-      } else {
-        Navigator.pushNamedAndRemoveUntil(
-            context, "/Homepage", (route) => false);
-        // Handle the case where the email already exists in the database
-        print('Email already exists in the database');
-      }
-    }
-
-    return user;
-  } catch (error) {
-    print(error);
-    return null;
-  }
-}
 
 Future<void> writeEmailToDatabase(String userId, String email) async {
   // Write the email to the database under the user's ID
@@ -112,7 +77,6 @@ Future<bool> checkIfEmailExistsInDatabase(String email) async {
 
 class _signinState extends State<signin> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn googleSignIn = GoogleSignIn();
 
   @override
   void initState() {
