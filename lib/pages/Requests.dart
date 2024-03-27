@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../Model/BorlaRequests.dart';
@@ -78,27 +79,26 @@ class _RequestpageState extends State<Requestpage> {
         children: [
           SizedBox(height: 45,),
           Column( children: [Text("Borla Requests",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 23),)]),
-          SizedBox(
-            height: screenWidth / 0.67,
-
-            child: ListView.builder(
-              itemCount: _userRequests.length,
-              itemBuilder: (context, index) {
-                final request = _userRequests[index];
-                return Card(
-                  elevation: 4, // Controls the shadow of the card.
-                  margin: EdgeInsets.all(16), // Margin around the card.
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12), // Rounded corners.
-                  ),
-                  child: ListTile(
-                    title: Text(request.title),
-                    subtitle: Text(request.description),
-                  ),
-                );
-              },
-            ),
-          ),
+         Expanded(
+           child: ListView.builder(
+                itemCount: _userRequests.length,
+                itemBuilder: (context, index) {
+                  final request = _userRequests[index];
+                  return Card(
+                    elevation: 4, // Controls the shadow of the card.
+                    margin: EdgeInsets.all(16), // Margin around the card.
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12), // Rounded corners.
+                    ),
+                    child: ListTile(
+                      title: Text(request.title),
+                      subtitle: Text(request.description),
+                    ),
+                  );
+                },
+              ),
+         ),
+          
 
         ],
       ),
