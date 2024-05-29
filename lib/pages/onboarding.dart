@@ -39,7 +39,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
           title: "We are Borla",
           body:
               'Trash the Waste, Not the Planet! Join our waste management campaign to reduce, '
-              'reuse, and recycle for a cleaner, greener future. 🌍♻️ #TrashTalk #WasteLessLiveMore".',
+              'reuse, and recycle for a cleaner, greener future🌍♻️".',
           image: Image(
             image: AssetImage('assets/images/wms.png'),
           ),
