@@ -30,7 +30,8 @@ void main() async {
     ),
     ChangeNotifierProvider<Users>(
       create: (context) => Users(),
-    ), ChangeNotifierProvider<WMS>(
+    ),
+    ChangeNotifierProvider<WMS>(
       create: (context) => WMS(),
     ),
 
@@ -131,7 +132,7 @@ class MyApp extends StatelessWidget {
           "/About": (context) => AboutPage(),
           // "/OnBoarding": (context) => ,
           "/SignIn": (context) => signin(),
-          "/Profile": (context) => Profilepg(),
+          "/Profile": (context) => ProfilePage(),
           "/Homepage": (context) => homepage(),
           //    "/addproduct":(context)=>addproduct()
         }
