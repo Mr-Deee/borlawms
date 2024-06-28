@@ -1,6 +1,7 @@
 
 import 'package:borlawms/pages/Aboutpage.dart';
 import 'package:borlawms/pages/Profilepage.dart';
+import 'package:borlawms/pages/addwmsdetails.dart';
 import 'package:borlawms/pages/homepage.dart';
 import 'package:borlawms/pages/onboarding.dart';
 import 'package:borlawms/pages/signin.dart';
@@ -125,9 +126,12 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         initialRoute:
-        FirebaseAuth.instance.currentUser == null ? '/Onboarding' : '/Homepage',
+        FirebaseAuth.instance.currentUser == null ? '/addmoredetails' : '/addmoredetails',
+            // '/Homepage',
+        //'/Onboarding'
         routes: {
           "/SignUP": (context) => signup(),
+          "/addmoredetails": (context) => Addwmsdetails(),
           "/Onboarding": (context) => OnBoardingPage(),
           "/About": (context) => AboutPage(),
           // "/OnBoarding": (context) => ,

@@ -15,6 +15,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../main.dart';
+import 'addwmsdetails.dart';
 
 class signup extends StatefulWidget {
   const signup({super.key});
@@ -466,7 +467,7 @@ class _signupState extends State<signup> {
 
 
       Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => signin()),
+          MaterialPageRoute(builder: (context) => Addwmsdetails()),
               (Route<dynamic> route) => false);
     } else {
       Navigator.push(
