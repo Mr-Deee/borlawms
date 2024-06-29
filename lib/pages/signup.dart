@@ -47,12 +47,7 @@ class _signupState extends State<signup> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
 
-            Container(
-              width: 159.0, // Adjust the width as needed
-              height: 120, // Adjust the height as needed
-              child: Image.asset(
-                'assets/images/wms.png',
-              ),),
+
 
 
             Row(
@@ -104,180 +99,159 @@ class _signupState extends State<signup> {
                 // ),
 
                 //Username
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Container(
+                    height: size.width / 7,
 
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        height: size.width / 7,
-                        width: size.width /2.2,
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(right: size.width / 30),
-                        decoration: BoxDecoration(
-                          color: Colors.grey,
-                          borderRadius: BorderRadius.circular(20),
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(right: size.width / 30),
+                    decoration: BoxDecoration(
+                      color:  Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: TextField(
+                      style: TextStyle(
+                        color: Colors.grey,                      ),
+                      controller: _usernamecontroller,
+                      // onChanged: (value){
+                      //   _firstName = value;
+                      // },
+                      // obscureText: isPassword,
+                      // keyboardType: isEmail ? TextInputType.name : TextInputType.text,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.account_circle_outlined,
+                          color:  Colors.grey,
                         ),
-                        child: TextField(
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(.9),
-                          ),
-                          controller: _usernamecontroller,
-                          // onChanged: (value){
-                          //   _firstName = value;
-                          // },
-                          // obscureText: isPassword,
-                          // keyboardType: isEmail ? TextInputType.name : TextInputType.text,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.account_circle_outlined,
-                              color: Colors.white.withOpacity(.8),
-                            ),
-                            border: InputBorder.none,
-                            hintMaxLines: 1,
-                            hintText:'UserName',
-                            hintStyle: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white.withOpacity(.5),
-                            ),
-                          ),
+                        border: InputBorder.none,
+                        hintMaxLines: 1,
+                        hintText:'UserName',
+                        hintStyle: TextStyle(
+                          fontSize: 14,
+                          color:  Colors.grey,
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        height: size.width / 7,
-                        width: size.width / 2.2,
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(
-                            right: size.width / 30),
-                        decoration: BoxDecoration(
-                          color: Colors.grey,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: TextField(
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(.9),
-                          ),
-                          controller: _phonecontroller,
-                          // onChanged: (value){
-                          //   _phonecontroller = value as TextEditingController;
-                          // },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Container(
+                    height: size.width / 7,
 
-                          keyboardType:  TextInputType.phone ,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.phone,
-                              color: Colors.white.withOpacity(.9),
-                            ),
-                            border: InputBorder.none,
-                            hintMaxLines: 1,
-                            hintText: 'Phone Number...',
-                            hintStyle: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white.withOpacity(.5),
-                            ),
-                          ),
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(
+                        right: size.width / 30),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: TextField(
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
+                      controller: _phonecontroller,
+                      // onChanged: (value){
+                      //   _phonecontroller = value as TextEditingController;
+                      // },
+
+                      keyboardType:  TextInputType.phone ,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.phone,
+                          color: Colors.grey,
+                        ),
+                        border: InputBorder.none,
+                        hintMaxLines: 1,
+                        hintText: 'Phone Number...',
+                        hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
                         ),
                       ),
                     ),
-                  ],
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Container(
+                    height: size.width / 7,
+
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(
+                        right: size.width / 30),
+                    decoration: BoxDecoration(
+                      color:  Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: TextField(
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
+                      controller: _emailcontroller,
+                      // onChanged: (value){
+                      //   _emailcontroller = value as TextEditingController;
+                      // },
+                      // obscureText: isPassword,
+                      keyboardType:  TextInputType.emailAddress ,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                            Icons.email,
+                            color: Colors.grey
+                        ),
+                        border: InputBorder.none,
+                        hintMaxLines: 1,
+                        hintText: 'Email...',
+                        hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
 
 
-                //email
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        height: size.width / 7,
-                        width: size.width / 2.2,
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(
-                            right: size.width / 30),
-                        decoration: BoxDecoration(
+//pass
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Container(
+                    height: size.width / 7,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(
+                        right: size.width / 30),
+                    decoration: BoxDecoration(
+                      color:  Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: TextField(
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
+                      controller: _passwordcontroller,
+                      obscureText: true,
+                      // onChanged: (value){
+                      //   _passwordcontroller=value as TextEditingController;
+                      // },
+                      // keyboardType: isPassword ? TextInputType.name : TextInputType.text,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.password,
                           color: Colors.grey,
-                          borderRadius: BorderRadius.circular(20),
                         ),
-                        child: TextField(
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(.9),
-                          ),
-                          controller: _emailcontroller,
-                          // onChanged: (value){
-                          //   _emailcontroller = value as TextEditingController;
-                          // },
-                          // obscureText: isPassword,
-                          keyboardType:  TextInputType.emailAddress ,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.email,
-                              color: Colors.white.withOpacity(.8),
-                            ),
-                            border: InputBorder.none,
-                            hintMaxLines: 1,
-                            hintText: 'Email...',
-                            hintStyle: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white.withOpacity(.5),
-                            ),
-                          ),
+                        border: InputBorder.none,
+                        hintMaxLines: 1,
+                        hintText: 'Password...',
+                        hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
                         ),
                       ),
                     ),
-                    //pass
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        height: size.width / 7,
-                        width: size.width / 2.2,
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(
-                            right: size.width / 30),
-                        decoration: BoxDecoration(
-                          color: Colors.grey,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: TextField(
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(.9),
-                          ),
-                          controller: _passwordcontroller,
-                          obscureText: true,
-                          // onChanged: (value){
-                          //   _passwordcontroller=value as TextEditingController;
-                          // },
-                          // keyboardType: isPassword ? TextInputType.name : TextInputType.text,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.password,
-                              color: Colors.white.withOpacity(.8),
-                            ),
-                            border: InputBorder.none,
-                            hintMaxLines: 1,
-                            hintText: 'Password...',
-                            hintStyle: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                // Date of Birth
-                Column(
-                  children: [
-
-
-
-                  ],
-                ),
-
-
 
 
 
