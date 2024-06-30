@@ -43,286 +43,288 @@ class _signupState extends State<signup> {
       //   title: Text("Login Page"),
       // ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-
-
-
-
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top:10,left: 18.0),
-                  child: Text("Sign Up",style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold),),
-                ),
-
-              ],
-            ),
-
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 18.0),
-                  child: Text("Sign Up to continue using the app",style: TextStyle(fontSize: 12,color: Colors.grey)),
-                ),
-              ],
-            ),
-
-
-
-
-            _buildImagePicker(
-              title: 'Rider Image',
-              setImage: (File image) {
-                setState(() {
-                  _riderImage = image;
-                });}),
-
-            Column(
-              mainAxisAlignment:
-              MainAxisAlignment.spaceBetween,
-              children: [
-                // Padding(
-                //   padding: EdgeInsets.only(
-                //     top: size.width * .1,
-                //     bottom: size.width * .1,
-                //   ),
-                //   child: SizedBox(
-                //     height: 70,
-                //     child: Image.asset(
-                //       'assets/images/logo.png',
-                //       // #Image Url: https://unsplash.com/photos/bOBM8CB4ZC4
-                //       fit: BoxFit.fitHeight,
-                //     ),
-                //   ),
-                // ),
-
-                //Username
-                Padding(
-                  padding: const EdgeInsets.all(18.0),
-                  child: Container(
-                    height: size.width / 7,
-
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.only(right: size.width / 30),
-                    decoration: BoxDecoration(
-                      color:  Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: TextField(
-                      style: TextStyle(
-                        color: Colors.grey,                      ),
-                      controller: _usernamecontroller,
-                      // onChanged: (value){
-                      //   _firstName = value;
-                      // },
-                      // obscureText: isPassword,
-                      // keyboardType: isEmail ? TextInputType.name : TextInputType.text,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.account_circle_outlined,
-                          color:  Colors.grey,
-                        ),
-                        border: InputBorder.none,
-                        hintMaxLines: 1,
-                        hintText:'UserName',
-                        hintStyle: TextStyle(
-                          fontSize: 14,
-                          color:  Colors.grey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+          
+          
+          
+          
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top:10,left: 18.0),
+                    child: Text("Sign Up",style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold),),
+                  ),
+          
+                ],
+              ),
+          
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 18.0),
+                    child: Text("Sign Up to continue using the app",style: TextStyle(fontSize: 12,color: Colors.grey)),
+                  ),
+                ],
+              ),
+          
+          
+          
+          
+              _buildImagePicker(
+                title: 'Rider Image',
+                setImage: (File image) {
+                  setState(() {
+                    _riderImage = image;
+                  });}),
+          
+              Column(
+                mainAxisAlignment:
+                MainAxisAlignment.spaceBetween,
+                children: [
+                  // Padding(
+                  //   padding: EdgeInsets.only(
+                  //     top: size.width * .1,
+                  //     bottom: size.width * .1,
+                  //   ),
+                  //   child: SizedBox(
+                  //     height: 70,
+                  //     child: Image.asset(
+                  //       'assets/images/logo.png',
+                  //       // #Image Url: https://unsplash.com/photos/bOBM8CB4ZC4
+                  //       fit: BoxFit.fitHeight,
+                  //     ),
+                  //   ),
+                  // ),
+          
+                  //Username
+                  Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Container(
+                      height: size.width / 7,
+          
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(right: size.width / 30),
+                      decoration: BoxDecoration(
+                        color:  Colors.grey[200],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TextField(
+                        style: TextStyle(
+                          color: Colors.grey,                      ),
+                        controller: _usernamecontroller,
+                        // onChanged: (value){
+                        //   _firstName = value;
+                        // },
+                        // obscureText: isPassword,
+                        // keyboardType: isEmail ? TextInputType.name : TextInputType.text,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(
+                            Icons.account_circle_outlined,
+                            color:  Colors.grey,
+                          ),
+                          border: InputBorder.none,
+                          hintMaxLines: 1,
+                          hintText:'UserName',
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            color:  Colors.grey,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(18.0),
-                  child: Container(
-                    height: size.width / 7,
-
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.only(
-                        right: size.width / 30),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: TextField(
-                      style: TextStyle(
-                        color: Colors.grey,
+                  Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Container(
+                      height: size.width / 7,
+          
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(
+                          right: size.width / 30),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      controller: _phonecontroller,
-                      // onChanged: (value){
-                      //   _phonecontroller = value as TextEditingController;
-                      // },
-
-                      keyboardType:  TextInputType.phone ,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.phone,
+                      child: TextField(
+                        style: TextStyle(
                           color: Colors.grey,
                         ),
-                        border: InputBorder.none,
-                        hintMaxLines: 1,
-                        hintText: 'Phone Number...',
-                        hintStyle: TextStyle(
-                          fontSize: 14,
+                        controller: _phonecontroller,
+                        // onChanged: (value){
+                        //   _phonecontroller = value as TextEditingController;
+                        // },
+          
+                        keyboardType:  TextInputType.phone ,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(
+                            Icons.phone,
+                            color: Colors.grey,
+                          ),
+                          border: InputBorder.none,
+                          hintMaxLines: 1,
+                          hintText: 'Phone Number...',
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+          
+                  Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Container(
+                      height: size.width / 7,
+          
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(
+                          right: size.width / 30),
+                      decoration: BoxDecoration(
+                        color:  Colors.grey[200],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TextField(
+                        style: TextStyle(
                           color: Colors.grey,
                         ),
+                        controller: _emailcontroller,
+                        // onChanged: (value){
+                        //   _emailcontroller = value as TextEditingController;
+                        // },
+                        // obscureText: isPassword,
+                        keyboardType:  TextInputType.emailAddress ,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(
+                              Icons.email,
+                              color: Colors.grey
+                          ),
+                          border: InputBorder.none,
+                          hintMaxLines: 1,
+                          hintText: 'Email...',
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.all(18.0),
-                  child: Container(
-                    height: size.width / 7,
-
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.only(
-                        right: size.width / 30),
-                    decoration: BoxDecoration(
-                      color:  Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: TextField(
-                      style: TextStyle(
-                        color: Colors.grey,
+          
+          
+          //pass
+                  Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Container(
+                      height: size.width / 7,
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(
+                          right: size.width / 30),
+                      decoration: BoxDecoration(
+                        color:  Colors.grey[200],
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      controller: _emailcontroller,
-                      // onChanged: (value){
-                      //   _emailcontroller = value as TextEditingController;
-                      // },
-                      // obscureText: isPassword,
-                      keyboardType:  TextInputType.emailAddress ,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                            Icons.email,
-                            color: Colors.grey
-                        ),
-                        border: InputBorder.none,
-                        hintMaxLines: 1,
-                        hintText: 'Email...',
-                        hintStyle: TextStyle(
-                          fontSize: 14,
+                      child: TextField(
+                        style: TextStyle(
                           color: Colors.grey,
                         ),
-                      ),
-                    ),
-                  ),
-                ),
-
-
-//pass
-                Padding(
-                  padding: const EdgeInsets.all(18.0),
-                  child: Container(
-                    height: size.width / 7,
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.only(
-                        right: size.width / 30),
-                    decoration: BoxDecoration(
-                      color:  Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: TextField(
-                      style: TextStyle(
-                        color: Colors.grey,
-                      ),
-                      controller: _passwordcontroller,
-                      obscureText: true,
-                      // onChanged: (value){
-                      //   _passwordcontroller=value as TextEditingController;
-                      // },
-                      // keyboardType: isPassword ? TextInputType.name : TextInputType.text,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.password,
-                          color: Colors.grey,
-                        ),
-                        border: InputBorder.none,
-                        hintMaxLines: 1,
-                        hintText: 'Password...',
-                        hintStyle: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
+                        controller: _passwordcontroller,
+                        obscureText: true,
+                        // onChanged: (value){
+                        //   _passwordcontroller=value as TextEditingController;
+                        // },
+                        // keyboardType: isPassword ? TextInputType.name : TextInputType.text,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(
+                            Icons.password,
+                            color: Colors.grey,
+                          ),
+                          border: InputBorder.none,
+                          hintMaxLines: 1,
+                          hintText: 'Password...',
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-
-
-
-                SizedBox(height: size.width * 0.019),
-                InkWell(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () {
-                 // registerInfirestore(context);
-                  registerNewUser(context);
-                    HapticFeedback.lightImpact();
-
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(
-                      bottom: size.width * .05,
-                    ),
-                    height: size.width / 8,
-                    width: size.width / 1.25,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color:  Color(0xFFF169F00),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'Sign-up',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
+          
+          
+          
+                  SizedBox(height: size.width * 0.019),
+                  InkWell(
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    onTap: () {
+                   // registerInfirestore(context);
+                    registerNewUser(context);
+                      HapticFeedback.lightImpact();
+          
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(
+                        bottom: size.width * .05,
+                      ),
+                      height: size.width / 8,
+                      width: size.width / 1.25,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color:  Color(0xFFF169F00),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Sign-up',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment:
-              MainAxisAlignment.spaceAround,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top:9.0),
-                  child: RichText(
-                    text: TextSpan(
-                      text: 'Already Signed-Up,Login?',
-                      style: TextStyle(
-                        color: Colors.black,
+                ],
+              ),
+              Row(
+                mainAxisAlignment:
+                MainAxisAlignment.spaceAround,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top:9.0),
+                    child: RichText(
+                      text: TextSpan(
+                        text: 'Already Signed-Up,Login?',
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+          
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => signin(),
+                              ),);
+                            HapticFeedback.lightImpact();
+                            // Fluttertoast.showToast(
+                            //   msg:
+                            //   '',
+                            // );
+                          },
                       ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => signin(),
-                            ),);
-                          HapticFeedback.lightImpact();
-                          // Fluttertoast.showToast(
-                          //   msg:
-                          //   '',
-                          // );
-                        },
                     ),
                   ),
-                ),
-
-              ],
-            ),
-
-
-          ],
+          
+                ],
+              ),
+          
+          
+            ],
+          ),
         ),
       ),
     );;

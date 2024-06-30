@@ -27,10 +27,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -56,7 +53,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDnIhWDi6C_CduK5cHsZ1ZUP-cz4y5QQFY',
-    appId: '1:372899048216:android:631040aa10d9c1e209cc6d',
+    appId: '1:372899048216:android:c10f536618d94bd109cc6d',
     messagingSenderId: '372899048216',
     projectId: 'borla-8866b',
     databaseURL: 'https://borla-8866b-default-rtdb.firebaseio.com',
@@ -77,13 +74,25 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAXTzdZvDGKnzJ_zdzayQOSHIgJEsdE9ic',
-    appId: '1:372899048216:ios:97639b934c025a1a09cc6d',
+    appId: '1:372899048216:ios:cf8209a5a1942a5809cc6d',
     messagingSenderId: '372899048216',
     projectId: 'borla-8866b',
     databaseURL: 'https://borla-8866b-default-rtdb.firebaseio.com',
     storageBucket: 'borla-8866b.appspot.com',
     androidClientId: '372899048216-11jnd6p491fjkftgti3udq9l0iebqg9m.apps.googleusercontent.com',
-    iosClientId: '372899048216-baphrc9ncu30ljsbtrdgqg0p1uop3ham.apps.googleusercontent.com',
-    iosBundleId: 'com.malcolm.borlawms.RunnerTests',
+    iosClientId: '372899048216-e2ccdo7q03146co98bgg639v5bil6hjs.apps.googleusercontent.com',
+    iosBundleId: 'com.malcolm.borlawms',
   );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyBx7hnDyC5BEQEzHuvtXuMr2qjD_lUXw-g',
+    appId: '1:372899048216:web:7a373c61d4991cbe09cc6d',
+    messagingSenderId: '372899048216',
+    projectId: 'borla-8866b',
+    authDomain: 'borla-8866b.firebaseapp.com',
+    databaseURL: 'https://borla-8866b-default-rtdb.firebaseio.com',
+    storageBucket: 'borla-8866b.appspot.com',
+    measurementId: 'G-PT56DXXLSC',
+  );
+
 }

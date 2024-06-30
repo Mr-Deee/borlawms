@@ -1,3 +1,4 @@
+import 'package:borlawms/pages/progressdialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as Path;
 import 'package:borlawms/pages/signin.dart';
@@ -95,6 +96,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
                     }
                     return null;
                   },
+                  controller: _landmarkController,
                 ),
                 TextFormField(
                   decoration: InputDecoration(labelText: 'Location'),
@@ -104,6 +106,8 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
                     }
                     return null;
                   },
+                  controller: _locationController,
+
                 ),
                 TextFormField(
                   decoration: InputDecoration(labelText: 'Number of Employees'),
@@ -112,8 +116,10 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter number of employees';
                     }
+
+
                     return null;
-                  },
+                  },        controller: _employeesController ,
                 ),
                 TextFormField(
                   decoration: InputDecoration(labelText: 'GH Mobile Number'),
@@ -124,6 +130,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
                     }
                     return null;
                   },
+                  controller: phoneNumberController,
                 ),
                 TextFormField(
                   decoration: InputDecoration(labelText: 'Ghana Card Number'),
@@ -133,6 +140,8 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
                     }
                     return null;
                   },
+                  controller: _ghanaCardNumberController,
+
                 ),
                 SizedBox(height: 20),
                 submitButton(),
@@ -157,45 +166,62 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
 
   ImagePicker _imagePicker = ImagePicker();
   Widget logoUploadButton() {
-    return ElevatedButton(
-      onPressed: () async {
-        final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-        if (pickedFile != null) {
-          setState(() {
-            _logoFile = File(pickedFile.path);
-          });
-        }
-      },
-      child: Text('Upload Company Logo'),
+    return Column(
+      children: [
+
+        if (_logoFile != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Image.file(
+              _logoFile!,
+              width: 100,
+              height: 100,
+            ),
+          ),
+        ElevatedButton(
+          onPressed: () async {
+            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+            if (pickedFile != null) {
+              setState(() {
+                _logoFile = File(pickedFile.path);
+              });
+            }
+          },
+          child: Text('Upload Company Logo'),
+        ),
+      ],
     );
   }
   Widget BusinessReGUploadButton() {
-    return ElevatedButton(
-      onPressed: () async {
-        final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-        if (pickedFile != null) {
-          setState(() {
-            _CompRegFile = File(pickedFile.path);
-          });
-        }
-      },
-      child: Text('Upload Bussiness Registration'),
+    return Column(
+      children: [
+
+        if (_CompRegFile != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Image.file(
+              _CompRegFile!,
+              width: 100,
+              height: 100,
+            ),
+          ),
+        ElevatedButton(
+          onPressed: () async {
+            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+            if (pickedFile != null) {
+              setState(() {
+                _CompRegFile = File(pickedFile.path);
+              });
+            }
+          },
+          child: Text('Upload Bussiness Registration'),
+
+
+        ),
+      ],
     );
+
   }
-  //
-  // Widget logoUploadButton() {
-  //   return ElevatedButton(
-  //     onPressed: () async {
-  //       FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
-  //       if (result != null) {
-  //         setState(() {
-  //           _logoFile = File(result.files.single.path!);
-  //         });
-  //       }
-  //     },
-  //     child: Text('Upload Company Logo'),
-  //   );
-  // }
 
 
   Widget registrationDocUploadButton() {
@@ -299,6 +325,14 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
   }
 
   void _submitForm() async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ProgressDialog(
+            message: "Adding,Please wait.....",
+          );
+        });
     if (_formKey.currentState!.validate()) {
       User? user = _auth.currentUser;
       if (user != null) {
@@ -325,19 +359,20 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
           'pickupBins': _pickupBins,
           'sellsBins': _sellsBins,
           'sellingBins': _sellingBins,
-          'logoUrl': logoUrl,
-          'BusinessCertUrl': CompRegUrl,
+          // 'logoUrl': logoUrl,
+          // 'BusinessCertUrl': CompRegUrl,
           'registrationDocUrl': regDocUrl,
-          'landmark': _landmarkController.text,
-          'location': _locationController.text,
-          'employeesCount': int.parse(_employeesController.text),
-          'ghMobileNumber': _ghMobileNumberController.text,
-          'ghanaCardNumber': _ghanaCardNumberController.text,
+          'landmark': _landmarkController.text.toString(),
+          'location': _locationController.text.toString(),
+          'employeesCount': _employeesController.text.toString(),
+          'ghMobileNumber': _ghMobileNumberController.text.toString(),
+          'ghanaCardNumber': _ghanaCardNumberController.text.toString(),
         };
 
-        await _database.child('users').child(userId).child(
+        await _database.child('WMS').child(userId).child(
             'wasteManagementInfo').set(formData);
 
+        Navigator.of(context).pop(); Navigator.of(context).pushNamed("/SignIn");
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Data submitted successfully')));
       } else {

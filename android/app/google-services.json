@@ -121,6 +121,42 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:372899048216:android:c10f536618d94bd109cc6d",
+        "android_client_info": {
+          "package_name": "com.mlabs.borlawms"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "372899048216-a5nnlctgr9q90eth00aagairdbb5g4o2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnIhWDi6C_CduK5cHsZ1ZUP-cz4y5QQFY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "372899048216-a5nnlctgr9q90eth00aagairdbb5g4o2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "372899048216-4vt3l0rac9edtg47bclkgub8bp9u1lv6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bgh.borlawms.borlawms"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

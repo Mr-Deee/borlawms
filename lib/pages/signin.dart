@@ -313,65 +313,8 @@ class _signinState extends State<signin> {
 
   final Random random = Random();
 
-  // void requestSmsPermission() async {
-  //   if (await Permission.sms.request().isGranted) {
-  //     // You have the SEND_SMS permission.
-  //   } else {
-  //     // You don't have the SEND_SMS permission. Show a rationale and request the permission.
-  //     if (await Permission.sms.request().isPermanentlyDenied) {
-  //       // The user has permanently denied the permission.
-  //       // You may want to navigate them to the app settings.
-  //       openAppSettings();
-  //     } else {
-  //       // The user has denied the permission but not permanently.
-  //       // You can request the permission again.
-  //       requestSmsPermission();
-  //     }
-  //   }
-  // }
-  //
-  // void sendVerificationCode() {
-  //   final int verificationCode = random.nextInt(900000) + 100000;
-  //   final String message = 'Your verification code is: $verificationCode';
-  //
-  //   sendMS(message);
-  //   // registerNewUser(context);
-  // }
-  String? _verificationCode;
 
-  // Future<void> sendMS(String message) async {
-  //   List<String> recipients = [phoneNumberController.text];
-  //   print("rarrr" + '${recipients}');
-  //   print("message" + '${message}');
-  //   try {
-  //     await sendSMS(
-  //       message: message,
-  //       recipients: recipients,
-  //       sendDirect: true, // Set this to true for immediate sending
-  //     );
-  //
-  //     // Show a toast message to indicate success.
-  //     Fluttertoast.showToast(
-  //       msg: "Verification code sent!",
-  //       toastLength: Toast.LENGTH_SHORT,
-  //       gravity: ToastGravity.BOTTOM,
-  //     );
-  //
-  //     // Navigate to the verification screen with the verification code.
-  //     Navigator.pushNamed(
-  //       context,
-  //       '/verify',
-  //       arguments: _verificationCode.toString(),
-  //     );
-  //   } catch (error) {
-  //     // Show a toast message for the error.
-  //     Fluttertoast.showToast(
-  //       msg: "Failed to send verification code.",
-  //       toastLength: Toast.LENGTH_SHORT,
-  //       gravity: ToastGravity.BOTTOM,
-  //     );
-  //   }
-  // }
+
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   void loginAndAuthenticateUser(BuildContext context) async {

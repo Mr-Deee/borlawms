@@ -94,7 +94,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                     print('yes');
                                     FirebaseAuth.instance.signOut();
                                     Navigator.pushNamedAndRemoveUntil(
-                                        context, "/signin", (route) => false);
+                                        context, "/SignIn", (route) => false);
                                     // Navigator.of(context).pop();
                                   },
                                 ),
@@ -263,107 +263,85 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
 
           const SizedBox(height: 19),
-          ListTile(
-            onTap: () {
-              Navigator.pop(context);
-              showDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    backgroundColor: Colors.white,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(10.0),
-                        bottom: Radius.circular(10),
-                      ),
-                    ),
-                    actions: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 15),
-                          const Text(
-                            "Confirm logout",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          const Text("Are you sure you want to logout?"),
-                          const SizedBox(height: 25),
-                          Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0),
-                                child: MaterialButton(
-                                  onPressed: () {
-                                    // AuthenticationRepository.instance
-                                    //     .logout();
-                                  },
-                                  color: Colors.green,
-                                  child: const Text(
-                                    "Logout",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0),
-                                child: MaterialButton(
-                                  onPressed: () {
-                                    //Get.back();
-                                  },
-                                  color: Colors.red,
-                                  child: const Text(
-                                    "Cancel",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            leading: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.redAccent.shade100,
-              ),
-              child: const Padding(
-                padding: EdgeInsets.all(10.0),
-                child: Icon(
-                  Icons.logout,
-                ),
-              ),
-            ),
-            title: const Text(
-              "Log out",
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            trailing: const Icon(
-              Icons.arrow_forward_ios,
-              size: 18,
-            ),
-          ),
-          const SizedBox(height: 18),
+          // ListTile(
+          //   onTap: () {
+          //     Navigator.pop(context);
+          //     showDialog(
+          //       barrierDismissible: true,
+          //       context: context,
+          //       builder: (BuildContext context) {
+          //         return AlertDialog(
+          //           backgroundColor: Colors.white,
+          //           shape: const RoundedRectangleBorder(
+          //             borderRadius: BorderRadius.vertical(
+          //               top: Radius.circular(10.0),
+          //               bottom: Radius.circular(10),
+          //             ),
+          //           ),
+          //           actions: [
+          //             Column(
+          //               mainAxisAlignment: MainAxisAlignment.center,
+          //               children: [
+          //                 const SizedBox(height: 15),
+          //                 const Text(
+          //                   "Confirm logout",
+          //                   style: TextStyle(
+          //                     fontWeight: FontWeight.bold,
+          //                     fontSize: 18,
+          //                   ),
+          //                 ),
+          //                 const SizedBox(height: 5),
+          //                 const Text("Are you sure you want to logout?"),
+          //                 const SizedBox(height: 25),
+          //                 Row(
+          //                   children: [
+          //                     Padding(
+          //                       padding: const EdgeInsets.symmetric(
+          //                           horizontal: 10.0),
+          //                       child: MaterialButton(
+          //                         onPressed: () {
+          //                           // AuthenticationRepository.instance
+          //                           //     .logout();
+          //                         },
+          //                         color: Colors.green,
+          //                         child: const Text(
+          //                           "Logout",
+          //                           style: TextStyle(
+          //                             color: Colors.white,
+          //                             fontSize: 14,
+          //                           ),
+          //                         ),
+          //                       ),
+          //                     ),
+          //                     Padding(
+          //                       padding: const EdgeInsets.symmetric(
+          //                           horizontal: 10.0),
+          //                       child: MaterialButton(
+          //                         onPressed: () {
+          //                           //Get.back();
+          //                         },
+          //                         color: Colors.red,
+          //                         child: const Text(
+          //                           "Cancel",
+          //                           style: TextStyle(
+          //                             color: Colors.white,
+          //                             fontSize: 14,
+          //                           ),
+          //                         ),
+          //                       ),
+          //                     ),
+          //                   ],
+          //                 ),
+          //               ],
+          //             ),
+          //           ],
+          //         );
+          //       },
+          //     );
+          //   },
+          //
+          // ),
+
           const Padding(
             padding: EdgeInsets.only(left: 17.0),
             child: Row(
