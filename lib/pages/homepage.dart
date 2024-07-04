@@ -188,15 +188,19 @@ class _homepageState extends State<homepage> {
           GoogleMap(
             mapType: MapType.normal,
             myLocationButtonEnabled: true,
+            padding: EdgeInsets.only(top: 24, bottom: bottomPaddingOfMap),
+
             initialCameraPosition: homepage._kGooglePlex,
             myLocationEnabled: true,
-            // markers: markersSet,
+            markers: markersSet,
             onMapCreated: (GoogleMapController controller) {
               _controllerGoogleMap.complete(controller);
               newGoogleMapController = controller;
-              // setState(() {
-              //   bottomPaddingOfMap = 0.0;
-              // });
+              setState(() {
+                // bottomPaddingOfMap = 0.0;
+                locatePosition();
+
+              });
               locatePosition();
 
             },
