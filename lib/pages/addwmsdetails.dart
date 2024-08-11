@@ -12,6 +12,8 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_selector/file_selector.dart';
 
+import '../widgets/RecycleForm.dart';
+
 class Addwmsdetails extends StatefulWidget {
   const Addwmsdetails({super.key});
 
@@ -47,7 +49,9 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
       appBar: AppBar(
         title: Text('Waste Management Registration Form'),
       ),
-      body: Form(
+      body:
+
+      Form(
         key: _formKey,
         child: SingleChildScrollView(
           child: Padding(
@@ -75,8 +79,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
 
                 // Show different widgets based on the dropdown selection
                 if (dropdownValue == 'Recycling') ...[
-                  Text('Recycling specific form goes here.'),
-                  // Add your Recycling form fields here
+                  RecyclingForm(),                  // Add your Recycling form fields here
                 ] else ...[
                   sectionTitle('Pickup Bins'),
                   Padding(
