@@ -28,6 +28,8 @@ class _RecyclingFormState extends State<RecyclingForm> {
   File? _registrationDocFile;
   final ImagePicker _imagePicker = ImagePicker();
 
+  final TextEditingController _fullnameController = TextEditingController();
+  final TextEditingController _gpsController = TextEditingController();
   final TextEditingController _landmarkController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _employeesController = TextEditingController();
@@ -45,6 +47,7 @@ class _RecyclingFormState extends State<RecyclingForm> {
           uploadButton('Upload Company Logo', _logoFile, (file) => _logoFile = file),
           uploadButton('Upload Company Registration Document', _compRegFile, (file) => _compRegFile = file),
           uploadButton('Upload Business Registration Certificate', _registrationDocFile, (file) => _registrationDocFile = file),
+          textField('Full Name', _fullnameController),
           textField('Landmark close to location', _landmarkController),
           textField('Location', _locationController),
           textField('Number of Employees', _employeesController, TextInputType.number),
@@ -88,7 +91,7 @@ class _RecyclingFormState extends State<RecyclingForm> {
     return TextFormField(
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(),
+        // border: OutlineInputBorder(),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
