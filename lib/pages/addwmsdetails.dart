@@ -1,154 +1,176 @@
-import 'package:borlawms/pages/progressdialog.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as Path;
-import 'package:borlawms/pages/signin.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:file_selector/file_selector.dart';
-class Addwmsdetails extends StatefulWidget {
-  const Addwmsdetails({super.key});
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:path/path.dart' as Path;
 
+class Addwmsdetails extends StatefulWidget {
   @override
-  State<Addwmsdetails> createState() => _AddwmsdetailsState();
+  _AddwmsdetailsState createState() => _AddwmsdetailsState();
 }
 
-TextEditingController _landmarkController = TextEditingController();
-TextEditingController _locationController = TextEditingController();
-TextEditingController _employeesController = TextEditingController();
-TextEditingController _ghMobileNumberController = TextEditingController();
-TextEditingController _ghanaCardNumberController = TextEditingController();
-Uint8List? _registrationDocBytes;
 class _AddwmsdetailsState extends State<Addwmsdetails> {
-  final _formKey = GlobalKey<FormState>();
-  final _auth = FirebaseAuth.instance;
-  final _database = FirebaseDatabase.instance.reference();
-  final _storage = FirebaseStorage.instance;
-  List<Map<String, dynamic>> _pickupBins = [];
-  List<Map<String, dynamic>> _sellingBins = [];
-  bool _sellsBins = false;
-  File? _logoFile;
-  File? _CompRegFile;
-  File? _registrationDocFile;
-  Uint8List? _registrationDocBytes;
+  String _selectedType = 'Waste Management';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Waste Management Registration Form'),
+        title: Text('Add Details'),
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-
-                sectionTitle('Pickup Bins'),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text("Kindly Let us know the types of bins you pickup and the price you charge"),
-                ),
-
-                ..._pickupBins.map((bin) => binCard(bin, _pickupBins)),
-                addButton('Add Another Pickup Bin', () {
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(labelText: 'Select Type'),
+                value: _selectedType,
+                items: ['Waste Management', 'Recycling']
+                    .map((type) => DropdownMenuItem(
+                  value: type,
+                  child: Text(type),
+                ))
+                    .toList(),
+                onChanged: (value) {
                   setState(() {
-                    _pickupBins.add({'image': null, 'price': ''});
+                    _selectedType = value!;
                   });
-                }),
-                SwitchListTile(
-                  title: Text('Does the company sell bins?'),
-                  value: _sellsBins,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _sellsBins = value;
-                    });
-                  },
-                ),
-                if (_sellsBins) ...[
-                  sectionTitle('Selling Bins'),
-                  ..._sellingBins.map((bin) => binCard(bin, _sellingBins)),
-                  addButton('Add Another Selling Bin', () {
-                    setState(() {
-                      _sellingBins.add({'image': null, 'price': ''});
-                    });
-                  }),
-                ],
-
-
-                SizedBox(height: 20),
-                sectionTitle('Company Details'),
-                logoUploadButton(),
-                BusinessReGUploadButton(),
-
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Landmark close to location'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter landmark';
-                    }
-                    return null;
-                  },
-                  controller: _landmarkController,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Location'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter location';
-                    }
-                    return null;
-                  },
-                  controller: _locationController,
-
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Number of Employees'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter number of employees';
-                    }
-
-
-                    return null;
-                  },        controller: _employeesController ,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'GH Mobile Number'),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter GH mobile number';
-                    }
-                    return null;
-                  },
-                  controller: phoneNumberController,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Ghana Card Number'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter Ghana card number';
-                    }
-                    return null;
-                  },
-                  controller: _ghanaCardNumberController,
-
-                ),
-                SizedBox(height: 20),
-                submitButton(),
-              ],
-            ),
+                },
+              ),
+              SizedBox(height: 20),
+              _selectedType == 'Waste Management'
+                  ? WasteManagementForm()
+                  : RecyclingForm(),
+            ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class WasteManagementForm extends StatefulWidget {
+  @override
+  _WasteManagementFormState createState() => _WasteManagementFormState();
+}
+
+class _WasteManagementFormState extends State<WasteManagementForm> {
+  final _formKey = GlobalKey<FormState>();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final DatabaseReference _database = FirebaseDatabase.instance.reference();
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final List<Map<String, dynamic>> _sellingBins = [];
+  bool _pickupBins = false;
+  bool _sellsBins = false;
+  File? _logoFile;
+  File? _CompRegFile;
+  File? _registrationDocFile;
+  final ImagePicker _imagePicker = ImagePicker();
+
+  final TextEditingController _landmarkController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _employeesController = TextEditingController();
+  final TextEditingController _ghMobileNumberController = TextEditingController();
+  final TextEditingController _ghanaCardNumberController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CheckboxListTile(
+            title: Text('Do you pick up bins?'),
+            value: _pickupBins,
+            onChanged: (value) {
+              setState(() {
+                _pickupBins = value!;
+              });
+            },
+          ),
+          CheckboxListTile(
+            title: Text('Do you sell bins?'),
+            value: _sellsBins,
+            onChanged: (value) {
+              setState(() {
+                _sellsBins = value!;
+              });
+            },
+          ),
+          if (_sellsBins) ...[
+            sectionTitle('Bins for Sale'),
+            ..._sellingBins.map((bin) => binCard(bin)),
+            addButton('Add Another Bin', () {
+              setState(() {
+                _sellingBins.add({'type': '', 'price': ''});
+              });
+            }),
+          ],
+          SizedBox(height: 20),
+          sectionTitle('Company Details'),
+          logoUploadButton(),
+          CompRegUploadButton(),
+          registrationDocUploadButton(),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'Landmark close to location'),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter landmark';
+              }
+              return null;
+            },
+            controller: _landmarkController,
+          ),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'Location'),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter location';
+              }
+              return null;
+            },
+            controller: _locationController,
+          ),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'Number of Employees'),
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter number of employees';
+              }
+              return null;
+            },
+            controller: _employeesController,
+          ),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'GH Mobile Number'),
+            keyboardType: TextInputType.phone,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter GH mobile number';
+              }
+              return null;
+            },
+            controller: _ghMobileNumberController,
+          ),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'Ghana Card Number'),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter Ghana card number';
+              }
+              return null;
+            },
+            controller: _ghanaCardNumberController,
+          ),
+          SizedBox(height: 20),
+          submitButton(),
+        ],
       ),
     );
   }
@@ -163,12 +185,9 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
     );
   }
 
-
-  ImagePicker _imagePicker = ImagePicker();
   Widget logoUploadButton() {
     return Column(
       children: [
-
         if (_logoFile != null)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
@@ -192,10 +211,10 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
       ],
     );
   }
-  Widget BusinessReGUploadButton() {
+
+  Widget CompRegUploadButton() {
     return Column(
       children: [
-
         if (_CompRegFile != null)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
@@ -214,28 +233,36 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
               });
             }
           },
-          child: Text('Upload Bussiness Registration'),
-
-
+          child: Text('Upload Company Registration Document'),
         ),
       ],
     );
-
   }
 
-
   Widget registrationDocUploadButton() {
-    return ElevatedButton(
-      onPressed: () async {
-        final typeGroup = XTypeGroup(label: 'documents', extensions: ['pdf', 'doc', 'docx']);
-        final file = await openFile(acceptedTypeGroups: [typeGroup]);
-        if (file != null) {
-          setState(()   {
-            _registrationDocBytes = file.readAsBytes() as Uint8List?;
-          });
-        }
-      },
-      child: Text('Upload Registration Document'),
+    return Column(
+      children: [
+        if (_registrationDocFile != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Image.file(
+              _registrationDocFile!,
+              width: 100,
+              height: 100,
+            ),
+          ),
+        ElevatedButton(
+          onPressed: () async {
+            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+            if (pickedFile != null) {
+              setState(() {
+                _registrationDocFile = File(pickedFile.path);
+              });
+            }
+          },
+          child: Text('Upload Business Registration Certificate'),
+        ),
+      ],
     );
   }
 
@@ -249,35 +276,21 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
     );
   }
 
-  Widget binCard(Map<String, dynamic> bin, List<Map<String, dynamic>> binsList) {
+  Widget binCard(Map<String, dynamic> bin) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            Image.asset(
-              bin['image']??"assets/images/choose.png",
-              height: 100,
-              width: 100,
-            ),
-            DropdownButtonFormField<String>(
-              value: bin['image'],
-              hint: Text('Select Bin Image'),
-              items: [
-                DropdownMenuItem(child: Text('Borla Extra - 240L'), value: 'assets/images/240L.png'),
-                DropdownMenuItem(child: Text('Borla General-140L'), value: 'assets/images/140.png'),
-                DropdownMenuItem(child: Text('Borla Medium -100L'), value: 'assets/images/100l.png'),
-                DropdownMenuItem(child: Text('Borla Bag'), value: 'assets/images/plasticbag.png'),
-              ],
+            TextFormField(
+              decoration: InputDecoration(labelText: 'Bin Type'),
               onChanged: (value) {
-                setState(() {
-                  bin['image'] = value;
-                });
+                bin['type'] = value;
               },
               validator: (value) {
-                if (value == null) {
-                  return 'Please select a bin image';
+                if (value == null || value.isEmpty) {
+                  return 'Please enter bin type';
                 }
                 return null;
               },
@@ -298,7 +311,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  binsList.remove(bin);
+                  _sellingBins.remove(bin);
                 });
               },
               child: Text('Remove Bin'),
@@ -310,82 +323,264 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
     );
   }
 
-
-
   Widget submitButton() {
     return Center(
       child: ElevatedButton(
         onPressed: _submitForm,
         child: Text('Submit'),
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-        ),
       ),
     );
   }
 
-  void _submitForm() async {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return ProgressDialog(
-            message: "Adding,Please wait.....",
-          );
-        });
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       User? user = _auth.currentUser;
       if (user != null) {
         String userId = user.uid;
 
-        // Upload logo and registration document to Firebase Storage
         String? logoUrl;
-        String? CompRegUrl;
-        String? regDocUrl;
+        String? compRegUrl;
+        String? registrationDocUrl;
 
         if (_logoFile != null) {
-          logoUrl = await uploadFile(_logoFile!, 'company_logos');
+          logoUrl = await uploadFile(_logoFile!, 'CompanyLogo');
         }
         if (_CompRegFile != null) {
-          CompRegUrl = await uploadFile(_CompRegFile!, 'Comp_reg');
+          compRegUrl = await uploadFile(_CompRegFile!, 'CompanyRegistration');
         }
-
         if (_registrationDocFile != null) {
-          regDocUrl =
-          await uploadFile(_registrationDocFile!, 'registration_documents');
+          registrationDocUrl = await uploadFile(_registrationDocFile!, 'BusinessRegistration');
         }
 
         Map<String, dynamic> formData = {
           'pickupBins': _pickupBins,
           'sellsBins': _sellsBins,
           'sellingBins': _sellingBins,
-          // 'logoUrl': logoUrl,
-          // 'BusinessCertUrl': CompRegUrl,
-          'registrationDocUrl': regDocUrl,
-          'landmark': _landmarkController.text.toString(),
-          'location': _locationController.text.toString(),
-          'employeesCount': _employeesController.text.toString(),
-          'ghMobileNumber': _ghMobileNumberController.text.toString(),
-          'ghanaCardNumber': _ghanaCardNumberController.text.toString(),
+          'logoUrl': logoUrl,
+          'compRegUrl': compRegUrl,
+          'registrationDocUrl': registrationDocUrl,
+          'landmark': _landmarkController.text,
+          'location': _locationController.text,
+          'employees': _employeesController.text,
+          'ghMobileNumber': _ghMobileNumberController.text,
+          'ghanaCardNumber': _ghanaCardNumberController.text,
         };
 
-        await _database.child('WMS').child(userId).child(
-            'wasteManagementInfo').set(formData);
+        await _database.child('WasteManagement').child(userId).child('wasteManagementInfo').set(formData);
 
-        Navigator.of(context).pop(); Navigator.of(context).pushNamed("/SignIn");
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Data submitted successfully')));
+        Navigator.of(context).pop();
+        Navigator.of(context).pushNamed("/SignIn");
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data submitted successfully')));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('User not signed in')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User not signed in')));
       }
     }
   }
+
   Future<String> uploadFile(File file, String folderName) async {
     Reference reference = _storage.ref().child('$folderName/${Path.basename(file.path)}');
     UploadTask uploadTask = reference.putFile(file);
     TaskSnapshot snapshot = await uploadTask;
     return await snapshot.ref.getDownloadURL();
   }
+}
 
+class RecyclingForm extends StatefulWidget {
+  @override
+  _RecyclingFormState createState() => _RecyclingFormState();
+}
+
+class _RecyclingFormState extends State<RecyclingForm> {
+  final _formKey = GlobalKey<FormState>();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final DatabaseReference _database = FirebaseDatabase.instance.reference();
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  File? _registrationDocFile;
+  final ImagePicker _imagePicker = ImagePicker();
+
+  final TextEditingController _landmarkController = TextEditingController();
+  final TextEditingController _FullNameController = TextEditingController();
+  final TextEditingController _GPSAddressController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _employeesController = TextEditingController();
+  final TextEditingController _ghMobileNumberController = TextEditingController();
+  final TextEditingController _ghanaCardNumberController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          sectionTitle('Recycling Company Details'),
+          registrationDocUploadButton(),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'Full Name/ Business Name'),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter landmark';
+              }
+              return null;
+            },
+            controller: _FullNameController,
+          ),
+
+
+          TextFormField(
+            decoration: InputDecoration(labelText: 'Landmark close to location'),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter landmark';
+              }
+              return null;
+            },
+            controller: _landmarkController,
+          ),
+
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Location'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter location';
+                  }
+                  return null;
+                },
+                controller: _locationController,
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'GPS Address'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter location';
+                  }
+                  return null;
+                },
+                controller:_GPSAddressController,
+              ),
+
+          TextFormField(
+            decoration: InputDecoration(labelText: 'Number of Employees'),
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter number of employees';
+              }
+              return null;
+            },
+            controller: _employeesController,
+          ),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'GH Mobile Number'),
+            keyboardType: TextInputType.phone,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter GH mobile number';
+              }
+              return null;
+            },
+            controller: _ghMobileNumberController,
+          ),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'Ghana Card Number'),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter Ghana card number';
+              }
+              return null;
+            },
+            controller: _ghanaCardNumberController,
+          ),
+          SizedBox(height: 20),
+          submitButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget registrationDocUploadButton() {
+    return Column(
+      children: [
+        if (_registrationDocFile != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Image.file(
+              _registrationDocFile!,
+              width: 100,
+              height: 100,
+            ),
+          ),
+        ElevatedButton(
+          onPressed: () async {
+            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+            if (pickedFile != null) {
+              setState(() {
+                _registrationDocFile = File(pickedFile.path);
+              });
+            }
+          },
+          child: Text('Upload Business Registration Certificate'),
+        ),
+      ],
+    );
+  }
+
+  Widget sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        title,
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget submitButton() {
+    return Center(
+      child: ElevatedButton(
+        onPressed: _submitForm,
+        child: Text('Submit'),
+      ),
+    );
+  }
+
+  Future<void> _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        String userId = user.uid;
+
+        String? registrationDocUrl;
+
+        if (_registrationDocFile != null) {
+          registrationDocUrl = await uploadFile(_registrationDocFile!, 'RecyclingRegistration');
+        }
+
+        Map<String, dynamic> formData = {
+          'registrationDocUrl': registrationDocUrl,
+          'landmark': _landmarkController.text,
+          'location': _locationController.text,
+          'employees': _employeesController.text,
+          'ghMobileNumber': _ghMobileNumberController.text,
+          'ghanaCardNumber': _ghanaCardNumberController.text,
+          'ghanaCardNumber': _ghanaCardNumberController.text,
+        };
+
+        await _database.child('Recycling').child(userId).child('recyclingInfo').set(formData);
+
+        Navigator.of(context).pop();
+        Navigator.of(context).pushNamed("/SignIn");
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data submitted successfully')));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User not signed in')));
+      }
+    }
+  }
+
+  Future<String> uploadFile(File file, String folderName) async {
+    Reference reference = _storage.ref().child('$folderName/${Path.basename(file.path)}');
+    UploadTask uploadTask = reference.putFile(file);
+    TaskSnapshot snapshot = await uploadTask;
+    return await snapshot.ref.getDownloadURL();
+  }
 }

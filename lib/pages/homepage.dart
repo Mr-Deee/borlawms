@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:animate_do/animate_do.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -149,12 +148,9 @@ class _homepageState extends State<homepage> {
 
   @override
   void initState() {
-    setState(() {
-      Provider.of<helper>(context, listen: false).getCurrentLocation();
-      Provider.of<helper>(context, listen: false).getAddressFromLatLng();
-    });
-
-    super.initState();
+        super.initState();
+        Provider.of<helper>(context, listen: false).getCurrentLocation();
+        Provider.of<helper>(context, listen: false).getAddressFromLatLng();
     locatePosition();
     AssistantMethod.getCurrentOnlineUserInfo(context);
     getCurrentWMSInfo();
@@ -196,12 +192,12 @@ class _homepageState extends State<homepage> {
             onMapCreated: (GoogleMapController controller) {
               _controllerGoogleMap.complete(controller);
               newGoogleMapController = controller;
-              setState(() {
+
                 // bottomPaddingOfMap = 0.0;
                 locatePosition();
 
-              });
-              locatePosition();
+              // });
+              // locatePosition();
 
             },
           ),
