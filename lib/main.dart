@@ -126,7 +126,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         initialRoute:
-        FirebaseAuth.instance.currentUser == null ? '/addmoredetails' : '/Homepage',
+        FirebaseAuth.instance.currentUser == null ? '/Onboarding' : '/Homepage',
             // '/Homepage',
         //'/Onboarding'
         routes: {

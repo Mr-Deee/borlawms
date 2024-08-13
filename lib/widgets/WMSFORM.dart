@@ -35,6 +35,8 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
   final ImagePicker _imagePicker = ImagePicker();
 
   final TextEditingController _landmarkController = TextEditingController();
+  final TextEditingController _fullnameController = TextEditingController();
+  final TextEditingController _gpsController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _employeesController = TextEditingController();
   final TextEditingController _ghMobileNumberController = TextEditingController();
@@ -89,6 +91,16 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                 logoUploadButton(),
                 BusinessReGUploadButton(),
                 TextFormField(
+                  decoration: InputDecoration(labelText: 'FullName'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter landmark';
+                    }
+                    return null;
+                  },
+                  controller: _fullnameController,
+                ),
+                TextFormField(
                   decoration: InputDecoration(labelText: 'Landmark close to location'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -107,6 +119,16 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                     return null;
                   },
                   controller: _locationController,
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'GPS Address'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter location';
+                    }
+                    return null;
+                  },
+                  controller: _gpsController,
                 ),
                 TextFormField(
                   decoration: InputDecoration(labelText: 'Number of Employees'),
@@ -360,11 +382,13 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
 
         Map<String, dynamic> formData = {
           'pickupBins': _pickupBins,
+          'fullname': _fullnameController,
           'sellsBins': _sellsBins,
           'sellingBins': _sellingBins,
           'logoUrl': logoUrl,
           'compRegUrl': compRegUrl,
           'registrationDocUrl': registrationDocUrl,
+          'gps': _gpsController,
           'landmark': _landmarkController.text,
           'location': _locationController.text,
           'employees': _employeesController.text,
