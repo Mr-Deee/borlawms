@@ -54,7 +54,7 @@ class _signupState extends State<signup> {
               Row(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top:10,left: 18.0),
+                    padding: const EdgeInsets.only(top:40,left: 18.0),
                     child: Text("Sign Up",style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold),),
                   ),
           
@@ -65,7 +65,7 @@ class _signupState extends State<signup> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 18.0),
-                    child: Text("Sign Up to continue using the app",style: TextStyle(fontSize: 12,color: Colors.grey)),
+                    child: Text("Sign Up to continue.",style: TextStyle(fontSize: 12,color: Colors.grey)),
                   ),
                 ],
               ),
@@ -268,7 +268,7 @@ class _signupState extends State<signup> {
                     },
                     child: Container(
                       margin: EdgeInsets.only(
-                        bottom: size.width * .05,
+                        bottom: size.width * .02,
                       ),
                       height: size.width / 8,
                       width: size.width / 1.25,
@@ -294,7 +294,7 @@ class _signupState extends State<signup> {
                 MainAxisAlignment.spaceAround,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top:9.0),
+                    padding: const EdgeInsets.only(top:5.0,bottom:10),
                     child: RichText(
                       text: TextSpan(
                         text: 'Already Signed-Up,Login?',
@@ -335,7 +335,7 @@ class _signupState extends State<signup> {
   Widget _buildImagePicker({required String title, required Function(File) setImage}) {
     return Column(
       children: <Widget>[
-        Text("ProfileImage",style: TextStyle(fontWeight: FontWeight.bold),),
+        // Text("ProfileImage",style: TextStyle(fontWeight: FontWeight.bold),),
         SizedBox(height: 14),
 
         CircleAvatar(
@@ -365,21 +365,8 @@ class _signupState extends State<signup> {
             ),
           ),
         ),
-        SizedBox(height: 10),
+        SizedBox(height: 5),
 
-        // _buildImagePreview(setImage),
-        // ElevatedButton(
-        //   onPressed: () {
-        //     _pickImage(ImageSource.gallery, setImage);
-        //   },
-        //   child: Text('Pick from Gallery'),
-        // ),
-        // ElevatedButton(
-        //   onPressed: () {
-        //     _pickImage(ImageSource.camera, setImage);
-        //   },
-        //   child: Text('Take a Photo'),
-        // ),
       ],
     );
   }
