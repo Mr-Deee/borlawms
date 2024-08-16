@@ -335,12 +335,12 @@ class _signupState extends State<signup> {
   Widget _buildImagePicker({required String title, required Function(File) setImage}) {
     return Column(
       children: <Widget>[
-        // Text("ProfileImage",style: TextStyle(fontWeight: FontWeight.bold),),
-        SizedBox(height: 14),
+        Text("Upload Image here⤸",style: TextStyle(color:Colors.grey,fontWeight: FontWeight.bold),),
+        SizedBox(height: 11),
 
         CircleAvatar(
           radius: 50, // Adjust the radius as needed
-          backgroundColor: Colors.blue, // Background color of the avatar
+          backgroundColor: Colors.white10, // Background color of the avatar
           child: _riderImage != null
               ? ClipOval(
             child: Image.file(
