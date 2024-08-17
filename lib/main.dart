@@ -208,14 +208,13 @@ Widget routeGenerator(RouteSettings settings)
           return OnBoardingPage();
         case '/Main':
           return homepage();
-        case '/verify':
-          return OtpVerificationScreen(verificationId: '');
-        case '/Riderdetails':
-          return Riderdetails();
-        case '/hubtel':
-          return hubtelpay();
-        case '/authpage':
-          return AuthPage();
+        case '/addmoredetails':
+          return Addwmsdetails();
+
+        case '/SignUP':
+          return signup();
+        case '/SignIn':
+          return signin();
         case '/Homepage':
           return homepage();
         default:
