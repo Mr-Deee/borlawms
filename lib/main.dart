@@ -136,96 +136,96 @@ class MyApp extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
-      future: getInitialRoute(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
+        future: getInitialRoute(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(
 
-            decoration: BoxDecoration(
-                color: Colors.white
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Image.asset(
-                    'assets/images/delivery-with-white-background-1.png',
-                    // Replace with your app's icon image path
-                    width: 200,
-                    height: 180,
-                    // Optionally, you can add a color filter or other styling here
-                  ),
-                ),
-                CircularProgressIndicator()
-              ],),
-          ); // Or a splash screen
-        } else {
-          String? initialRoute = snapshot.data;
-
-          // Handle null case if necessary
-          if (initialRoute == null) {
-            initialRoute =
-            '/onboarding'; // Or any default route you want to use
-          }
-
-          return MaterialApp(
-              title: 'BorlApp_wms',
-              debugShowCheckedModeBanner: false,
-              theme: ThemeData(
-
-
-                colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
-                useMaterial3: true,
+              decoration: BoxDecoration(
+                  color: Colors.white
               ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Image.asset(
+                      'assets/images/delivery-with-white-background-1.png',
+                      // Replace with your app's icon image path
+                      width: 200,
+                      height: 180,
+                      // Optionally, you can add a color filter or other styling here
+                    ),
+                  ),
+                  CircularProgressIndicator()
+                ],),
+            ); // Or a splash screen
+          } else {
+            String? initialRoute = snapshot.data;
+
+            // Handle null case if necessary
+            if (initialRoute == null) {
+              initialRoute =
+              '/onboarding'; // Or any default route you want to use
+            }
+
+            return MaterialApp(
+                title: 'BorlApp_wms',
+                debugShowCheckedModeBanner: false,
+                theme: ThemeData(
 
 
-              initialRoute: initialRoute,
+                  colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+                  useMaterial3: true,
+                ),
 
-              // FirebaseAuth.instance.currentUser == null ? '/Onboarding' : '/Homepage',
-              // '/Homepage',
-              //'/Onboarding'
-              routes: {
-                "/SignUP": (context) => signup(),
-                "/addmoredetails": (context) => Addwmsdetails(),
-                "/Onboarding": (context) => OnBoardingPage(),
-                "/About": (context) => AboutPage(),
-                // "/OnBoarding": (context) => ,
-                "/SignIn": (context) => signin(),
-                "/Profile": (context) => ProfilePage(),
-                "/Homepage": (context) => homepage(),
-                //    "/addproduct":(context)=>addproduct()
-              }
-          );
-        }
-      });
-}
-Widget routeGenerator(RouteSettings settings)
-    {
-      switch (settings.name) {
-        case '/onboarding':
-          return OnBoardingPage();
-        case '/Main':
-          return homepage();
-        case '/addmoredetails':
-          return Addwmsdetails();
 
-        case '/SignUP':
-          return signup();
-        case '/SignIn':
-          return signin();
-        case '/Homepage':
-          return homepage();
-        default:
-          return Scaffold(
-            body: Center(
-              child: Text('Route not found: ${settings.name}'),
-            ),
-          );
-      }
+                initialRoute: initialRoute,
+
+                // FirebaseAuth.instance.currentUser == null ? '/Onboarding' : '/Homepage',
+                // '/Homepage',
+                //'/Onboarding'
+                routes: {
+                  "/SignUP": (context) => signup(),
+                  "/addmoredetails": (context) => Addwmsdetails(),
+                  "/Onboarding": (context) => OnBoardingPage(),
+                  "/About": (context) => AboutPage(),
+                  // "/OnBoarding": (context) => ,
+                  "/SignIn": (context) => signin(),
+                  "/Profile": (context) => ProfilePage(),
+                  "/Homepage": (context) => homepage(),
+                  //    "/addproduct":(context)=>addproduct()
+                }
+            );
+          }
+        });
+  }
+
+  Widget routeGenerator(RouteSettings settings) {
+    switch (settings.name) {
+      case '/onboarding':
+        return OnBoardingPage();
+      case '/Main':
+        return homepage();
+      case '/addmoredetails':
+        return Addwmsdetails();
+
+      case '/SignUP':
+        return signup();
+      case '/SignIn':
+        return signin();
+      case '/Homepage':
+        return homepage();
+      default:
+        return Scaffold(
+          body: Center(
+            child: Text('Route not found: ${settings.name}'),
+          ),
+        );
     }
+  }
 
 
-
+}
 
