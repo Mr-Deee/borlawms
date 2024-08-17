@@ -48,19 +48,16 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
       key: _formKey,
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(6.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              SizedBox(height: 20),
-
-              // Show different widgets based on the dropdown selection
-
-                sectionTitle('Pickup Bins'),
+              sectionTitle('Pickup Bins'),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text("Kindly Let us know the types of bins you pickup and the price you charge"),
+                  padding: const EdgeInsets.only(left:2.0),
+                  child: Text("Kindly Let us know the types of bins you "
+                      "pickup and the price you charge, by tapping the '+' button",style: TextStyle(color: Colors.black54),),
                 ),
                 ..._pickupBins.map((bin) => binCard(bin, _pickupBins)),
                 addButton('Add Another Pickup Bin', () {
@@ -69,7 +66,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                   });
                 }),
                 SwitchListTile(
-                  title: Text('Does the company sell bins?'),
+                  title: Text('Do you sell bins?'),
                   value: _sellsBins,
                   onChanged: (bool value) {
                     setState(() {
@@ -79,6 +76,11 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                 ),
                 if (_sellsBins) ...[
                   sectionTitle('Selling Bins'),
+                  Padding(
+                    padding: const EdgeInsets.only(left:2.0),
+                    child: Text("Kindly Let us know the types of bins you "
+                        "sell and the price you charge, by tapping the '+' button",style: TextStyle(color: Colors.black54),),
+                  ),
                   ..._sellingBins.map((bin) => binCard(bin, _sellingBins)),
                   addButton('Add Another Selling Bin', () {
                     setState(() {
@@ -231,7 +233,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: ElevatedButton(
         onPressed: onPressed,
-        child: Text(text),
+        child: Icon(Icons.add),
       ),
     );
   }

@@ -73,25 +73,45 @@ DatabaseReference WMSDBtoken = FirebaseDatabase.instance.ref()
     .child(uid!);
 DatabaseReference WMSAvailable = FirebaseDatabase.instance.ref().child(
     "availableWMS").child(uid!);
+Future<String> getInitialRoute() async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+
+  // Fetch detailComp value from Firebase
+  DatabaseEvent snapshot = await FirebaseDatabase.instance
+      .ref()
+      .child('Riders')
+      .child(uid)
+      .child('detailsComp')
+      .once();
+
+  bool? detailComp = snapshot.snapshot.value as bool?;
+
+  if (FirebaseAuth.instance.currentUser == null) {
+    return '/onboarding';
+
+  } else if (detailComp == true) {
+    return '/Main';
+  } else {
+    return '/Riderdetails'; // Navigate to Riderdetails if detailComp is false or not set
+  }
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   void initState() {
     // super.initState();
 
-    final FirebaseMessaging messaging  = FirebaseMessaging.instance;
+    final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
 
 // PROBLEM STARTS HERE
-    Future initialize(context) async{
+    Future initialize(context) async {
       print("Start here");
 
 
-
-
-
-      FirebaseMessaging.onMessage.listen((RemoteMessage message)   {
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         print('Got a message whilst in the foreground!');
         // retrieveRideRequestInfo(getRideRequestId(message.data), context);
 
@@ -105,43 +125,108 @@ class MyApp extends StatelessWidget {
       });
 
 
-
-
-      final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+      final RemoteMessage? initialMessage = await FirebaseMessaging.instance
+          .getInitialMessage();
       if (initialMessage != null) {
         //retrieveRideRequestInfo(getRideRequestId(context), context);
       }
     }
   }
-  // This widget is the root of your application.
-  @override
+
+
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'BorlApp_wms',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
+    return FutureBuilder<String>(
+      future: getInitialRoute(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+
+            decoration: BoxDecoration(
+                color: Colors.white
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Image.asset(
+                    'assets/images/delivery-with-white-background-1.png',
+                    // Replace with your app's icon image path
+                    width: 200,
+                    height: 180,
+                    // Optionally, you can add a color filter or other styling here
+                  ),
+                ),
+                CircularProgressIndicator()
+              ],),
+          ); // Or a splash screen
+        } else {
+          String? initialRoute = snapshot.data;
+
+          // Handle null case if necessary
+          if (initialRoute == null) {
+            initialRoute =
+            '/onboarding'; // Or any default route you want to use
+          }
+
+          return MaterialApp(
+              title: 'BorlApp_wms',
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
 
 
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
-          useMaterial3: true,
-        ),
-        initialRoute:
-        FirebaseAuth.instance.currentUser == null ? '/Onboarding' : '/Homepage',
-            // '/Homepage',
-        //'/Onboarding'
-        routes: {
-          "/SignUP": (context) => signup(),
-          "/addmoredetails": (context) => Addwmsdetails(),
-          "/Onboarding": (context) => OnBoardingPage(),
-          "/About": (context) => AboutPage(),
-          // "/OnBoarding": (context) => ,
-          "/SignIn": (context) => signin(),
-          "/Profile": (context) => ProfilePage(),
-          "/Homepage": (context) => homepage(),
-          //    "/addproduct":(context)=>addproduct()
+                colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+                useMaterial3: true,
+              ),
+
+
+              initialRoute: initialRoute,
+
+              // FirebaseAuth.instance.currentUser == null ? '/Onboarding' : '/Homepage',
+              // '/Homepage',
+              //'/Onboarding'
+              routes: {
+                "/SignUP": (context) => signup(),
+                "/addmoredetails": (context) => Addwmsdetails(),
+                "/Onboarding": (context) => OnBoardingPage(),
+                "/About": (context) => AboutPage(),
+                // "/OnBoarding": (context) => ,
+                "/SignIn": (context) => signin(),
+                "/Profile": (context) => ProfilePage(),
+                "/Homepage": (context) => homepage(),
+                //    "/addproduct":(context)=>addproduct()
+              }
+          );
         }
-    );
-  }
+      });
 }
+Widget routeGenerator(RouteSettings settings)
+    {
+      switch (settings.name) {
+        case '/onboarding':
+          return OnBoardingPage();
+        case '/Main':
+          return homepage();
+        case '/verify':
+          return OtpVerificationScreen(verificationId: '');
+        case '/Riderdetails':
+          return Riderdetails();
+        case '/hubtel':
+          return hubtelpay();
+        case '/authpage':
+          return AuthPage();
+        case '/Homepage':
+          return homepage();
+        default:
+          return Scaffold(
+            body: Center(
+              child: Text('Route not found: ${settings.name}'),
+            ),
+          );
+      }
+    }
+
+
 
 

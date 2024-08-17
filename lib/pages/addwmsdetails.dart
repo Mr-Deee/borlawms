@@ -53,30 +53,51 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
         ),
         body: SingleChildScrollView(
             child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding:  EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        labelText: 'Select Type',
-                        border: OutlineInputBorder(),
+                    Container(
+
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(13),
+                        color: Colors.green,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.5), // Shadow color with opacity
+                            offset: Offset(5, 5), // Horizontal and Vertical offset
+                            blurRadius: 10, // Blur radius
+                            spreadRadius: 2, // Spread radius
+                          ),
+                        ],
                       ),
-                      value: _selectedType,
-                      items: ['Waste Management', 'Recycling']
-                          .map((type) => DropdownMenuItem(
-                                value: type,
-                                child: Text(type),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedType = value!;
-                        });
-                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(left:16.0),
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: 'Select Type',
+                            border: InputBorder.none,
+                          
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          dropdownColor: Colors.green,
+                          value: _selectedType,
+                          items: ['Waste Management Service', 'Recycling']
+                              .map((type) => DropdownMenuItem(
+                                    value: type,
+                                    child: Text(type),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedType = value!;
+                            });
+                          },
+                        ),
+                      ),
                     ),
                     SizedBox(height: 20),
-                    _selectedType == 'Waste Management'
+                    _selectedType == 'Waste Management Service'
                         ? WasteManagementForm()
                         : RecyclingForm(),
                   ],
