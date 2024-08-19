@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_selector/file_selector.dart';
 
+import '../widgets/BinSale.dart';
 import '../widgets/RecycleForm.dart';
 import '../widgets/WMSFORM.dart';
 
@@ -44,7 +45,16 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
   String _selectedType = 'Waste Management';
 
   String dropdownValue = 'Waste Management';
+@override
+  void initState() {
 
+
+  if (!['Waste Management Service', 'Recycling','Bin Sale'].contains(_selectedType)) {
+    _selectedType = 'Waste Management Service';
+  }
+    // TODO: implement initState
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,7 +92,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
                           borderRadius: BorderRadius.circular(12),
                           dropdownColor: Colors.green,
                           value: _selectedType,
-                          items: ['Waste Management Service', 'Recycling']
+                          items: ['Waste Management Service','Recycling','Bin Sale']
                               .map((type) => DropdownMenuItem(
                                     value: type,
                                     child: Text(type),
@@ -97,11 +107,15 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    _selectedType == 'Waste Management Service'
-                        ? WasteManagementForm()
-                        : RecyclingForm(),
-                  ],
-                ))))
+      SizedBox(height: 20),
+      _selectedType == 'Waste Management Service'
+          ? WasteManagementForm()
+          : _selectedType == 'Recycling Service'
+          ? RecyclingForm()
+          : _selectedType == 'Bin Sale'
+          ? SellingBinsWidget()
+          : Container(),
+    ]))))
     ;
   }
 

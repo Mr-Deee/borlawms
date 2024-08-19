@@ -181,7 +181,9 @@ class MyApp extends StatelessWidget {
                 ),
 
 
-                initialRoute: initialRoute,
+                initialRoute: '/addmoredetails',
+
+                //initialRoute,
 
                 // FirebaseAuth.instance.currentUser == null ? '/Onboarding' : '/Homepage',
                 // '/Homepage',

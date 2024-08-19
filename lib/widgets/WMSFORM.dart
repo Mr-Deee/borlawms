@@ -74,20 +74,20 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                     });
                   },
                 ),
-                if (_sellsBins) ...[
-                  sectionTitle('Selling Bins'),
-                  Padding(
-                    padding: const EdgeInsets.only(left:2.0),
-                    child: Text("Kindly Let us know the types of bins you "
-                        "sell and the price you charge, by tapping the '+' button",style: TextStyle(color: Colors.black54),),
-                  ),
-                  ..._sellingBins.map((bin) => binCard(bin, _sellingBins)),
-                  addButton('Add Another Selling Bin', () {
-                    setState(() {
-                      _sellingBins.add({'image': null, 'price': ''});
-                    });
-                  }),
-                ],
+                // if (_sellsBins) ...[
+                //   sectionTitle('Selling Bins'),
+                //   Padding(
+                //     padding: const EdgeInsets.only(left:2.0),
+                //     child: Text("Kindly Let us know the types of bins you "
+                //         "sell and the price you charge, by tapping the '+' button",style: TextStyle(color: Colors.black54),),
+                //   ),
+                //   ..._sellingBins.map((bin) => binCard(bin, _sellingBins)),
+                //   addButton('Add Another Selling Bin', () {
+                //     setState(() {
+                //       _sellingBins.add({'image': null, 'price': ''});
+                //     });
+                //   }),
+                // ],
                 SizedBox(height: 20),
                 sectionTitle('Company Details'),
                 logoUploadButton(),
