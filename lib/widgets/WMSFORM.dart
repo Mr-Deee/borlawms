@@ -65,29 +65,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                     _pickupBins.add({'image': null, 'price': ''});
                   });
                 }),
-                SwitchListTile(
-                  title: Text('Do you sell bins?'),
-                  value: _sellsBins,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _sellsBins = value;
-                    });
-                  },
-                ),
-                // if (_sellsBins) ...[
-                //   sectionTitle('Selling Bins'),
-                //   Padding(
-                //     padding: const EdgeInsets.only(left:2.0),
-                //     child: Text("Kindly Let us know the types of bins you "
-                //         "sell and the price you charge, by tapping the '+' button",style: TextStyle(color: Colors.black54),),
-                //   ),
-                //   ..._sellingBins.map((bin) => binCard(bin, _sellingBins)),
-                //   addButton('Add Another Selling Bin', () {
-                //     setState(() {
-                //       _sellingBins.add({'image': null, 'price': ''});
-                //     });
-                //   }),
-                // ],
+
                 SizedBox(height: 20),
                 sectionTitle('Company Details'),
                 logoUploadButton(),
@@ -188,17 +166,44 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
               height: 100,
             ),
           ),
-        ElevatedButton(
-          onPressed: () async {
-            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-            if (pickedFile != null) {
-              setState(() {
-                _logoFile = File(pickedFile.path);
-              });
-            }
-          },
-          child: Text('Upload Company Logo'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Column(
+              children: [
+                Text("Upload \n Logo"),
+                GestureDetector(
+                  onTap: () async {
+                    final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+                    if (pickedFile != null) {
+                      setState(() {
+                        _logoFile = File(pickedFile.path);
+                      });
+                    }
+                  },
+                  child: Container(child: Icon(Icons.drive_folder_upload)),
+                ),
+              ],
+            ),
+            Column(
+              children: [
+                Text("Upload business \n Certificate"),
+                GestureDetector(
+                  onTap: () async {
+                    final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+                    if (pickedFile != null) {
+                      setState(() {
+                        _logoFile = File(pickedFile.path);
+                      });
+                    }
+                  },
+                  child: Container(child: Icon(Icons.drive_folder_upload)),
+                ),
+              ],
+            ),
+          ],
         ),
+
       ],
     );
   }
