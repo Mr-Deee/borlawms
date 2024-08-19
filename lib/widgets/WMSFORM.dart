@@ -171,7 +171,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
           children: [
             Column(
               children: [
-                Text("Upload \n Logo"),
+                Text("Upload Logo"),
                 GestureDetector(
                   onTap: () async {
                     final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
@@ -187,7 +187,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
             ),
             Column(
               children: [
-                Text("Upload business \n Certificate"),
+                Text("Upload"),
                 GestureDetector(
                   onTap: () async {
                     final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
