@@ -84,7 +84,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
               Column(
                 children: [
                   Container(
-                    height: height / 1.7,
+                    height: height / 1.5,
                     width: 400,
                     decoration: BoxDecoration(
                       color: Color(0xFFE9EBED),
@@ -269,21 +269,42 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                             ),
                           ),
                         ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: size.width / 7,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(right: size.width / 30),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.numbers,
+                                    color: Colors.grey,
+                                  ),
+                                  border: InputBorder.none,
+                                  hintMaxLines: 1,
+                                  hintText:'Ghana Card Number'),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter Ghana card number';
+                                }
+                                return null;
+                              },
+                              controller: _ghanaCardNumberController,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
+
                 ],
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Ghana Card Number'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter Ghana card number';
-                  }
-                  return null;
-                },
-                controller: _ghanaCardNumberController,
-              ),
+
               SizedBox(height: 20),
               submitButton(),
             ],

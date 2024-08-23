@@ -59,7 +59,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Add Details'),
+          title: Text('Details',style: TextStyle(fontWeight: FontWeight.bold),),
         ),
         body: SingleChildScrollView(
             child: Padding(
@@ -274,7 +274,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
                   binsList.remove(bin);
                 });
               },
-              child: Text('Remove Bin'),
+              child: Icon(Icons.delete),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             ),
           ],
