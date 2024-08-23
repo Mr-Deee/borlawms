@@ -22,6 +22,7 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
   TextEditingController _locationController = TextEditingController();
   TextEditingController _employeesController = TextEditingController();
   TextEditingController _ghMobileNumberController = TextEditingController();
+  TextEditingController _DirectorNameController = TextEditingController();
   TextEditingController _ghanaCardNumberController = TextEditingController();
   final _auth = FirebaseAuth.instance;
 
@@ -66,7 +67,7 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
         Column(
           children: [
             Container(
-              height: height/1.7,
+              height: height / 1.4,
               width: 400,
               decoration: BoxDecoration(
                 color: Color(0xFFE9EBED),
@@ -74,9 +75,8 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
               ),
               child: Column(
                 children: [
-//Company Name
                   Padding(
-                    padding: const EdgeInsets.all(18.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Container(
                       height: size.width / 7,
                       alignment: Alignment.center,
@@ -85,11 +85,7 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
                         color: Colors.grey[100],
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: TextField(
-                        style: TextStyle(
-                          color: Colors.grey,
-                        ),
-                        controller: _CompanyNameController,
+                      child: TextFormField(
                         decoration: InputDecoration(
                           prefixIcon: Icon(
                             Icons.business,
@@ -98,18 +94,19 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
                           border: InputBorder.none,
                           hintMaxLines: 1,
                           hintText: 'Company Name',
-                          hintStyle: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter CompanyName';
+                          }
+                          return null;
+                        },
+                        controller: _CompanyNameController,
                       ),
                     ),
                   ),
-
-                  //GPS ADDRESS
                   Padding(
-                    padding: const EdgeInsets.all(18.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Container(
                       height: size.width / 7,
                       alignment: Alignment.center,
@@ -118,31 +115,28 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
                         color: Colors.grey[100],
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: TextField(
-                        style: TextStyle(
-                          color: Colors.grey,
-                        ),
-                        controller: _gpsController,
+                      child: TextFormField(
                         decoration: InputDecoration(
                           prefixIcon: Icon(
-                            Icons.location_searching_sharp,
+                            Icons.person,
                             color: Colors.grey,
                           ),
                           border: InputBorder.none,
                           hintMaxLines: 1,
-                          hintText: 'GPS Address',
-                          hintStyle: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
+                          hintText: 'Director Name',
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter Director Name';
+                          }
+                          return null;
+                        },
+                        controller: _DirectorNameController,
                       ),
                     ),
                   ),
-
-                  //Location
                   Padding(
-                    padding: const EdgeInsets.all(18.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Container(
                       height: size.width / 7,
                       alignment: Alignment.center,
@@ -151,35 +145,180 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
                         color: Colors.grey[100],
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: TextField(
-                        style: TextStyle(
-                          color: Colors.grey,
-                        ),
-                        controller: _locationController,
-                         decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.location_on,
-                            color: Colors.grey,
-                          ),
-                          border: InputBorder.none,
-                          hintMaxLines: 1,
-                          hintText: 'Location',
-                          hintStyle: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.landscape,
+                              color: Colors.grey,
+                            ),
+                            border: InputBorder.none,
+                            hintMaxLines: 1,
+                            hintText: 'Landmark close to location'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter landmark';
+                          }
+                          return null;
+                        },
+                        controller: _landmarkController,
                       ),
                     ),
                   ),
-                  submitButton()
-
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      height: size.width / 7,
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(right: size.width / 30),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.location_searching_outlined,
+                              color: Colors.grey,
+                            ),
+                            border: InputBorder.none,
+                            hintMaxLines: 1,
+                            hintText: 'Location'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter location';
+                          }
+                          return null;
+                        },
+                        controller: _locationController,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      height: size.width / 7,
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(right: size.width / 30),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.gps_fixed,
+                              color: Colors.grey,
+                            ),
+                            border: InputBorder.none,
+                            hintMaxLines: 1,
+                            hintText: 'GPS Address'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter location';
+                          }
+                          return null;
+                        },
+                        controller: _gpsController,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      height: size.width / 7,
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(right: size.width / 30),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.person_pin_circle_sharp,
+                              color: Colors.grey,
+                            ),
+                            border: InputBorder.none,
+                            hintMaxLines: 1,
+                            hintText: 'Number of Employees'),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter number of employees';
+                          }
+                          return null;
+                        },
+                        controller: _employeesController,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      height: size.width / 7,
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(right: size.width / 30),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.numbers,
+                              color: Colors.grey,
+                            ),
+                            border: InputBorder.none,
+                            hintMaxLines: 1,
+                            hintText: 'Phone Number'),
+                        keyboardType: TextInputType.phone,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter GH mobile number';
+                          }
+                          return null;
+                        },
+                        controller: _ghMobileNumberController,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      height: size.width / 7,
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(right: size.width / 30),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.numbers,
+                              color: Colors.grey,
+                            ),
+                            border: InputBorder.none,
+                            hintMaxLines: 1,
+                            hintText: 'Ghana Card Number'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter Ghana card number';
+                          }
+                          return null;
+                        },
+                        controller: _ghanaCardNumberController,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
 
+
+            submitButton(),
           ],
-        )
+        ),
       ],
     );
   }
@@ -197,9 +336,17 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
               width: 100,
             ),
             DropdownButtonFormField<String>(
+              borderRadius: BorderRadius.circular(10),
+
               value: bin['image'] as String?,
+              decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.border_inner,
+                  color: Colors.grey,
+                ),
+                border: InputBorder.none,
+                hintText: ('Select Bin Image'),),
               // Ensure type safety
-              hint: Text('Select Bin Image'),
               items: [
                 DropdownMenuItem(
                     child: Text('Borla Extra - 240L'),
@@ -226,18 +373,38 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
                 return null;
               },
             ),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Price for selected bin'),
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                bin['price'] = value;
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a price';
-                }
-                return null;
-              },
+            Container(
+              height: 69,
+              alignment: Alignment.center,
+              // padding: EdgeInsets.only(right: size.width / 30),30
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: TextFormField(
+                decoration:  InputDecoration(
+                  prefixIcon: Icon(
+                    Icons.price_check,
+                    color: Colors.grey,
+                  ),
+                  border: InputBorder.none,
+                    hintText:  'Price for selected bin'
+
+
+              ),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  bin['price'] = value;
+                },
+
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a price';
+                  }
+                  return null;
+                },
+
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -267,10 +434,27 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
   Widget submitButton() {
     return Center(
       child: ElevatedButton(
-        onPressed: _submitForm,
-        child: Text('Submit'),
         style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+          backgroundColor: Colors.transparent, // Ensure the button background is transparent
+          shadowColor: Colors.transparent,     // Remove shadow to match the gradient container
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12), // Match the container's border radius
+          ),
+        ),
+        onPressed: _submitForm,
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.green, Colors.lightGreenAccent], // Define the gradient colors
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+            child: Text('Submit', style: TextStyle(color: Colors.white)),
+          ),
         ),
       ),
     );
@@ -337,6 +521,41 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
             .showSnackBar(SnackBar(content: Text('User not signed in')));
       }
     }
+  }
+  final ImagePicker _imagePicker = ImagePicker();
+
+  Widget logoUploadButton() {
+    return Column(children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Column(
+            children: [
+              Text("Upload Logo"),
+              GestureDetector(
+                onTap: () async {
+                  final pickedFile =
+                  await _imagePicker.pickImage(source: ImageSource.gallery);
+                  if (pickedFile != null) {
+                    setState(() {
+                      _logoFile = File(pickedFile.path);
+                    });
+                  }
+                },
+                child: Container(
+                  width: 100, // Set a fixed width for the image container
+                  height: 105, // Set a fixed height for the image container
+                  child: _logoFile != null
+                      ? Image.file(_logoFile!) // Display the uploaded image
+                      : Icon(Icons
+                      .drive_folder_upload), // Display the icon if no image is uploaded
+                ),
+              ),
+            ],
+          ),
+        ],
+      )
+    ]);
   }
 
   Future<String> uploadFile(File file, String folderName) async {

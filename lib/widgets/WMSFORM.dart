@@ -36,6 +36,8 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
   final ImagePicker _imagePicker = ImagePicker();
 
   final TextEditingController _landmarkController = TextEditingController();
+  final TextEditingController _DirectorNameController = TextEditingController();
+
   final TextEditingController _CompanynameController = TextEditingController();
   final TextEditingController _gpsController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
@@ -76,6 +78,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
               SizedBox(height: 20),
               sectionTitle('Company Details'),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   logoUploadButton(),
                   BusinessReGUploadButton(),
@@ -84,7 +87,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
               Column(
                 children: [
                   Container(
-                    height: height / 1.5,
+                    height: height / 1.4,
                     width: 400,
                     decoration: BoxDecoration(
                       color: Color(0xFFE9EBED),
@@ -119,6 +122,36 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                                 return null;
                               },
                               controller: _CompanynameController,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: size.width / 7,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(right: size.width / 30),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                prefixIcon: Icon(
+                                  Icons.person,
+                                  color: Colors.grey,
+                                ),
+                                border: InputBorder.none,
+                                hintMaxLines: 1,
+                                hintText: 'Director Name',
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter Director Name';
+                                }
+                                return null;
+                              },
+                              controller: _DirectorNameController,
                             ),
                           ),
                         ),
@@ -257,7 +290,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                                   ),
                                   border: InputBorder.none,
                                   hintMaxLines: 1,
-                                  hintText:  'Phone Number'),
+                                  hintText: 'Phone Number'),
                               keyboardType: TextInputType.phone,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -287,7 +320,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                                   ),
                                   border: InputBorder.none,
                                   hintMaxLines: 1,
-                                  hintText:'Ghana Card Number'),
+                                  hintText: 'Ghana Card Number'),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter Ghana card number';
@@ -301,10 +334,8 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                       ],
                     ),
                   ),
-
                 ],
               ),
-
               SizedBox(height: 20),
               submitButton(),
             ],
@@ -452,8 +483,15 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
               width: 100,
             ),
             DropdownButtonFormField<String>(
+              borderRadius: BorderRadius.circular(10),
               value: bin['image'],
-              hint: Text('Select Bin Image'),
+              decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.border_inner,
+                  color: Colors.grey,
+                ),
+                border: InputBorder.none,
+              hintText: ('Select Bin Image'),),
               items: [
                 DropdownMenuItem(
                     child: Text('Borla Extra - 240L'),
@@ -480,28 +518,46 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
                 return null;
               },
             ),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Price for selected bin'),
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                bin['price'] = value;
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a price';
-                }
-                return null;
-              },
+            Container(
+              height: 69,
+              alignment: Alignment.center,
+              // padding: EdgeInsets.only(right: size.width / 30),30
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: TextFormField(
+                decoration: InputDecoration(
+                    prefixIcon: Icon(
+                      Icons.price_check,
+                      color: Colors.grey,
+                    ),
+
+                    border: InputBorder.none,
+                    hintMaxLines: 1,
+                    hintText:  'Price for selected bin'),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  bin['price'] = value;
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a price';
+                  }
+                  return null;
+                },
+              ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  binsList.remove(bin);
-                });
-              },
-              child: Text('Remove Bin'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            ),
+           GestureDetector(
+                  onTap: (){
+
+
+                    setState(() {
+                      binsList.remove(bin);
+                    });
+                  },
+                  child: Icon(Icons.delete,color: Colors.red,)),
+
           ],
         ),
       ),
@@ -509,12 +565,33 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
   }
 
   Widget submitButton() {
-    return Center(
+    return  Center(
       child: ElevatedButton(
-        onPressed: _submitForm,
-        child: Text('Submit'),
-      ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent, // Ensure the button background is transparent
+            shadowColor: Colors.transparent,     // Remove shadow to match the gradient container
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12), // Match the container's border radius
+            ),
+          ),
+          onPressed: _submitForm,
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.green, Colors.lightGreenAccent], // Define the gradient colors
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+              child: Text('Submit', style: TextStyle(color: Colors.white)),
+            ),
+          ),
+        ),
     );
+
   }
 
   Future<void> _submitForm() async {
@@ -540,12 +617,11 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
 
         Map<String, dynamic> formData = {
           'pickupBins': _pickupBins,
+          'WMSTYPE':"WMS",
           'CompanyName': _CompanynameController,
-          'sellsBins': _sellsBins,
-          'sellingBins': _sellingBins,
+          'DirectorName': _DirectorNameController,
           'logoUrl': logoUrl,
           'compRegUrl': compRegUrl,
-          'registrationDocUrl': registrationDocUrl,
           'gps': _gpsController,
           'landmark': _landmarkController.text,
           'location': _locationController.text,

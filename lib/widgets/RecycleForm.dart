@@ -29,6 +29,7 @@ class _RecyclingFormState extends State<RecyclingForm> {
   final ImagePicker _imagePicker = ImagePicker();
 
   final TextEditingController _fullnameController = TextEditingController();
+  final TextEditingController _DirectornameController = TextEditingController();
   final TextEditingController _gpsController = TextEditingController();
   final TextEditingController _landmarkController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
@@ -38,22 +39,44 @@ class _RecyclingFormState extends State<RecyclingForm> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           sectionTitle('Company Details'),
-          uploadButton('Upload Company Logo', _logoFile, (file) => _logoFile = file),
-          uploadButton('Upload Company Registration Document', _compRegFile, (file) => _compRegFile = file),
-          uploadButton('Upload Business Registration Certificate', _registrationDocFile, (file) => _registrationDocFile = file),
-          textField('Full Name', _fullnameController),
-          textField('Landmark close to location', _landmarkController),
-          textField('Location', _locationController),
-          textField('GPS ', _gpsController),
-          textField('Number of Employees', _employeesController, TextInputType.number),
-          textField('GH Mobile Number', _ghMobileNumberController, TextInputType.phone),
-          textField('Ghana Card Number', _ghanaCardNumberController),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              BusinessReGUploadButton(),
+              logoUploadButton()
+            ],
+          ),
+
+          Container(
+                height: height / 1.2,
+                width: 400,
+                decoration: BoxDecoration(
+                  color: Color(0xFFE9EBED),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+
+              child: Column(
+                children: [
+                  textField('Company Name', _fullnameController,icon: Icons.business),
+                  textField('Director Name', _DirectornameController,icon: Icons.person),
+                  textField('Landmark close to location', _landmarkController,icon: Icons.landscape),
+                  textField('Location', _locationController,icon: Icons.location_on),
+                  textField('GPS ', _gpsController,icon: Icons.gps_fixed_outlined),
+                  textField('Number of Employees', _employeesController, icon: Icons.people),
+                  textField('GH Mobile Number', _ghMobileNumberController, icon: Icons.phone),
+                  textField('Ghana Card Number', _ghanaCardNumberController,icon: Icons.credit_card),
+                ],
+              )),
+
           SizedBox(height: 20),
           submitButton(),
         ],
@@ -88,20 +111,33 @@ class _RecyclingFormState extends State<RecyclingForm> {
     );
   }
 
-  Widget textField(String label, TextEditingController controller, [TextInputType keyboardType = TextInputType.text]) {
-    return TextFormField(
-      decoration: InputDecoration(
-        labelText: label,
-        // border: OutlineInputBorder(),
+  Widget textField(String label, TextEditingController controller, {TextInputType keyboardType = TextInputType.text, IconData? icon}) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        height: 67,
+        alignment: Alignment.center,
+        padding: EdgeInsets.only(right: 10),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: TextFormField(
+          decoration: InputDecoration(
+            labelText: label,
+            prefixIcon: icon != null ? Icon(icon) : null, // Add an icon if provided
+            border: InputBorder.none, // Remove the default border
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter $label';
+            }
+            return null;
+          },
+          controller: controller,
+          keyboardType: keyboardType,
+        ),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter $label';
-        }
-        return null;
-      },
-      controller: controller,
-      keyboardType: keyboardType,
     );
   }
 
@@ -118,8 +154,28 @@ class _RecyclingFormState extends State<RecyclingForm> {
   Widget submitButton() {
     return Center(
       child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent, // Ensure the button background is transparent
+          shadowColor: Colors.transparent,     // Remove shadow to match the gradient container
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12), // Match the container's border radius
+          ),
+        ),
         onPressed: _submitForm,
-        child: Text('Submit'),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.green, Colors.lightGreenAccent], // Define the gradient colors
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+            child: Text('Submit', style: TextStyle(color: Colors.white)),
+          ),
+        ),
       ),
     );
   }
@@ -146,9 +202,11 @@ class _RecyclingFormState extends State<RecyclingForm> {
 
         Map<String, dynamic> formData = {
           'logoUrl': logoUrl,
+          'WMSTYPE':"Recycle",
           'compRegUrl': compRegUrl,
           'registrationDocUrl': registrationDocUrl,
           'FullName': _fullnameController.text,
+          'DirectorName':_DirectornameController,
           'landmark': _landmarkController.text,
           'location': _locationController.text,
           'GPSAddress': _gpsController.text,
@@ -173,5 +231,65 @@ class _RecyclingFormState extends State<RecyclingForm> {
     UploadTask uploadTask = reference.putFile(file);
     TaskSnapshot snapshot = await uploadTask;
     return await snapshot.ref.getDownloadURL();
+  }
+
+
+  Widget logoUploadButton() {
+    return Column(children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Column(
+            children: [
+              Text("Upload Logo"),
+              GestureDetector(
+                onTap: () async {
+                  final pickedFile =
+                  await _imagePicker.pickImage(source: ImageSource.gallery);
+                  if (pickedFile != null) {
+                    setState(() {
+                      _logoFile = File(pickedFile.path);
+                    });
+                  }
+                },
+                child: Container(
+                  width: 100, // Set a fixed width for the image container
+                  height: 105, // Set a fixed height for the image container
+                  child: _logoFile != null
+                      ? Image.file(_logoFile!) // Display the uploaded image
+                      : Icon(Icons
+                      .drive_folder_upload), // Display the icon if no image is uploaded
+                ),
+              ),
+            ],
+          ),
+        ],
+      )
+    ]);
+  }
+  Widget BusinessReGUploadButton() {
+    return Column(
+      children: [
+        Text("Business Registration"),
+        GestureDetector(
+          onTap: () async {
+            final pickedFile =
+            await _imagePicker.pickImage(source: ImageSource.gallery);
+            if (pickedFile != null) {
+              setState(() {
+                _compRegFile = File(pickedFile.path);
+              });
+            }
+          },
+          child: Container(
+            width: 100,
+            height: 100,
+            child: _compRegFile != null
+                ? Image.file(_compRegFile!)
+                : Icon(Icons.drive_folder_upload),
+          ),
+        ),
+      ],
+    );
   }
 }

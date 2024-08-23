@@ -110,7 +110,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
       SizedBox(height: 20),
       _selectedType == 'Waste Management Service'
           ? WasteManagementForm()
-          : _selectedType == 'Recycling Service'
+          : _selectedType == 'Recycling'
           ? RecyclingForm()
           : _selectedType == 'Bin Sale'
           ? SellingBinsWidget()
