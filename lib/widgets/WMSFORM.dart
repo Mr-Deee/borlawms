@@ -27,6 +27,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final List<Map<String, dynamic>> _sellingBins = [];
   List<Map<String, dynamic>> _pickupBins = [];
+
   // bool _pickupBins = false;
   bool _sellsBins = false;
   File? _logoFile;
@@ -35,204 +36,321 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
   final ImagePicker _imagePicker = ImagePicker();
 
   final TextEditingController _landmarkController = TextEditingController();
-  final TextEditingController _fullnameController = TextEditingController();
+  final TextEditingController _CompanynameController = TextEditingController();
   final TextEditingController _gpsController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _employeesController = TextEditingController();
-  final TextEditingController _ghMobileNumberController = TextEditingController();
-  final TextEditingController _ghanaCardNumberController = TextEditingController();
+  final TextEditingController _ghMobileNumberController =
+      TextEditingController();
+  final TextEditingController _ghanaCardNumberController =
+      TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return    Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        child: Padding(
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+    return Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+            child: Padding(
           padding: const EdgeInsets.all(6.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               sectionTitle('Pickup Bins'),
-                Padding(
-                  padding: const EdgeInsets.only(left:2.0),
-                  child: Text("Kindly Let us know the types of bins you "
-                      "pickup and the price you charge, by tapping the '+' button",style: TextStyle(color: Colors.black54),),
+              Padding(
+                padding: const EdgeInsets.only(left: 2.0),
+                child: Text(
+                  "Kindly Let us know the types of bins you "
+                  "pickup and the price you charge, by tapping the '+' button",
+                  style: TextStyle(color: Colors.black54),
                 ),
-                ..._pickupBins.map((bin) => binCard(bin, _pickupBins)),
-                addButton('Add Another Pickup Bin', () {
-                  setState(() {
-                    _pickupBins.add({'image': null, 'price': ''});
-                  });
-                }),
-
-                SizedBox(height: 20),
-                sectionTitle('Company Details'),
-                logoUploadButton(),
-                BusinessReGUploadButton(),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'FullName'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter landmark';
-                    }
-                    return null;
-                  },
-                  controller: _fullnameController,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Landmark close to location'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter landmark';
-                    }
-                    return null;
-                  },
-                  controller: _landmarkController,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Location'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter location';
-                    }
-                    return null;
-                  },
-                  controller: _locationController,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'GPS Address'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter location';
-                    }
-                    return null;
-                  },
-                  controller: _gpsController,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Number of Employees'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter number of employees';
-                    }
-                    return null;
-                  },
-                  controller: _employeesController,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'GH Mobile Number'),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter GH mobile number';
-                    }
-                    return null;
-                  },
-                  controller: _ghMobileNumberController,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Ghana Card Number'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter Ghana card number';
-                    }
-                    return null;
-                  },
-                  controller: _ghanaCardNumberController,
-                ),
-                SizedBox(height: 20),
-                submitButton(),
-              ],
-
+              ),
+              ..._pickupBins.map((bin) => binCard(bin, _pickupBins)),
+              addButton('Add Another Pickup Bin', () {
+                setState(() {
+                  _pickupBins.add({'image': null, 'price': ''});
+                });
+              }),
+              SizedBox(height: 20),
+              sectionTitle('Company Details'),
+              Row(
+                children: [
+                  logoUploadButton(),
+                  BusinessReGUploadButton(),
+                ],
+              ),
+              Column(
+                children: [
+                  Container(
+                    height: height / 1.7,
+                    width: 400,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFE9EBED),
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: size.width / 7,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(right: size.width / 30),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                prefixIcon: Icon(
+                                  Icons.business,
+                                  color: Colors.grey,
+                                ),
+                                border: InputBorder.none,
+                                hintMaxLines: 1,
+                                hintText: 'Company Name',
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter CompanyName';
+                                }
+                                return null;
+                              },
+                              controller: _CompanynameController,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: size.width / 7,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(right: size.width / 30),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.landscape,
+                                    color: Colors.grey,
+                                  ),
+                                  border: InputBorder.none,
+                                  hintMaxLines: 1,
+                                  hintText: 'Landmark close to location'),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter landmark';
+                                }
+                                return null;
+                              },
+                              controller: _landmarkController,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: size.width / 7,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(right: size.width / 30),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.location_searching_outlined,
+                                    color: Colors.grey,
+                                  ),
+                                  border: InputBorder.none,
+                                  hintMaxLines: 1,
+                                  hintText: 'Location'),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter location';
+                                }
+                                return null;
+                              },
+                              controller: _locationController,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: size.width / 7,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(right: size.width / 30),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.gps_fixed,
+                                    color: Colors.grey,
+                                  ),
+                                  border: InputBorder.none,
+                                  hintMaxLines: 1,
+                                  hintText: 'GPS Address'),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter location';
+                                }
+                                return null;
+                              },
+                              controller: _gpsController,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: size.width / 7,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(right: size.width / 30),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.person_pin_circle_sharp,
+                                    color: Colors.grey,
+                                  ),
+                                  border: InputBorder.none,
+                                  hintMaxLines: 1,
+                                  hintText: 'Number of Employees'),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter number of employees';
+                                }
+                                return null;
+                              },
+                              controller: _employeesController,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: size.width / 7,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(right: size.width / 30),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.numbers,
+                                    color: Colors.grey,
+                                  ),
+                                  border: InputBorder.none,
+                                  hintMaxLines: 1,
+                                  hintText:  'Phone Number'),
+                              keyboardType: TextInputType.phone,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter GH mobile number';
+                                }
+                                return null;
+                              },
+                              controller: _ghMobileNumberController,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Ghana Card Number'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter Ghana card number';
+                  }
+                  return null;
+                },
+                controller: _ghanaCardNumberController,
+              ),
+              SizedBox(height: 20),
+              submitButton(),
+            ],
           ),
-        )
-      )
-    );
-
+        )));
   }
-
 
   Widget logoUploadButton() {
-    return Column(
-      children: [
-        if (_logoFile != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Image.file(
-              _logoFile!,
-              width: 100,
-              height: 100,
-            ),
+    return Column(children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Column(
+            children: [
+              Text("Upload Logo"),
+              GestureDetector(
+                onTap: () async {
+                  final pickedFile =
+                      await _imagePicker.pickImage(source: ImageSource.gallery);
+                  if (pickedFile != null) {
+                    setState(() {
+                      _logoFile = File(pickedFile.path);
+                    });
+                  }
+                },
+                child: Container(
+                  width: 100, // Set a fixed width for the image container
+                  height: 105, // Set a fixed height for the image container
+                  child: _logoFile != null
+                      ? Image.file(_logoFile!) // Display the uploaded image
+                      : Icon(Icons
+                          .drive_folder_upload), // Display the icon if no image is uploaded
+                ),
+              ),
+            ],
           ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Column(
-              children: [
-                Text("Upload Logo"),
-                GestureDetector(
-                  onTap: () async {
-                    final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-                    if (pickedFile != null) {
-                      setState(() {
-                        _logoFile = File(pickedFile.path);
-                      });
-                    }
-                  },
-                  child: Container(child: Icon(Icons.drive_folder_upload)),
-                ),
-              ],
-            ),
-            Column(
-              children: [
-                Text("Upload"),
-                GestureDetector(
-                  onTap: () async {
-                    final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-                    if (pickedFile != null) {
-                      setState(() {
-                        _logoFile = File(pickedFile.path);
-                      });
-                    }
-                  },
-                  child: Container(child: Icon(Icons.drive_folder_upload)),
-                ),
-              ],
-            ),
-          ],
-        ),
-
-      ],
-    );
+        ],
+      )
+    ]);
   }
+
   Widget BusinessReGUploadButton() {
     return Column(
       children: [
-        if (_compRegFile != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Image.file(
-              _compRegFile!,
-              width: 100,
-              height: 100,
-            ),
-          ),
-        ElevatedButton(
-          onPressed: () async {
-            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+        Text("Business Registration"),
+        GestureDetector(
+          onTap: () async {
+            final pickedFile =
+                await _imagePicker.pickImage(source: ImageSource.gallery);
             if (pickedFile != null) {
               setState(() {
                 _compRegFile = File(pickedFile.path);
               });
             }
           },
-          child: Text('Upload Business Registration'),
+          child: Container(
+            width: 100,
+            height: 100,
+            child: _compRegFile != null
+                ? Image.file(_compRegFile!)
+                : Icon(Icons.drive_folder_upload),
+          ),
         ),
       ],
     );
   }
+
   Widget addButton(String text, VoidCallback onPressed) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -257,7 +375,8 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
           ),
         ElevatedButton(
           onPressed: () async {
-            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+            final pickedFile =
+                await _imagePicker.pickImage(source: ImageSource.gallery);
             if (pickedFile != null) {
               setState(() {
                 onFilePicked(File(pickedFile.path));
@@ -270,7 +389,8 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
     );
   }
 
-  Widget textField(String label, TextEditingController controller, [TextInputType keyboardType = TextInputType.text]) {
+  Widget textField(String label, TextEditingController controller,
+      [TextInputType keyboardType = TextInputType.text]) {
     return TextFormField(
       decoration: InputDecoration(
         labelText: label,
@@ -297,7 +417,8 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
     );
   }
 
-  Widget binCard(Map<String, dynamic> bin, List<Map<String, dynamic>> binsList) {
+  Widget binCard(
+      Map<String, dynamic> bin, List<Map<String, dynamic>> binsList) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
@@ -313,10 +434,18 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
               value: bin['image'],
               hint: Text('Select Bin Image'),
               items: [
-                DropdownMenuItem(child: Text('Borla Extra - 240L'), value: 'assets/images/240L.png'),
-                DropdownMenuItem(child: Text('Borla General-140L'), value: 'assets/images/140.png'),
-                DropdownMenuItem(child: Text('Borla Medium -100L'), value: 'assets/images/100l.png'),
-                DropdownMenuItem(child: Text('Borla Bag'), value: 'assets/images/plasticbag.png'),
+                DropdownMenuItem(
+                    child: Text('Borla Extra - 240L'),
+                    value: 'assets/images/240L.png'),
+                DropdownMenuItem(
+                    child: Text('Borla General-140L'),
+                    value: 'assets/images/140.png'),
+                DropdownMenuItem(
+                    child: Text('Borla Medium -100L'),
+                    value: 'assets/images/100l.png'),
+                DropdownMenuItem(
+                    child: Text('Borla Bag'),
+                    value: 'assets/images/plasticbag.png'),
               ],
               onChanged: (value) {
                 setState(() {
@@ -384,12 +513,13 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
           compRegUrl = await uploadFile(_compRegFile!, 'CompanyRegistration');
         }
         if (_registrationDocFile != null) {
-          registrationDocUrl = await uploadFile(_registrationDocFile!, 'BusinessRegistration');
+          registrationDocUrl =
+              await uploadFile(_registrationDocFile!, 'BusinessRegistration');
         }
 
         Map<String, dynamic> formData = {
           'pickupBins': _pickupBins,
-          'fullname': _fullnameController,
+          'CompanyName': _CompanynameController,
           'sellsBins': _sellsBins,
           'sellingBins': _sellingBins,
           'logoUrl': logoUrl,
@@ -403,19 +533,26 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
           'ghanaCardNumber': _ghanaCardNumberController.text,
         };
 
-        await _database.child('WasteManagement').child(userId).child('wasteManagementInfo').set(formData);
+        await _database
+            .child('WasteManagement')
+            .child(userId)
+            .child('wasteManagementInfo')
+            .set(formData);
 
         Navigator.of(context).pop();
         Navigator.of(context).pushNamed("/SignIn");
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data submitted successfully')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Data submitted successfully')));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User not signed in')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('User not signed in')));
       }
     }
   }
 
   Future<String> uploadFile(File file, String folderName) async {
-    Reference reference = _storage.ref().child('$folderName/${Path.basename(file.path)}');
+    Reference reference =
+        _storage.ref().child('$folderName/${Path.basename(file.path)}');
     UploadTask uploadTask = reference.putFile(file);
     TaskSnapshot snapshot = await uploadTask;
     return await snapshot.ref.getDownloadURL();
