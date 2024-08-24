@@ -181,7 +181,9 @@ class MyApp extends StatelessWidget {
                 ),
 
 
-                initialRoute: '/addmoredetails',
+                initialRoute: initialRoute,
+
+                //'/addmoredetails',
 
                 //initialRoute,
 
