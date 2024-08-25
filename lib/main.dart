@@ -167,7 +167,7 @@ class MyApp extends StatelessWidget {
             // Handle null case if necessary
             if (initialRoute == null) {
               initialRoute =
-              '/onboarding'; // Or any default route you want to use
+              '/Onboarding'; // Or any default route you want to use
             }
 
             return MaterialApp(
@@ -208,7 +208,7 @@ class MyApp extends StatelessWidget {
 
   Widget routeGenerator(RouteSettings settings) {
     switch (settings.name) {
-      case '/onboarding':
+      case '/Onboarding':
         return OnBoardingPage();
       case '/Main':
         return homepage();
