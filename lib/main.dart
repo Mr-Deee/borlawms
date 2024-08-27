@@ -79,7 +79,7 @@ Future<String> getInitialRoute() async {
   // Fetch detailComp value from Firebase
   DatabaseEvent snapshot = await FirebaseDatabase.instance
       .ref()
-      .child('Riders')
+      .child('WMS')
       .child(uid)
       .child('detailsComp')
       .once();
@@ -87,12 +87,12 @@ Future<String> getInitialRoute() async {
   bool? detailComp = snapshot.snapshot.value as bool?;
 
   if (FirebaseAuth.instance.currentUser == null) {
-    return '/onboarding';
+    return '/Onboarding';
 
   } else if (detailComp == true) {
-    return '/Main';
+    return '/Homepage';
   } else {
-    return '/Riderdetails'; // Navigate to Riderdetails if detailComp is false or not set
+    return '/addmoredetails'; // Navigate to Riderdetails if detailComp is false or not set
   }
 }
 
@@ -151,7 +151,7 @@ class MyApp extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Image.asset(
-                      'assets/images/delivery-with-white-background-1.png',
+                      'assets/images/wms.png',
                       // Replace with your app's icon image path
                       width: 200,
                       height: 180,
@@ -166,8 +166,7 @@ class MyApp extends StatelessWidget {
 
             // Handle null case if necessary
             if (initialRoute == null) {
-              initialRoute =
-              '/Onboarding'; // Or any default route you want to use
+              initialRoute = '/Onboarding'; // Or any default route you want to use
             }
 
             return MaterialApp(

@@ -416,6 +416,7 @@ class _signupState extends State<signup> {
         "Username":_usernamecontroller.text.trim(),
         "phone": _phonecontroller.text.trim(),
         "Password": _passwordcontroller.text.trim(),
+        "detailsComp": false,
         // 'Date Of Birth': selectedDate!.toLocal().toString().split(' ')[0],
         // "Dob":birthDate,
         // "Gender":Gender,

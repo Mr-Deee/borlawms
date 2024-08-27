@@ -73,245 +73,248 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
                 color: Color(0xFFE9EBED),
                 borderRadius: BorderRadius.circular(13),
               ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: size.width / 7,
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.only(right: size.width / 30),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.business,
-                            color: Colors.grey,
-                          ),
-                          border: InputBorder.none,
-                          hintMaxLines: 1,
-                          hintText: 'Company Name',
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: size.width / 7,
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(right: size.width / 30),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter CompanyName';
-                          }
-                          return null;
-                        },
-                        controller: _CompanyNameController,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: size.width / 7,
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.only(right: size.width / 30),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.person,
-                            color: Colors.grey,
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.business,
+                              color: Colors.grey,
+                            ),
+                            border: InputBorder.none,
+                            hintMaxLines: 1,
+                            hintText: 'Company Name',
                           ),
-                          border: InputBorder.none,
-                          hintMaxLines: 1,
-                          hintText: 'Director Name',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter CompanyName';
+                            }
+                            return null;
+                          },
+                          controller: _CompanyNameController,
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter Director Name';
-                          }
-                          return null;
-                        },
-                        controller: _DirectorNameController,
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: size.width / 7,
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.only(right: size.width / 30),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextFormField(
-                        decoration: InputDecoration(
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: size.width / 7,
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(right: size.width / 30),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: TextFormField(
+                          decoration: InputDecoration(
                             prefixIcon: Icon(
-                              Icons.landscape,
+                              Icons.person,
                               color: Colors.grey,
                             ),
                             border: InputBorder.none,
                             hintMaxLines: 1,
-                            hintText: 'Landmark close to location'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter landmark';
-                          }
-                          return null;
-                        },
-                        controller: _landmarkController,
+                            hintText: 'Director Name',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter Director Name';
+                            }
+                            return null;
+                          },
+                          controller: _DirectorNameController,
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: size.width / 7,
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.only(right: size.width / 30),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.location_searching_outlined,
-                              color: Colors.grey,
-                            ),
-                            border: InputBorder.none,
-                            hintMaxLines: 1,
-                            hintText: 'Location'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter location';
-                          }
-                          return null;
-                        },
-                        controller: _locationController,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: size.width / 7,
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.only(right: size.width / 30),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.gps_fixed,
-                              color: Colors.grey,
-                            ),
-                            border: InputBorder.none,
-                            hintMaxLines: 1,
-                            hintText: 'GPS Address'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter location';
-                          }
-                          return null;
-                        },
-                        controller: _gpsController,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: size.width / 7,
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(right: size.width / 30),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(
+                                Icons.landscape,
+                                color: Colors.grey,
+                              ),
+                              border: InputBorder.none,
+                              hintMaxLines: 1,
+                              hintText: 'Landmark close to location'),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter landmark';
+                            }
+                            return null;
+                          },
+                          controller: _landmarkController,
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: size.width / 7,
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.only(right: size.width / 30),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.person_pin_circle_sharp,
-                              color: Colors.grey,
-                            ),
-                            border: InputBorder.none,
-                            hintMaxLines: 1,
-                            hintText: 'Number of Employees'),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter number of employees';
-                          }
-                          return null;
-                        },
-                        controller: _employeesController,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: size.width / 7,
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.only(right: size.width / 30),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.numbers,
-                              color: Colors.grey,
-                            ),
-                            border: InputBorder.none,
-                            hintMaxLines: 1,
-                            hintText: 'Phone Number'),
-                        keyboardType: TextInputType.phone,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter GH mobile number';
-                          }
-                          return null;
-                        },
-                        controller: _ghMobileNumberController,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: size.width / 7,
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(right: size.width / 30),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(
+                                Icons.location_searching_outlined,
+                                color: Colors.grey,
+                              ),
+                              border: InputBorder.none,
+                              hintMaxLines: 1,
+                              hintText: 'Location'),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter location';
+                            }
+                            return null;
+                          },
+                          controller: _locationController,
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: size.width / 7,
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.only(right: size.width / 30),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.numbers,
-                              color: Colors.grey,
-                            ),
-                            border: InputBorder.none,
-                            hintMaxLines: 1,
-                            hintText: 'Ghana Card Number'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter Ghana card number';
-                          }
-                          return null;
-                        },
-                        controller: _ghanaCardNumberController,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: size.width / 7,
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(right: size.width / 30),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(
+                                Icons.gps_fixed,
+                                color: Colors.grey,
+                              ),
+                              border: InputBorder.none,
+                              hintMaxLines: 1,
+                              hintText: 'GPS Address'),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter location';
+                            }
+                            return null;
+                          },
+                          controller: _gpsController,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: size.width / 7,
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(right: size.width / 30),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(
+                                Icons.person_pin_circle_sharp,
+                                color: Colors.grey,
+                              ),
+                              border: InputBorder.none,
+                              hintMaxLines: 1,
+                              hintText: 'Number of Employees'),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter number of employees';
+                            }
+                            return null;
+                          },
+                          controller: _employeesController,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: size.width / 7,
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(right: size.width / 30),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(
+                                Icons.numbers,
+                                color: Colors.grey,
+                              ),
+                              border: InputBorder.none,
+                              hintMaxLines: 1,
+                              hintText: 'Phone Number'),
+                          keyboardType: TextInputType.phone,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter GH mobile number';
+                            }
+                            return null;
+                          },
+                          controller: _ghMobileNumberController,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: size.width / 7,
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(right: size.width / 30),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(
+                                Icons.numbers,
+                                color: Colors.grey,
+                              ),
+                              border: InputBorder.none,
+                              hintMaxLines: 1,
+                              hintText: 'Ghana Card Number'),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter Ghana card number';
+                            }
+                            return null;
+                          },
+                          controller: _ghanaCardNumberController,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -461,7 +464,8 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
   }
 
   void _submitForm() async {
-    showDialog(
+
+      showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
@@ -470,7 +474,6 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
           );
         });
 
-    if (_formKey.currentState!.validate()) {
       User? user = _auth.currentUser;
       if (user != null) {
         String userId = user.uid;
@@ -512,6 +515,11 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
             .child('wasteManagementInfo')
             .set(formData);
 
+        _database
+            .child('WMS')
+            .child(userId)
+            .update({'detailsComp': true});
+
         Navigator.of(context).pop();
         Navigator.of(context).pushNamed("/SignIn");
         ScaffoldMessenger.of(context).showSnackBar(
@@ -521,7 +529,7 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
             .showSnackBar(SnackBar(content: Text('User not signed in')));
       }
     }
-  }
+
   final ImagePicker _imagePicker = ImagePicker();
 
   Widget logoUploadButton() {

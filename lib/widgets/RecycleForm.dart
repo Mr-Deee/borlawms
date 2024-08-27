@@ -64,17 +64,20 @@ class _RecyclingFormState extends State<RecyclingForm> {
                   borderRadius: BorderRadius.circular(13),
                 ),
 
-              child: Column(
-                children: [
-                  textField('Company Name', _fullnameController,icon: Icons.business),
-                  textField('Director Name', _DirectornameController,icon: Icons.person),
-                  textField('Landmark close to location', _landmarkController,icon: Icons.landscape),
-                  textField('Location', _locationController,icon: Icons.location_on),
-                  textField('GPS ', _gpsController,icon: Icons.gps_fixed_outlined),
-                  textField('Number of Employees', _employeesController, icon: Icons.people),
-                  textField('GH Mobile Number', _ghMobileNumberController, icon: Icons.phone),
-                  textField('Ghana Card Number', _ghanaCardNumberController,icon: Icons.credit_card),
-                ],
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  children: [
+                    textField('Company Name', _fullnameController,icon: Icons.business),
+                    textField('Director Name', _DirectornameController,icon: Icons.person),
+                    textField('Landmark close to location', _landmarkController,icon: Icons.landscape),
+                    textField('Location', _locationController,icon: Icons.location_on),
+                    textField('GPS ', _gpsController,icon: Icons.gps_fixed_outlined),
+                    textField('Number of Employees', _employeesController, icon: Icons.people),
+                    textField('GH Mobile Number', _ghMobileNumberController, icon: Icons.phone),
+                    textField('Ghana Card Number', _ghanaCardNumberController,icon: Icons.credit_card),
+                  ],
+                ),
               )),
 
           SizedBox(height: 20),
@@ -181,50 +184,88 @@ class _RecyclingFormState extends State<RecyclingForm> {
   }
 
   Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      User? user = _auth.currentUser;
-      if (user != null) {
-        String userId = user.uid;
-
-        String? logoUrl;
-        String? compRegUrl;
-        String? registrationDocUrl;
-
-        if (_logoFile != null) {
-          logoUrl = await uploadFile(_logoFile!, 'CompanyLogo');
-        }
-        if (_compRegFile != null) {
-          compRegUrl = await uploadFile(_compRegFile!, 'CompanyRegistration');
-        }
-        if (_registrationDocFile != null) {
-          registrationDocUrl = await uploadFile(_registrationDocFile!, 'BusinessRegistration');
-        }
-
-        Map<String, dynamic> formData = {
-          'logoUrl': logoUrl,
-          'WMSTYPE':"Recycle",
-          'compRegUrl': compRegUrl,
-          'registrationDocUrl': registrationDocUrl,
-          'FullName': _fullnameController.text,
-          'DirectorName':_DirectornameController,
-          'landmark': _landmarkController.text,
-          'location': _locationController.text,
-          'GPSAddress': _gpsController.text,
-          'employees': _employeesController.text,
-          'ghMobileNumber': _ghMobileNumberController.text,
-          'ghanaCardNumber': _ghanaCardNumberController.text,
-        };
-
-        await _database.child('Recycling').child(userId).child('recyclingInfo').set(formData);
-
-        Navigator.of(context).pop();
-        Navigator.of(context).pushNamed("/SignIn");
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data submitted successfully')));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User not signed in')));
-      }
+    if (!_formKey.currentState!.validate()) {
+      return; // Exit early if form validation fails
     }
+
+    // Show progress dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return ProgressDialog(
+          message: "Updating, please wait.....",
+        );
+      },
+    );
+
+    User? user = _auth.currentUser;
+    if (user == null) {
+      Navigator.of(context).pop(); // Close dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User not signed in')),
+      );
+      return;
+    }
+
+    String userId = user.uid;
+    List<Future<String?>> uploadTasks = [];
+
+    // Upload files concurrently
+    if (_logoFile != null) {
+      uploadTasks.add(uploadFile(_logoFile!, 'CompanyLogo'));
+    } else {
+      uploadTasks.add(Future.value(null));
+    }
+    if (_compRegFile != null) {
+      uploadTasks.add(uploadFile(_compRegFile!, 'CompanyRegistration'));
+    } else {
+      uploadTasks.add(Future.value(null));
+    }
+    if (_registrationDocFile != null) {
+      uploadTasks.add(uploadFile(_registrationDocFile!, 'BusinessRegistration'));
+    } else {
+      uploadTasks.add(Future.value(null));
+    }
+
+    // Wait for all uploads to complete
+    List<String?> uploadResults = await Future.wait(uploadTasks);
+    String? logoUrl = uploadResults[0];
+    String? compRegUrl = uploadResults[1];
+    String? registrationDocUrl = uploadResults[2];
+
+    // Prepare form data
+    Map<String, dynamic> formData = {
+      'logoUrl': logoUrl,
+      'WMSTYPE': "Recycle",
+      'detailsComp': 'true',
+      'compRegUrl': compRegUrl.toString(),
+      'registrationDocUrl': registrationDocUrl.toString(),
+      'FullName': _fullnameController.text,
+      'DirectorName': _DirectornameController.text,
+      'landmark': _landmarkController.text,
+      'location': _locationController.text,
+      'GPSAddress': _gpsController.text,
+      'employees': _employeesController.text,
+      'ghMobileNumber': _ghMobileNumberController.text,
+      'ghanaCardNumber': _ghanaCardNumberController.text,
+    };
+
+    // Update database
+    await _database.child('WMS').child(userId).child('wasteManagementInfo').set(formData);
+  _database
+        .child('WMS')
+        .child(userId)
+        .update({'detailsComp': 'true'});
+
+    // Close dialog and navigate
+    Navigator.of(context).pop();
+    Navigator.of(context).pushNamed("/SignIn");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Data submitted successfully')),
+    );
   }
+
 
   Future<String> uploadFile(File file, String folderName) async {
     Reference reference = _storage.ref().child('$folderName/${Path.basename(file.path)}');
