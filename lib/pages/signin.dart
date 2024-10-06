@@ -32,7 +32,7 @@ class signin extends StatefulWidget {
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final DatabaseReference _userRef =
-    FirebaseDatabase.instance.reference().child('users');
+    FirebaseDatabase.instance.ref().child('users');
 TextEditingController phoneNumberController = TextEditingController();
 TextEditingController emailcontroller = TextEditingController();
 TextEditingController passwordcontroller = TextEditingController();

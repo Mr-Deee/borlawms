@@ -21,7 +21,7 @@ class RecyclingForm extends StatefulWidget {
 class _RecyclingFormState extends State<RecyclingForm> {
   final _formKey = GlobalKey<FormState>();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _database = FirebaseDatabase.instance.reference();
+  final DatabaseReference _database = FirebaseDatabase.instance.ref();
   final FirebaseStorage _storage = FirebaseStorage.instance;
   File? _logoFile;
   File? _compRegFile;

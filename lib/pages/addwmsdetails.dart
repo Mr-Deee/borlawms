@@ -33,7 +33,7 @@ Uint8List? _registrationDocBytes;
 class _AddwmsdetailsState extends State<Addwmsdetails> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
-  final _database = FirebaseDatabase.instance.reference();
+  final _database = FirebaseDatabase.instance.ref();
   final _storage = FirebaseStorage.instance;
   List<Map<String, dynamic>> _pickupBins = [];
   List<Map<String, dynamic>> _sellingBins = [];

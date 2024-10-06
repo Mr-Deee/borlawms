@@ -1,160 +1,46 @@
 {
   "project_info": {
-    "project_number": "372899048216",
-    "firebase_url": "https://borla-8866b-default-rtdb.firebaseio.com",
-    "project_id": "borla-8866b",
-    "storage_bucket": "borla-8866b.appspot.com"
+    "project_number": "711849765217",
+    "firebase_url": "https://borlagh-2cc0d-default-rtdb.firebaseio.com",
+    "project_id": "borlagh-2cc0d",
+    "storage_bucket": "borlagh-2cc0d.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:372899048216:android:5443dd6c818eca0809cc6d",
+        "mobilesdk_app_id": "1:711849765217:android:a08374e98e3dad97a7bd20",
         "android_client_info": {
-          "package_name": "com.example.borla_app"
+          "package_name": "com.mlabs.borla_client"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "372899048216-11jnd6p491fjkftgti3udq9l0iebqg9m.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.borla_app",
-            "certificate_hash": "b242a08acb4973e3c90be00ebee112439cd8838c"
-          }
-        },
-        {
-          "client_id": "372899048216-a5nnlctgr9q90eth00aagairdbb5g4o2.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDnIhWDi6C_CduK5cHsZ1ZUP-cz4y5QQFY"
+          "current_key": "AIzaSyAeVr5xFxgNaJmMYM7aIN2GshOih4DBjVw"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "372899048216-a5nnlctgr9q90eth00aagairdbb5g4o2.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "372899048216-4vt3l0rac9edtg47bclkgub8bp9u1lv6.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.bgh.borlawms.borlawms"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:372899048216:android:292894e6b76783c209cc6d",
-        "android_client_info": {
-          "package_name": "com.example.borla_client"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "372899048216-a5nnlctgr9q90eth00aagairdbb5g4o2.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDnIhWDi6C_CduK5cHsZ1ZUP-cz4y5QQFY"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "372899048216-a5nnlctgr9q90eth00aagairdbb5g4o2.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "372899048216-4vt3l0rac9edtg47bclkgub8bp9u1lv6.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.bgh.borlawms.borlawms"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:372899048216:android:631040aa10d9c1e209cc6d",
-        "android_client_info": {
-          "package_name": "com.malcolm.borlawms"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "372899048216-a5nnlctgr9q90eth00aagairdbb5g4o2.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDnIhWDi6C_CduK5cHsZ1ZUP-cz4y5QQFY"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "372899048216-a5nnlctgr9q90eth00aagairdbb5g4o2.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "372899048216-4vt3l0rac9edtg47bclkgub8bp9u1lv6.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.bgh.borlawms.borlawms"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:372899048216:android:c10f536618d94bd109cc6d",
+        "mobilesdk_app_id": "1:711849765217:android:7e74ce4bb6b49cf1a7bd20",
         "android_client_info": {
           "package_name": "com.mlabs.borlawms"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "372899048216-a5nnlctgr9q90eth00aagairdbb5g4o2.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDnIhWDi6C_CduK5cHsZ1ZUP-cz4y5QQFY"
+          "current_key": "AIzaSyAeVr5xFxgNaJmMYM7aIN2GshOih4DBjVw"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "372899048216-a5nnlctgr9q90eth00aagairdbb5g4o2.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "372899048216-4vt3l0rac9edtg47bclkgub8bp9u1lv6.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.bgh.borlawms.borlawms"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
