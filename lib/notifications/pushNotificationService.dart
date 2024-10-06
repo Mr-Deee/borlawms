@@ -63,13 +63,13 @@ class PushNotificationService {
     String rideRequestId = "";
     if (Platform.isAndroid) {
       print("This is Ride Request Id::");
-      rideRequestId = message['WMS_request_id'];
+      rideRequestId = message['wms_request_id'];
       print("ride_request_id");
       print(rideRequestId);
     }
     else {
       print("This is Ride Request Id:: ");
-      rideRequestId = message['WMS_request_id'];
+      rideRequestId = message['wms_request_id'];
       print(rideRequestId);
     }
 
@@ -78,12 +78,13 @@ class PushNotificationService {
 
   void retrieveRideRequestInfo(String artisanRequestId, BuildContext context) {
     clientRequestRef.child(artisanRequestId).once().then((event) {
-
+      final map = event.snapshot.value as Map<dynamic,dynamic>;
+      print("reqid3:$artisanRequestId");
       // var dataSnapshot = value.snapshot;
       // final map = dataSnapshot.value as Map<dynamic, dynamic>;
       //var map = Map<String, dynamic>.from(event.snapshot.value as Map);
       if (event.snapshot.value != null) {
-        final map = event.snapshot.value as Map<dynamic,dynamic>;
+        // final map = event.snapshot.value as Map<dynamic,dynamic>;
       //  assetsAudioPlayer.open(Audio("sounds/alert.mp3"));
         //assetsAudioPlayer.play();
 
