@@ -45,13 +45,13 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                 image: 'assets/images/signup.png',
               ),
               buildPage(
-                backgroundImage: 'assets/images/background3.jpg',
+                backgroundImage: 'assets/images/signonb1.jpg',
                 title: "How To Sign In",
                 body: "Enter your email and password.\nTap Continue to sign in.",
                 image: 'assets/images/signin.png',
               ),
               buildPage(
-                backgroundImage: 'assets/images/background4.jpg',
+                backgroundImage: 'assets/images/onb21.jpg',
                 title: "Go Online",
                 body: "Want To Receive Requests? \nToggle to go online and receive requests.",
                 image: 'assets/images/toggle.png',
@@ -91,7 +91,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                     height: 53,
                     width: 100,
                     decoration: BoxDecoration(
-                        color: Colors.white12,
+                        color: Colors.white54,
                         borderRadius: BorderRadius.circular(33)),
                       child: Center(child: Padding(
                         padding: const EdgeInsets.all(8.0),
