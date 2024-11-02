@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:borlawms/pages/signin.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -36,6 +37,8 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                 body:
                 'Trash the Waste, Not the Planet! Join our waste management campaign to reduce, reuse, and recycle for a cleaner, greener future🌍♻️.',
                 image: 'assets/images/bwmslogo.png',
+            titleColor:  Colors.green, bodyColor:  Colors.white,
+                titleFontSize: 63, bodyFontSize: 15,
               ),
               buildPage(
                 backgroundImage: 'assets/images/signonb1.jpg',
@@ -43,18 +46,26 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                 body:
                 "Tap 'New User? signup', navigate to signup screen, and input credentials.\nReturn and sign in to your account.",
                 image: 'assets/images/signup.png',
+                 titleColor:  Colors.white,
+                  bodyColor:  Colors.white,
+                titleFontSize: 33,
+                bodyFontSize: 15,
               ),
               buildPage(
                 backgroundImage: 'assets/images/signonb1.jpg',
                 title: "How To Sign In",
                 body: "Enter your email and password.\nTap Continue to sign in.",
-                image: 'assets/images/signin.png',
+                image: 'assets/images/signin.png',  titleColor:  Colors.white, bodyColor:  Colors.white,
+                titleFontSize: 23,
+                bodyFontSize: 15,
               ),
               buildPage(
                 backgroundImage: 'assets/images/onb21.jpg',
                 title: "Go Online",
                 body: "Want To Receive Requests? \nToggle to go online and receive requests.",
                 image: 'assets/images/toggle.png',
+                titleColor:  Colors.green, bodyColor:  Colors.white,
+                titleFontSize: 23, bodyFontSize: 65,
               ),
             ],
           ),
@@ -77,6 +88,10 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                     ? ElevatedButton(
                   onPressed: () {
                     // Navigate to main page or home screen
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => signin()), // Ensure the class name is `SignIn`
+                    );
                   },
                   child: Text('Get Started'),
                 )
@@ -88,14 +103,14 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                     );
                   },
                   child: Container(
-                    height: 53,
-                    width: 100,
+                    height: 43,
+                    width: 120,
                     decoration: BoxDecoration(
-                        color: Colors.white54,
+                        color: Colors.white70,
                         borderRadius: BorderRadius.circular(33)),
                       child: Center(child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Next',style: TextStyle(color: Colors.green,fontSize: 21),),
+                        child: Text('Next',style: TextStyle(color: Colors.green,fontSize: 19),),
                       ))),
                 ),
               ],
@@ -111,6 +126,11 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
     required String title,
     required String body,
     required String image,
+    required Color titleColor,
+    required Color bodyColor,
+    required double titleFontSize,
+    required double bodyFontSize,
+
   }) {
     return Stack(
       children: [
@@ -139,8 +159,8 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+
+                    color: titleColor),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 10),
@@ -148,7 +168,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
                 child: Text(
                   body,
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  style: TextStyle(fontSize: 16,                color: bodyColor,),
                   textAlign: TextAlign.center,
                 ),
               ),
