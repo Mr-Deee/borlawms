@@ -98,214 +98,136 @@ class _signinState extends State<signin> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-          
+              // Logo Image
               Container(
-                width: 159.0, // Adjust the width as needed
-                height: 120, // Adjust the height as needed
-                child: Image.asset(
-                  'assets/images/wms.png',
-                ),),
-          
+                width: 160.0,
+                height: 120.0,
+                margin: EdgeInsets.only(bottom: 20.0),
+                child: Image.asset('assets/images/wms.png'),
+              ),
+
+
+
+              // Subheader Text
               Row(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top: 10, left: 18.0),
+                    padding: const EdgeInsets.only(left:20.0),
                     child: Text(
-                      "Login",
-                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                      "Login to continue using the app",
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ),
                 ],
               ),
-          
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 18.0),
-                    child: Text("Login to continue using the app",
-                        style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  ),
-                ],
-              ),
-          
-              SizedBox(
-                height: 10,
-              ),
+
+              SizedBox(height: 24.0),
+
+              // Email Input Field
               Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: TextFormField(
                   controller: emailcontroller,
                   decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.email,
-                      color: Colors.grey,
-                    ),
+                    prefixIcon: Icon(Icons.email, color: Colors.grey),
                     filled: true,
-                    // Set filled to true for a grey background
                     fillColor: Colors.grey[200],
                     hintText: "Email",
                     hintStyle: TextStyle(color: Colors.grey),
-                    enabledBorder: OutlineInputBorder(
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(
-                          color: Colors.grey), // Set the border color to grey
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(
-                          color: Colors
-                              .grey), // Set the border color to grey when focused
+                      borderSide: BorderSide.none,
                     ),
                   ),
                 ),
               ),
-          
-              SizedBox(
-                height: 1,
-              ),
+
+              SizedBox(height: 10.0),
+
+              // Password Input Field
               Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: TextFormField(
                   obscureText: true,
                   controller: passwordcontroller,
                   decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.password,
-                      color: Colors.grey,
-                    ),
+                    prefixIcon: Icon(Icons.lock, color: Colors.grey),
                     filled: true,
-          
-                    // Set filled to true for a grey background
                     fillColor: Colors.grey[200],
                     hintText: "Password",
                     hintStyle: TextStyle(color: Colors.grey),
-                    enabledBorder: OutlineInputBorder(
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(
-                          color: Colors.grey), // Set the border color to grey
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(
-                          color: Colors
-                              .grey), // Set the border color to grey when focused
+                      borderSide: BorderSide.none,
                     ),
                   ),
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0, right: 12),
-                    child: RichText(
-                      text: TextSpan(
-                        text: 'Forgotten password?',
-                        style: TextStyle(
-                          color: Colors.black,
-                        ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                builder: (context) => ForgotPasswordPage(),
-                            ),);
-                            HapticFeedback.lightImpact();
-                            // Fluttertoast.showToast(
-                            //   msg: 'Forgotten password! button pressed',
-                            // );
-                          },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              // Implement Apple sign-in button here using the `flutter_apple_sign_in` package.
-              Padding(
-                padding: const EdgeInsets.only(top: 21.0),
-                child: SizedBox(
-                  width: 300,
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFF169F00)),
-                    onPressed: () {
-                      // sendVerificationCode();
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => SMSCodeInputScreen("verificationId"),
-                      //   ),
-                      // );
-                      // _sendVerificationCode();
-          
-                      loginAndAuthenticateUser(context);
-                      // Implement Firebase email/password sign-in logic here
+
+              // Forgotten Password Link
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 24.0, top: 8.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                      );
                     },
                     child: Text(
-                      "Continue",
-                      style: TextStyle(color: Colors.white),
+                      "Forgotten password?",
+                      style: TextStyle(color: Colors.black),
                     ),
                   ),
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 9.0),
-                    child: RichText(
-                      text: TextSpan(
-                        text: 'New User? Sign up',
-                        style: TextStyle(
-                          color: Colors.black,
-                        ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => signup(),
-                              ),
-                            );
-                            HapticFeedback.lightImpact();
-                            // Fluttertoast.showToast(
-                            //   msg:
-                            //   '',
-                            // );
-                          },
-                      ),
+
+              SizedBox(height: 20.0),
+
+              // Continue Button
+              SizedBox(
+                width: 300,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFF169F00),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
-                ],
+                  onPressed: () {
+                    loginAndAuthenticateUser(context);
+                  },
+                  child: Text(
+                    "Continue",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
               ),
-              SizedBox(
-                height: 30,
+
+              SizedBox(height: 16.0),
+
+              // Sign-up Prompt
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => signup()),
+                  );
+                },
+                child: Text(
+                  "New User? Sign up",
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
-              //
-              // ElevatedButton(
-              //   onPressed: () {
-              //     _handleGoogleSignIn(context);
-              //   },
-              //   style: ElevatedButton.styleFrom(
-              //     shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.circular(
-              //           30.0), // Adjust the value to change the roundness
-              //     ),
-              //   ),
-              //   child: Container(
-              //     width: 20.0, // Adjust the width as needed
-              //     height: 48.0, // Adjust the height as needed
-              //     child: Image.asset(
-              //       'assets/images/logo.png',
-              //     ),
-              //   ),
-              // ),
+
+              SizedBox(height: 30.0),
             ],
           ),
         ),
-      ),
+      )
     );
   }
 
