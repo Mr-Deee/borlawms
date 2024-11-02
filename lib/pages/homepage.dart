@@ -246,21 +246,22 @@ class _homepageState extends State<homepage> {
             left: 0.0,
             right: 0.0,
             child: Container(
+
               decoration: BoxDecoration(color: Colors.transparent),
               child: Column(children: [
                     if (Provider.of<WMS>(context).riderInfo?.firstname != null)
 
 
                       Switch(
-                        value: context.read<AppState>().isSwitched,
+                        value: context.watch<AppState>().isSwitched,
                         onChanged: (value) async {
                           final appState = context.read<AppState>();
 
                           try {
                             if (value) {
                               // Switching to online
-                               makeArtisanOnlineNow();
-                               getLocationLiveUpdates();
+                              makeArtisanOnlineNow();
+                              getLocationLiveUpdates();
                               displayToast("Online.", context);
                             } else {
                               // Switching to offline
@@ -268,24 +269,26 @@ class _homepageState extends State<homepage> {
                               displayToast("Offline.", context);
                             }
 
-                             appState.toggleSwitch(); // Assume toggleSwitch is an asynchronous operation
-
-                            // Trigger a rebuild of the widget tree to reflect the updated switch state
-                            setState(() {});
+                            await appState.toggleSwitch(); // Await if toggleSwitch is async
+                            setState(() {}); // Trigger rebuild for updated switch state
 
                           } catch (error) {
                             print("Error: $error");
                             displayToast("Error occurred.", context);
                           }
                         },
-                        activeTrackColor: Colors.black38,
-                        activeColor: Colors.black,
+                        activeTrackColor: Colors.green.withOpacity(0.6), // Custom active track color
+                        inactiveTrackColor: Colors.white12.withOpacity(0.3),  // Custom inactive track color
+                        activeColor: Colors.green,                        // Active thumb color
+                        inactiveThumbColor: Colors.black,             // Inactive thumb color
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // Smaller tap target
                       ),
 
 
 
 
-                    Padding(
+
+                Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,

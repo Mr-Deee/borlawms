@@ -97,6 +97,7 @@ class CollectFareDialog extends StatelessWidget
                               print('Submitted comment: $comment');
                               _commentController.clear(); // Clear the input field after submission
                               Navigator.of(context).pop(); // Close the dialog after submission
+                              Navigator.of(context).pop(); // Close the dialog after submission
                             },
                             child: Text('Submit'),
                           ),

@@ -5,7 +5,7 @@ class AppState with ChangeNotifier {
 
   bool get isSwitched => _isSwitched;
 
-  void toggleSwitch() {
+   toggleSwitch() {
     _isSwitched = !_isSwitched;
     notifyListeners();
   }
