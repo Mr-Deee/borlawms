@@ -242,6 +242,8 @@ class _CustomerSupportServiceState extends State<CustomerSupportService> {
           'title': titleController.text,
           'description': descriptionController.text,
           'issue': selectedIssue,
+          'status': 'open',
+          'WMSTYPE': 'WMS',
           'timestamp': DateTime.now().toString(),
         };
 
