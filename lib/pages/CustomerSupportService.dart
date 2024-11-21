@@ -23,6 +23,37 @@ class _CustomerSupportServiceState extends State<CustomerSupportService> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
+
+  List<Map<String, dynamic>> userRequests = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserRequests();
+  }
+
+  Future<void> _fetchUserRequests() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        final uid = user.uid;
+        final ref = _database.ref("WMS/$uid/css");
+
+        final snapshot = await ref.get();
+        if (snapshot.exists) {
+          final data = snapshot.value as Map<dynamic, dynamic>;
+          setState(() {
+            userRequests = data.entries
+                .map((e) => Map<String, dynamic>.from(e.value))
+                .toList();
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Error fetching requests: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,78 +63,73 @@ class _CustomerSupportServiceState extends State<CustomerSupportService> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              // Dropdown for request title
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Select Request Title'),
-                value: selectedIssue,
-                onChanged: (value) {
-                  setState(() {
-                    selectedIssue = value;
-                  });
-                },
-                items: [
-                  'Bug Report',
-                  'Account Issue',
-                  'Feature Request',
-                  'Other'
-                ]
-                    .map((issue) => DropdownMenuItem<String>(
-                  value: issue,
-                  child: Text(issue),
-                ))
-                    .toList(),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please select a request title';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Conditional input for title and description
-              if (selectedIssue == 'Other')
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextFormField(
-                      controller: titleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Enter Title',
-                        hintText: 'Describe the issue briefly',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a title';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Enter Description',
-                        hintText: 'Provide detailed information about the issue',
-                      ),
-                      maxLines: 4,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a description';
-                        }
-                        return null;
-                      },
-                    ),
-                  ],
-                )
-              else
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+        child: ListView(
+          children: [
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(labelText: 'Select Request Title'),
+                    value: selectedIssue,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedIssue = value;
+                      });
+                    },
+                    items: [
+                      'Bug Report',
+                      'Account Issue',
+                      'Feature Request',
+                      'Other'
+                    ]
+                        .map((issue) => DropdownMenuItem<String>(
+                      value: issue,
+                      child: Text(issue),
+                    ))
+                        .toList(),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a request title';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  if (selectedIssue == 'Other')
+                    Column(
+                      children: [
+                        TextFormField(
+                          controller: titleController,
+                          decoration: const InputDecoration(
+                            labelText: 'Enter Title',
+                            hintText: 'Describe the issue briefly',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a title';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: descriptionController,
+                          decoration: const InputDecoration(
+                            labelText: 'Enter Description',
+                            hintText: 'Provide detailed information about the issue',
+                          ),
+                          maxLines: 4,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a description';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    )
+                  else
                     TextFormField(
                       controller: descriptionController,
                       decoration: InputDecoration(
@@ -113,7 +139,6 @@ class _CustomerSupportServiceState extends State<CustomerSupportService> {
                           fontWeight: FontWeight.bold,
                         ),
                         hintText: 'Describe the issue',
-                        hintStyle: const TextStyle(color: Colors.grey),
                         enabledBorder: OutlineInputBorder(
                           borderSide: const BorderSide(color: Colors.blueGrey, width: 1.5),
                           borderRadius: BorderRadius.circular(12),
@@ -122,11 +147,6 @@ class _CustomerSupportServiceState extends State<CustomerSupportService> {
                           borderSide: const BorderSide(color: Colors.blue, width: 2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        border: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Colors.blueGrey, width: 1.5),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                       ),
                       maxLines: 4,
                       validator: (value) {
@@ -136,107 +156,106 @@ class _CustomerSupportServiceState extends State<CustomerSupportService> {
                         return null;
                       },
                     ),
-                  ],
-                ),
-
-
-               SizedBox(height: 16),
-
-              // Image upload
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-                  if (pickedFile != null) {
-                    setState(() {
-                      imageFile = File(pickedFile.path);
-                    });
-                  }
-                },
-                icon: const Icon(Icons.image),
-                label: const Text("Upload Screenshot"),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+                      if (pickedFile != null) {
+                        setState(() {
+                          imageFile = File(pickedFile.path);
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.image),
+                    label: const Text("Upload Screenshot"),
+                  ),
+                  const SizedBox(height: 8),
+                  if (imageFile != null)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.file(imageFile!, height: 150, fit: BoxFit.cover),
+                    ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        _submitRequest();
+                      }
+                    },
+                    child: const Text("Submit Request"),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-
-              // Display uploaded image
-              if (imageFile != null)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Image.file(imageFile!, height: 150, fit: BoxFit.cover),
-                ),
-
-              const SizedBox(height: 16),
-
-              // Submit button
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    // Handle form submission
-                    _submitRequest();
-                  }
-                },
-                child: const Text("Submit Request"),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              "Your Previous Requests",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            if (userRequests.isEmpty)
+              const Text("No requests found."),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: userRequests.length,
+              itemBuilder: (context, index) {
+                final request = userRequests[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: ListTile(
+                    title: Text(request['issue'] ?? "No Title"),
+                    subtitle: Text(request['description'] ?? "No Description"),
+                    trailing: Text(request['timestamp']?.toString().split(' ').first ?? ""),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 
-
   Future<void> _submitRequest() async {
-    try {
-      // Show loading dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false, // Prevent closing the dialog by tapping outside
-        builder: (BuildContext context) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        },
-      );
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
 
+    try {
       final user = _auth.currentUser;
 
       if (user != null) {
         final uid = user.uid;
-        final ref = _database.ref("WMS/$uid"); // Path for user's waste management info
-        final refcss = _database.ref();       // Root reference for global customer support requests
+        final ref = _database.ref("WMS/$uid/css");
+        final refcss = _database.ref();
 
-        // Prepare data to be saved
         final requestData = {
           'UserId': uid,
-          'email':user.email,
           'title': titleController.text,
           'description': descriptionController.text,
           'issue': selectedIssue,
           'timestamp': DateTime.now().toString(),
         };
 
-        // Check if there is an image to upload
-        String? imageUrl;
         if (imageFile != null) {
-          // Upload image to Firebase Storage
           final imageRef = _storage.ref().child('screenshots/${DateTime.now().millisecondsSinceEpoch}.jpg');
           await imageRef.putFile(imageFile!);
-          imageUrl = await imageRef.getDownloadURL();
+          final imageUrl = await imageRef.getDownloadURL();
+          requestData['imageUrl'] = imageUrl;
         }
 
-        // Save the data in Realtime Database under the current user
-        await refcss.child('customerSupportRequests').push().set(requestData);
+        await ref.push().set(requestData);
+        await refcss.child("customerSupportRequests").push().set(requestData);
+        _fetchUserRequests();
 
-        // Save the same data under a new child called 'css'
-        await ref.child('css').push().set({
-          'UserId': uid,
-          'email':user.email,
-          'title': titleController.text,
-          'description': descriptionController.text,
-          'imageUrl': imageUrl, // if image is uploaded
-          'timestamp': DateTime.now().toString(),
-        });
-
-        // Reset the form
         setState(() {
           titleController.clear();
           descriptionController.clear();
@@ -244,50 +263,18 @@ class _CustomerSupportServiceState extends State<CustomerSupportService> {
           imageFile = null;
         });
 
-        // Dismiss loading dialog
-        Navigator.pop(context);
-
-        // Show success dialog
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text("Request Submitted"),
-            content: const Text(
-                "Your request has been submitted successfully.\nOur team will get back to you shortly."),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text("OK"),
-              ),
-            ],
-          ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Request submitted successfully.")),
         );
       }
     } catch (e) {
-      // Dismiss loading dialog
-      Navigator.pop(context);
-
-      // Show error dialog
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Error"),
-          content: Text("An error occurred: $e"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("OK"),
-            ),
-          ],
-        ),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error submitting request: $e")),
       );
+    } finally {
+      // Dismiss loading dialog
+      Navigator.of(context, rootNavigator: true).pop();
     }
   }
 
-
 }
-
