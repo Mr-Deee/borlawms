@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 // import '../../constants/color_constants.dart';
 import '../Model/Users.dart';
 import '../widgets/textform_widget.dart';
+import 'CustomerSupportService.dart';
 import 'WMSBINS.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -82,7 +83,7 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 ProfileMenuItem(
                   icon: Icons.settings,
-                  title: 'My Bins',
+                  title: 'Bins Management',
                   onTap: () {
                     Navigator.push(
                       context,
@@ -93,10 +94,14 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                 ),
                 ProfileMenuItem(
-                  icon: Icons.credit_card,
-                  title: 'Payments',
+                  icon: Icons.call,
+                  title: 'Customer Support',
                   onTap: () {
-
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>    CustomerSupportService()
+                      ),);
                   },
                 ),
                 ProfileMenuItem(
