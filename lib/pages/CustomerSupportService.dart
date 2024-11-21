@@ -207,6 +207,7 @@ class _CustomerSupportServiceState extends State<CustomerSupportService> {
         // Prepare data to be saved
         final requestData = {
           'UserId': uid,
+          'email':user.email,
           'title': titleController.text,
           'description': descriptionController.text,
           'issue': selectedIssue,
@@ -227,6 +228,8 @@ class _CustomerSupportServiceState extends State<CustomerSupportService> {
 
         // Save the same data under a new child called 'css'
         await ref.child('css').push().set({
+          'UserId': uid,
+          'email':user.email,
           'title': titleController.text,
           'description': descriptionController.text,
           'imageUrl': imageUrl, // if image is uploaded

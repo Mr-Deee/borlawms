@@ -104,21 +104,17 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),);
                   },
                 ),
-                ProfileMenuItem(
-                  icon: Icons.people,
-                  title: 'User Management',
-                  onTap: () {},
-                ),
-                ProfileMenuItem(
-                  icon: Icons.info,
-                  title: 'Information',
-                  onTap: () {},
-                ),
-                ProfileMenuItem(
-                  icon: Icons.logout,
-                  title: 'Log Out',
-                  onTap: () {},
-                ),
+
+                // ProfileMenuItem(
+                //   icon: Icons.info,
+                //   title: 'Information',
+                //   onTap: () {},
+                // ),
+                // ProfileMenuItem(
+                //   icon: Icons.logout,
+                //   title: 'Log Out',
+                //   onTap: () {},
+                // ),
               ],
             ),
           ),
