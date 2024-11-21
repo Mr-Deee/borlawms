@@ -351,18 +351,12 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
                 hintText: ('Select Bin Image'),),
               // Ensure type safety
               items: [
-                DropdownMenuItem(
-                    child: Text('Borla Extra - 240L'),
-                    value: 'assets/images/240L.png'),
-                DropdownMenuItem(
-                    child: Text('Borla General-140L'),
-                    value: 'assets/images/140.png'),
-                DropdownMenuItem(
-                    child: Text('Borla Medium -100L'),
-                    value: 'assets/images/100l.png'),
-                DropdownMenuItem(
-                    child: Text('Borla Bag'),
-                    value: 'assets/images/plasticbag.png'),
+                DropdownMenuItem(child: Text('Borla Extra -660L'), value: 'assets/images/660l.png'),
+                DropdownMenuItem(child: Text('Borla Plus - 360L'), value: 'assets/images/360l.png'),
+                DropdownMenuItem(child: Text('Borla Large - 240L'), value: 'assets/images/240L.png'),
+                DropdownMenuItem(child: Text('Borla Standard-140L'), value: 'assets/images/140.png'),
+                DropdownMenuItem(child: Text('Borla Medium -100L'), value: 'assets/images/100l.png'),
+                DropdownMenuItem(child: Text('Borla Bag'), value: 'assets/images/plasticbag.png'),
               ],
               onChanged: (value) {
                 setState(() {
