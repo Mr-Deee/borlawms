@@ -216,6 +216,44 @@ class _CustomDrawerState extends State<CustomDrawer> {
               size: 18,
             ),
           ),
+          // const SizedBox(height: 9),
+          // ListTile(
+          //   onTap: (){
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => Requestpage(),
+          //       ),);
+          //   },
+          //   leading: Container(
+          //     decoration: const BoxDecoration(
+          //       shape: BoxShape.circle,
+          //       color: Colors.green,
+          //     ),
+          //     child: const Padding(
+          //       padding: EdgeInsets.all(10.0),
+          //       child: Icon(
+          //         Icons.bim,
+          //         color: Colors.white,
+          //       ),
+          //     ),
+          //   ),
+          //   title: const Text(
+          //     "My Bins",
+          //     style: TextStyle(
+          //       fontSize: 15,
+          //       fontWeight: FontWeight.w500,
+          //     ),
+          //   ),
+          //   trailing: const Icon(
+          //     Icons.arrow_forward_ios,
+          //     size: 18,
+          //   ),
+          // ),
+
+
+
+
 
 
           const SizedBox(height: 19),
