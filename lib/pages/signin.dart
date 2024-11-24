@@ -241,53 +241,68 @@ class _signinState extends State<signin> {
 
   void loginAndAuthenticateUser(BuildContext context) async {
     showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return ProgressDialog(
-            message: "Logging you ,Please wait.",
-          );
-        });
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return ProgressDialog(
+          message: "Logging you in, Please wait.",
+        );
+      },
+    );
 
-    Future signInWithEmailAndPassword(String email, String password) async {
-      try {
-        UserCredential result = await _firebaseAuth.signInWithEmailAndPassword(
-            email: emailcontroller.text.trim(), password: emailcontroller.text.trim());
-        User? user = result.user;
-        return _firebaseAuth;
-      } catch (error) {
-        print(error.toString());
-        return null;
-      }
-    }
-
-    final User? firebaseUser = (await _firebaseAuth
-            .signInWithEmailAndPassword(
-                email: emailcontroller.text.trim(),
-                password: passwordcontroller.text.trim())
-            .catchError((errMsg) {
-      Navigator.pop(context);
-      displayToast("Error" + errMsg.toString(), context);
-    }))
-        .user;
     try {
-      UserCredential userCredential =
-          await _firebaseAuth.signInWithEmailAndPassword(
-              email: emailcontroller.text.trim(), password: passwordcontroller.text.trim());
+      // Attempt to sign in with email and password
+      UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: emailcontroller.text.trim(),
+        password: passwordcontroller.text.trim(),
+      );
 
-     if (clients != null) {
-       AssistantMethod.getCurrentOnlineUserInfo(context);
+      User? firebaseUser = userCredential.user;
 
-       Navigator.of(context).pushNamed("/Homepage");
+      if (firebaseUser != null) {
+        // Get the user ID
+        String userId = firebaseUser.uid;
 
-        displayToast("Logged-in ", context);
+        // Fetch the user's WMSTYPE from Firebase Realtime Database
+        DatabaseReference userRef = FirebaseDatabase.instance.ref().child("WMS").child(userId).child("wasteManagementInfo");
+
+        userRef.once().then((DatabaseEvent event) {
+          if (event.snapshot.exists) {
+            Map<dynamic, dynamic>? userData = event.snapshot.value as Map<dynamic, dynamic>?;
+
+            if (userData != null && userData['WMSTYPE'] != null) {
+              String wmstype = userData['WMSTYPE'];
+
+              // Navigate based on WMSTYPE
+              if (wmstype == "BinSale") {
+                Navigator.of(context).pushNamed("/binsale");
+              } else if (wmstype == "Recycle") {
+                Navigator.of(context).pushNamed("/recycle");
+              } else {
+                Navigator.of(context).pushNamed("/Homepage");
+              }
+
+              displayToast("Logged in successfully", context);
+            } else {
+              Navigator.pop(context);
+              displayToast("Error: Unable to retrieve user data", context);
+            }
+          } else {
+            Navigator.pop(context);
+            displayToast("Error: User does not exist in the database", context);
+          }
+        });
       } else {
-        displayToast("Error: Cannot be signed in", context);
+        Navigator.pop(context);
+        displayToast("Error: Unable to log in", context);
       }
     } catch (e) {
-      // handle error
+      Navigator.pop(context);
+      displayToast("Error: ${e.toString()}", context);
     }
   }
+
+
 
   displayToast(String message, BuildContext context) {
     Fluttertoast.showToast(msg: message);
