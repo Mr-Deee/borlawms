@@ -1,6 +1,8 @@
 
 import 'package:borlawms/pages/Aboutpage.dart';
+import 'package:borlawms/pages/BinSalesPage.dart';
 import 'package:borlawms/pages/Profilepage.dart';
+import 'package:borlawms/pages/RecyclePage.dart';
 import 'package:borlawms/pages/addwmsdetails.dart';
 import 'package:borlawms/pages/homepage.dart';
 import 'package:borlawms/pages/onboarding.dart';
@@ -77,24 +79,38 @@ Future<String> getInitialRoute() async {
   final uid = FirebaseAuth.instance.currentUser!.uid;
 
   // Fetch detailComp value from Firebase
-  DatabaseEvent snapshot = await FirebaseDatabase.instance
+  DatabaseEvent detailCompSnapshot = await FirebaseDatabase.instance
       .ref()
       .child('WMS')
       .child(uid)
       .child('detailsComp')
       .once();
 
-  bool? detailComp = snapshot.snapshot.value as bool?;
+  DatabaseEvent wmstypeSnapshot = await FirebaseDatabase.instance
+      .ref()
+      .child('WMS')
+      .child(uid).child('wasteManagementInfo')
+      .child('WMSTYPE')
+      .once();
 
+  bool? detailComp = detailCompSnapshot.snapshot.value as bool?;
+  String? wmstype = wmstypeSnapshot.snapshot.value as String?;
+print('three:$wmstype');
   if (FirebaseAuth.instance.currentUser == null) {
     return '/Onboarding';
-
   } else if (detailComp == true) {
-    return '/Homepage';
-  } else {
-    return '/addmoredetails'; // Navigate to Riderdetails if detailComp is false or not set
+    // Additional conditional routing based on WMSTYPE
+    if (wmstype == "BinSale") {
+      return '/binsale';
+    } else if (wmstype == "Recycle") {
+      return '/recycle';
+    } else if (wmstype == "WMS") {
+      return '/Homepage';
+    }
   }
+  return '/addmoredetails'; // Navigate to addmoredetails if detailComp is false or not set
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -194,6 +210,8 @@ class MyApp extends StatelessWidget {
                   "/addmoredetails": (context) => Addwmsdetails(),
                   "/Onboarding": (context) => OnBoardingPage(),
                   "/About": (context) => AboutPage(),
+                  "/binsale": (context) => BinSalePage(),
+                  "/recycle": (context) => RecyclePage(),
                   // "/OnBoarding": (context) => ,
                   "/SignIn": (context) => signin(),
                   "/Profile": (context) => ProfilePage(),
