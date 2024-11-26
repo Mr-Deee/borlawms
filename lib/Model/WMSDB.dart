@@ -14,8 +14,28 @@ class WMS extends ChangeNotifier
   String? automobile_model;
   String?plate_number;
   String?profilepicture;
+ String? profileImageUrl;
+   String? companyName;
+   String ?directorName;
+   String ?location;
+   String ?landmark;
+   int ?employeesCount;
 
-  WMS({this.firstname, this.lastname,this.phone, this.email, this.id, this.automobile_color, this.automobile_model, this.plate_number, this.profilepicture,});
+  WMS({this.firstname,
+    this.lastname,
+    this.phone,
+    this.email,
+    this.profileImageUrl,
+    this.companyName,
+    this.directorName,
+    this.location,
+    this.landmark,
+    this.employeesCount,
+    this.id,
+    this.automobile_color,
+    this.automobile_model,
+    this.plate_number,
+    this.profilepicture,});
 
   static WMS fromMap(Map<String, dynamic> data)
 
@@ -28,9 +48,11 @@ class WMS extends ChangeNotifier
       firstname: data["Username"],
       // lastname: data["LastName"],
       profilepicture: data["riderImageUrl"],
-      // automobile_color: data["car_details"]["automobile_color"],
-      // automobile_model: data["car_details"]["motorBrand"],
-      //  plate_number:data["car_details"]["licensePlateNumber"],
+      // companyName: data['wasteManagementInfo']['CompanyName'],
+      // directorName: data['wasteManagementInfo']['DirectorName'],
+      // // location: data['wasteManagementInfo']['SoldBins']['location']??"",
+      // landmark: data['wasteManagementInfo']['SolidBins']['landmark'],
+      // employeesCount: data['wasteManagementInfo']['SolidBins']['employeesCount'],
     );
   }
 
