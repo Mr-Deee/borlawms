@@ -523,9 +523,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
   }
 
 // Helper function for creating text field widgets
-  Widget _buildTextField(BuildContext context, TextEditingController controller, IconData icon, String hintText,
-      String validationMessage,
-      {TextInputType keyboardType = TextInputType.text}) {
+  Widget _buildTextField(BuildContext context, TextEditingController controller, IconData icon, String hintText, String validationMessage, {TextInputType keyboardType = TextInputType.text}) {
     final size = MediaQuery.of(context).size;
     return Padding(
       padding: const EdgeInsets.all(8.0),
