@@ -60,7 +60,7 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
             _landmarkController.text = data['landmark'] ?? '';
             _locationController.text = data['location'] ?? '';
             _gpsController.text = data['gps'] ?? '';
-            _employeesController.text = data['employees'] ?? '';
+            _employeesController.text = data['employeesCount'] ?? '';
             _ghMobileNumberController.text = data['ghMobileNumber'] ?? '';
             _ghanaCardNumberController.text = data['ghanaCardNumber'] ?? '';
           });
@@ -341,7 +341,12 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
           }).toList(),
           'WMSTYPE': "BinSale",
           'sellsBins': _sellsBins,
-          'sellingBins': _sellingBins,
+          'CompanyName': _CompanyNameController.text,
+          'DirectorName': _DirectorNameController.text,
+          'WMSTYPE': "WMS",
+          'CompanyName': _CompanyNameController.text,
+          'DirectorName': _DirectorNameController.text,
+          'gps': _gpsController.text,
           // 'CompanyType':
           'logoUrl': logoUrl,
           'BusinessCertUrl': CompRegUrl,
