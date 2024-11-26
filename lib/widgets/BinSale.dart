@@ -339,7 +339,7 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
             'bintypename': bin['bintypename'],
             'price': bin['price'],
           }).toList(),
-          'WMSType': "BinSale",
+          'WMSTYPE': "BinSale",
           'sellsBins': _sellsBins,
           'sellingBins': _sellingBins,
           // 'CompanyType':
