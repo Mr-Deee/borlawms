@@ -1,6 +1,9 @@
+import 'package:borlawms/Assistant/assistantmethods.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+
+import 'Profilepage.dart';
 
 class BinSalePage extends StatefulWidget {
   const BinSalePage({super.key});
@@ -17,13 +20,14 @@ class _BinSalePageState extends State<BinSalePage> {
   @override
   void initState() {
     super.initState();
+    AssistantMethod.getCurrentOnlineUserInfo(context);
     _fetchUserInfo();
   }
 
   Future<void> _fetchUserInfo() async {
     try {
       DatabaseReference userRef =
-      FirebaseDatabase.instance.ref().child('WMS').child(uid);
+          FirebaseDatabase.instance.ref().child('WMS').child(uid);
 
       DataSnapshot userSnapshot = await userRef.get();
 
@@ -45,10 +49,13 @@ class _BinSalePageState extends State<BinSalePage> {
       context: context,
       builder: (context) {
         return Dialog(
-          backgroundColor: Colors.transparent, // Make the background transparent
+          backgroundColor: Colors.transparent,
+          // Make the background transparent
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.9, // 90% of screen width
-            height: MediaQuery.of(context).size.height * 0.8, // 80% of screen height
+            width:
+                MediaQuery.of(context).size.width * 0.9, // 90% of screen width
+            height: MediaQuery.of(context).size.height *
+                0.8, // 80% of screen height
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Colors.blue, Colors.lightGreen],
@@ -86,22 +93,22 @@ class _BinSalePageState extends State<BinSalePage> {
                 Expanded(
                   child: soldBins.isEmpty
                       ? const Center(
-                    child: Text(
-                      'No bins available',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  )
+                          child: Text(
+                            'No bins available',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        )
                       : ListView.builder(
-                    itemCount: soldBins.length,
-                    itemBuilder: (context, index) {
-                      var bin = soldBins[index];
-                      return _buildBinItem(
-                        name: bin['bintypename'] ?? 'Unknown',
-                        price: bin['price'] ?? 'N/A',
-                        imagePath: bin['image'] ?? '',
-                      );
-                    },
-                  ),
+                          itemCount: soldBins.length,
+                          itemBuilder: (context, index) {
+                            var bin = soldBins[index];
+                            return _buildBinItem(
+                              name: bin['bintypename'] ?? 'Unknown',
+                              price: bin['price'] ?? 'N/A',
+                              imagePath: bin['image'] ?? '',
+                            );
+                          },
+                        ),
                 ),
               ],
             ),
@@ -111,35 +118,85 @@ class _BinSalePageState extends State<BinSalePage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         title: const Text(
           'Bin Sale',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              showDialog<void>(
+                context: context,
+                barrierDismissible: false, // user must tap button!
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Sign Out'),
+                    backgroundColor: Colors.white,
+                    content: SingleChildScrollView(
+                      child: Column(
+                        children: <Widget>[
+                          Text('Are you certain you want to Sign Out?'),
+                        ],
+                      ),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text(
+                          'Yes',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        onPressed: () {
+                          print('yes');
+                          FirebaseAuth.instance.signOut();
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, "/SignIn", (route) => false);
+                          // Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            icon: const Icon(
+              Icons.logout,
+              color: Colors.black,
+            ),
+          ),
+        ],
       ),
-      drawer: _buildCustomDrawer(),
-
+      drawer: _buildCustomDrawer(userName ?? ""),
       body: Container(
-        decoration:const BoxDecoration(
-            gradient: const LinearGradient(
-      colors: [Colors.white, Colors.white],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),),
+        decoration: const BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Colors.white, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Padding(
-          padding:  EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Hello, $userName!',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -152,17 +209,24 @@ class _BinSalePageState extends State<BinSalePage> {
                 children: [
                   GestureDetector(
                     onTap: _showBinsDialog, // Show dialog when tapped
-                    child: _buildCategoryCard('My Bins',
-                        soldBins.length,  Colors.blue, // Start of gradient
-                      Colors.green, // End of gradient
-                      'assets/images/bin.png'),
+                    child: _buildCategoryCard(
+                        'My Bins',
+                        soldBins.length,
+                        Colors.blue, // Start of gradient
+                        Colors.green, // End of gradient
+                        'assets/images/bin.png'),
                   ),
-                  _buildCategoryCard('Bin Requests', 3,  Colors.blue, // Start of gradient
-                    Colors.green, // End of gradient
+                  _buildCategoryCard(
+                      'Bin Requests',
+                      3,
+                      Colors.blue, // Start of gradient
+                      Colors.green, // End of gradient
                       'assets/images/b1.png'),
-                  _buildCategoryCard('Meeting', 2,  Colors.blue, // Start of gradient
+                  _buildCategoryCard(
+                    'Meeting', 2, Colors.blue, // Start of gradient
                     Colors.green, // End of gradient
-                    'assets/images/',),
+                    'assets/images/',
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -178,41 +242,55 @@ class _BinSalePageState extends State<BinSalePage> {
     );
   }
 
-  Widget _buildCustomDrawer() {
+  Widget _buildCustomDrawer(String userName) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(
-              color: Colors.blue,
+              color: Colors.green,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
-              children: const [
-                Text(
-                  'Bin Sale App',
-                  style: TextStyle(color: Colors.white, fontSize: 24),
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.white10,
+                  radius: 43,
+                  backgroundImage: AssetImage('assets/images/bwmslogo.png'),
+                  foregroundColor: Colors.black,
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Welcome Andrew!',
+                  'Welcome $userName',
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ],
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Home'),
+            leading: const Icon(Icons.history),
+            title: const Text('My Request'),
             onTap: () {
               // Handle navigation
             },
           ),
           ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            leading: const Icon(Icons.history),
+            title: const Text('Profile'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: ((context) => const ProfilePage()),
+                  ));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: const Text('About'),
             onTap: () {
               // Handle navigation
             },
@@ -229,8 +307,8 @@ class _BinSalePageState extends State<BinSalePage> {
     );
   }
 
-  Widget _buildCategoryCard(
-      String title, int tasks, Color gradientStart, Color gradientEnd, String imageUrl) {
+  Widget _buildCategoryCard(String title, int tasks, Color gradientStart,
+      Color gradientEnd, String imageUrl) {
     return Container(
       width: 110,
       height: 120,
@@ -245,7 +323,8 @@ class _BinSalePageState extends State<BinSalePage> {
           image: AssetImage(imageUrl),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.3), // Darkens the image for better text visibility
+            Colors.black.withOpacity(0.3),
+            // Darkens the image for better text visibility
             BlendMode.darken,
           ),
         ),
@@ -282,8 +361,10 @@ class _BinSalePageState extends State<BinSalePage> {
     );
   }
 
-
-  Widget _buildBinItem({required String name, required String price, required String imagePath}) {
+  Widget _buildBinItem(
+      {required String name,
+      required String price,
+      required String imagePath}) {
     return Card(
       color: Colors.white.withOpacity(0.9), // Semi-transparent background
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -297,5 +378,4 @@ class _BinSalePageState extends State<BinSalePage> {
       ),
     );
   }
-
 }

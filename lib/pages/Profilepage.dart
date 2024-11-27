@@ -40,13 +40,13 @@ class _ProfilePageState extends State<ProfilePage> {
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
-
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-          ),
-        ],
+        //
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.more_vert),
+        //     onPressed: () {},
+        //   ),
+        // ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
