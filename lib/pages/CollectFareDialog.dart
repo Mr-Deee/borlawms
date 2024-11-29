@@ -68,45 +68,46 @@ class CollectFareDialog extends StatelessWidget
                 {
                   TextEditingController _commentController = TextEditingController();
 
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Comment Session'),
-                        content: TextField(
-                          controller: _commentController,
-                          decoration: InputDecoration(
-                            hintText: 'Write your comment here...',
-                          ),
-                        ),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Cancel'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              final String _firebaseAuth = FirebaseAuth.instance.currentUser!.uid;
-                              TextEditingController _commentController = TextEditingController();
-
-                              // Submit the comment to the current user
-                              String comment = _commentController.text.toString();
-                              clients.child(_firebaseAuth).update({"Comments":_commentController});
-                              print('Submitted comment: $comment');
-                              _commentController.clear(); // Clear the input field after submission
-                              Navigator.of(context).pop(); // Close the dialog after submission
-                              Navigator.of(context).pop(); // Close the dialog after submission
-                            },
-                            child: Text('Submit'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                  // Navigator.pop(context);
-                  // Navigator.pop(context);
+                  // showDialog(
+                  //   context: context,
+                  //   builder: (BuildContext context) {
+                  //     return AlertDialog(
+                  //       title: Text('Comment Session'),
+                  //       content: TextField(
+                  //         controller: _commentController,
+                  //         decoration: InputDecoration(
+                  //           hintText: 'Write your comment here...',
+                  //         ),
+                  //       ),
+                  //       actions: <Widget>[
+                  //         TextButton(
+                  //           onPressed: () {
+                  //             Navigator.of(context).pop();
+                  //           },
+                  //           child: Text('Cancel'),
+                  //         ),
+                  //         ElevatedButton(
+                  //           onPressed: () {
+                  //             final String _firebaseAuth = FirebaseAuth.instance.currentUser!.uid;
+                  //             TextEditingController _commentController = TextEditingController();
+                  //
+                  //             // Submit the comment to the current user
+                  //             String comment = _commentController.text.toString();
+                  //             clients.child(_firebaseAuth).update({"Comments":_commentController});
+                  //             print('Submitted comment: $comment');
+                  //             _commentController.clear(); // Clear the input field after submission
+                  //             Navigator.of(context).pop(); // Close the dialog after submission
+                  //             Navigator.of(context).pop(); // Close the dialog after submission
+                  //           },
+                  //           child: Text('Submit'),
+                  //         ),
+                  //       ],
+                  //     );
+                  //   },
+                  // );
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
 
 
 
