@@ -492,7 +492,7 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
       'DirectorName': _DirectorNameController.text,
       'logoUrl': logoUrl,
       'compRegUrl': compRegUrl,
-      'detailsComp': 'true',
+      'detailsComp': true,
       'gps': _gpsController.text,
       'landmark': _landmarkController.text,
       'location': _locationController.text,
