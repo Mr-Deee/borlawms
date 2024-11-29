@@ -92,10 +92,12 @@ Future<String> getInitialRoute() async {
       .child(uid).child('wasteManagementInfo')
       .child('WMSTYPE')
       .once();
-
+  print('object:$uid');
   bool? detailComp = detailCompSnapshot.snapshot.value as bool?;
   String? wmstype = wmstypeSnapshot.snapshot.value as String?;
+  print('details:$detailComp');
 print('three:$wmstype');
+
   if (FirebaseAuth.instance.currentUser == null) {
     return '/Onboarding';
   } else if (detailComp == true) {

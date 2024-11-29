@@ -238,7 +238,7 @@ class _RecyclingFormState extends State<RecyclingForm> {
     Map<String, dynamic> formData = {
       'logoUrl': logoUrl,
       'WMSTYPE': "Recycle",
-      'detailsComp': 'true',
+      'detailsComp': true,
       'compRegUrl': compRegUrl.toString(),
       'registrationDocUrl': registrationDocUrl.toString(),
       'FullName': _fullnameController.text,
@@ -256,7 +256,7 @@ class _RecyclingFormState extends State<RecyclingForm> {
   _database
         .child('WMS')
         .child(userId)
-        .update({'detailsComp': 'true'});
+        .update({'detailsComp': true});
 
     // Close dialog and navigate
     Navigator.of(context).pop();
