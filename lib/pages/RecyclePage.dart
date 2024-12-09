@@ -1,5 +1,7 @@
 import 'package:borlawms/Assistant/assistantmethods.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -38,6 +40,7 @@ class _RecyclePageState extends State<RecyclePage> {
     var phoneNumber =
         Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "";
     return Scaffold(
+
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -65,14 +68,77 @@ class _RecyclePageState extends State<RecyclePage> {
   }
 }
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
+  @override
+  _DashboardPageState createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  TextEditingController searchController = TextEditingController();
+  String selectedCategory = 'All'; // Default dropdown value
+  List<String> categories = ['All', 'Metal', 'Plastic', 'Glass', 'Organic'];
+  List<Map<dynamic, dynamic>> allItems = [];
+  List<Map<dynamic, dynamic>> filteredItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  void fetchData() async {
+    final database = FirebaseDatabase.instance.ref('recycle_items');
+    final snapshot = await database.get();
+
+    if (snapshot.value != null) {
+      Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
+      List<Map<dynamic, dynamic>> items = data.entries.map((entry) {
+        return {
+          'key': entry.key,
+          ...entry.value as Map<dynamic, dynamic>,
+        };
+      }).toList();
+
+      setState(() {
+        allItems = items;
+        filteredItems = allItems;
+      });
+    }
+  }
+
+  void filterItems(String query, String category) {
+    setState(() {
+      filteredItems = allItems.where((item) {
+        final itemType = item['RecycleType']?.toString().toLowerCase() ?? '';
+        final description = item['description']?.toString().toLowerCase() ?? '';
+        final matchesQuery = query.isEmpty ||
+            itemType.contains(query.toLowerCase()) ||
+            description.contains(query.toLowerCase());
+        final matchesCategory =
+            category == 'All' || itemType == category.toLowerCase();
+
+        return matchesQuery && matchesCategory;
+      }).toList();
+    });
+  }
+
+  Future<void> openGoogleMaps(String location) async {
+    final url = 'https://www.google.com/maps/search/?api=1&query=$location';
+    // if (await canLaunch(url)) {
+    //   await launch(url);
+    // } else {
+    //   throw 'Could not launch $url';
+    // }
+  }
+
   @override
   Widget build(BuildContext context) {
+
     var email = Provider.of<WMS>(context, listen: false).riderInfo?.email ?? "";
     var fclientname = Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "";
     var lclientname = Provider.of<WMS>(context, listen: false).riderInfo?.lastname ?? "";
-    var phoneNumber =
-        Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "";
+    var phoneNumber = Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "";
+
     // Determine the time-based salutation
     String getTimeBasedSalutation() {
       final hour = DateTime.now().hour;
@@ -89,15 +155,54 @@ class DashboardPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Dashboard'),
         centerTitle: true,
-      ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              showDialog<void>(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Sign Out'),
+                    backgroundColor: Colors.white,
+                    content: SingleChildScrollView(
+                      child: Column(
+                        children: <Widget>[
+                          Text('Are you certain you want to Sign Out?'),
+                        ],
+                      ),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text('Yes', style: TextStyle(color: Colors.black)),
+                        onPressed: () {
+                          FirebaseAuth.instance.signOut();
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, "/SignIn", (route) => false);
+                        },
+                      ),
+                      TextButton(
+                        child: Text('Cancel', style: TextStyle(color: Colors.red)),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            icon: const Icon(Icons.logout, color: Colors.black),
+          ),
+        ],
+            ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${getTimeBasedSalutation()}\n'
-                  'Start Today! - $fclientname',
+              '${getTimeBasedSalutation()}\nStart Today! - $fclientname',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
@@ -113,14 +218,8 @@ class DashboardPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Text('\$9.999',
-                        //     style: TextStyle(
-                        //         fontSize: 24,
-                        //         fontWeight: FontWeight.bold,
-                        //         color: Colors.green)),
                         SizedBox(height: 5),
-                        Text('Total waste collected',
-                            style: TextStyle(color: Colors.grey)),
+                        Text('Total waste collected', style: TextStyle(color: Colors.grey)),
                         SizedBox(height: 5),
                         LinearProgressIndicator(
                           value: 0.75,
@@ -133,30 +232,69 @@ class DashboardPage extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 20),
-            Text('Waste Category', style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                CategoryItem('Plastic', Icons.local_drink),
-                CategoryItem('Glass', Icons.wine_bar),
-                CategoryItem('Metal', Icons.settings),
-                CategoryItem('Organic', Icons.eco),
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search recycle items...',
+                      border: OutlineInputBorder(),
+                      suffixIcon: Icon(Icons.search),
+                    ),
+                    onChanged: (value) {
+                      filterItems(value, selectedCategory);
+                    },
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  flex: 2,
+                  child: DropdownButtonFormField<String>(
+                    value: selectedCategory,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    items: categories
+                        .map((category) => DropdownMenuItem<String>(
+                      value: category,
+                      child: Text(category),
+                    ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedCategory = value!;
+                        filterItems(searchController.text, selectedCategory);
+                      });
+                    },
+                  ),
+                ),
               ],
             ),
             SizedBox(height: 20),
-            Text('Nearby Recycleables', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 10),
             Expanded(
-              child: ListView.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) => ListTile(
-                  leading: Icon(Icons.map),
-                  title: Text('OGG Bin Station'),
-                  subtitle: Text('Sesame Street 223, Washington DC'),
-                  trailing: Text('2.3 km'),
-                ),
+              child: filteredItems.isEmpty
+                  ? Center(child: Text('No items found'))
+                  : ListView.builder(
+                itemCount: filteredItems.length,
+                itemBuilder: (context, index) {
+                  final item = filteredItems[index];
+                  return ListTile(
+                    leading: item['image_url'] != null
+                        ? Image.network(item['image_url'],
+                        width: 50, height: 50, fit: BoxFit.cover)
+                        : Icon(Icons.image),
+                    title: Text(item['RecycleType'] ?? 'Unknown'),
+                    subtitle: Text(item['description'] ?? 'No description'),
+                    trailing: IconButton(
+                      icon: Icon(Icons.directions),
+                      onPressed: () => openGoogleMaps(item['location']),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -165,7 +303,6 @@ class DashboardPage extends StatelessWidget {
     );
   }
 }
-
 class WalletPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -271,25 +408,82 @@ class SuccessPage extends StatelessWidget {
   }
 }
 
-// Reusable Widget for Waste Categories
 class CategoryItem extends StatelessWidget {
   final String title;
   final IconData icon;
 
   CategoryItem(this.title, this.icon);
 
+  Future<void> _fetchAndShowRecycleItems(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('recycle_items');
+      final snapshot = await databaseReference.orderByChild('RecycleType').equalTo(title).get();
+
+      Navigator.pop(context); // Close the loading dialog
+
+      if (snapshot.exists) {
+        final data = snapshot.value as Map<dynamic, dynamic>? ?? {};
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text('$title RecycleType'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: data.entries.map((entry) {
+                    final item = entry.value as Map<dynamic, dynamic>;
+                    return ListTile(
+                      title: Text(item['Description'] ?? 'Unnamed Item'),
+                      subtitle: Text('Weight: ${item['size'] ?? 'N/A'}'),
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Close'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No items found in this category.')),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context); // Close the loading dialog
+      print('Error fetching items: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch items. Please try again later.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 30,
-          backgroundColor: Colors.green.withOpacity(0.1),
-          child: Icon(icon, color: Colors.green),
-        ),
-        SizedBox(height: 5),
-        Text(title, style: TextStyle(fontSize: 14)),
-      ],
+    return GestureDetector(
+      onTap: () => _fetchAndShowRecycleItems(context),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.green.withOpacity(0.1),
+            child: Icon(icon, color: Colors.green),
+          ),
+          SizedBox(height: 5),
+          Text(title, style: TextStyle(fontSize: 14)),
+        ],
+      ),
     );
   }
 }

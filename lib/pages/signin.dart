@@ -93,138 +93,156 @@ class _signinState extends State<signin> {
       // appBar: AppBar(
       //   title: Text("Login Page"),
       // ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Logo Image
-              Container(
-                width: 160.0,
-                height: 120.0,
-                margin: EdgeInsets.only(bottom: 20.0),
-                child: Image.asset('assets/images/wms.png'),
-              ),
+      body: Container(
+
+        padding: EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.green.shade400, Colors.greenAccent.shade200],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo Image
+                Container(
+                  width: 160.0,
+                  height: 120.0,
+                  margin: EdgeInsets.only(bottom: 20.0),
+                  child: Image.asset('assets/images/wms.png'),
+                ),
 
 
 
-              // Subheader Text
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left:20.0),
-                    child: Text(
-                      "Login to continue using the app",
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                // Subheader Text
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left:20.0),
+                      child: Text(
+                        "Login to continue using the app",
+                        style: TextStyle(fontSize: 14, color: Colors.black45,fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
 
-              SizedBox(height: 24.0),
+                SizedBox(height: 24.0),
 
-              // Email Input Field
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: TextFormField(
-                  controller: emailcontroller,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.email, color: Colors.grey),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    hintText: "Email",
-                    hintStyle: TextStyle(color: Colors.grey),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
+                // Email Input Field
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: TextFormField(
+                    style: TextStyle(
+                      color: Colors.white70,
+                    ),
+                    controller: emailcontroller,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.email, color: Colors.white70),
+                      filled: true,
+                      fillColor: Colors.green[400],
+                      hintText: "Email",
+                      hintStyle: TextStyle(color: Colors.white70),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              SizedBox(height: 10.0),
+                SizedBox(height: 10.0),
 
-              // Password Input Field
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: TextFormField(
-                  obscureText: true,
-                  controller: passwordcontroller,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.lock, color: Colors.grey),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    hintText: "Password",
-                    hintStyle: TextStyle(color: Colors.grey),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
+                // Password Input Field
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: TextFormField(
+                    style: TextStyle(
+                      color: Colors.white70,
+                    ),
+                    obscureText: true,
+                    controller: passwordcontroller,
+
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.lock, color: Colors.white70),
+                      filled: true,
+                      fillColor: Colors.green[400],
+                      hintText: "Password",
+                      hintStyle: TextStyle(color: Colors.white70),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              // Forgotten Password Link
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 24.0, top: 8.0),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
-                      );
+                // Forgotten Password Link
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 24.0, top: 8.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                        );
+                      },
+                      child: Text(
+                        "Forgotten password?",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 20.0),
+
+                // Continue Button
+                SizedBox(
+                  width: 300,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFF169F00),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    onPressed: () {
+                      loginAndAuthenticateUser(context);
                     },
                     child: Text(
-                      "Forgotten password?",
-                      style: TextStyle(color: Colors.black),
+                      "Continue",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
                 ),
-              ),
 
-              SizedBox(height: 20.0),
+                SizedBox(height: 16.0),
 
-              // Continue Button
-              SizedBox(
-                width: 300,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFF169F00),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                  onPressed: () {
-                    loginAndAuthenticateUser(context);
+                // Sign-up Prompt
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => signup()),
+                    );
                   },
                   child: Text(
-                    "Continue",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    "New User? Sign up",
+                    style: TextStyle(color: Colors.black),
                   ),
                 ),
-              ),
 
-              SizedBox(height: 16.0),
-
-              // Sign-up Prompt
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => signup()),
-                  );
-                },
-                child: Text(
-                  "New User? Sign up",
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
-
-              SizedBox(height: 30.0),
-            ],
+                SizedBox(height: 30.0),
+              ],
+            ),
           ),
         ),
       )
