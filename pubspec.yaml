@@ -39,6 +39,7 @@ dependencies:
   firebase_storage:
   firebase_auth:
   firebase_messaging:
+  url_launcher:
   flutter_geofire: ^2.0.4
   fluttertoast: ^8.2.4
   cloud_firestore:

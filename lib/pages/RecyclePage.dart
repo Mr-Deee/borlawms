@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../Model/WMSDB.dart';
 
@@ -122,14 +123,16 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
+
   Future<void> openGoogleMaps(String location) async {
-    final url = 'https://www.google.com/maps/search/?api=1&query=$location';
-    // if (await canLaunch(url)) {
-    //   await launch(url);
-    // } else {
-    //   throw 'Could not launch $url';
-    // }
+    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$location');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
