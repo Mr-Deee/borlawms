@@ -241,8 +241,14 @@ class _DashboardPageState extends State<DashboardPage> {
                     controller: searchController,
                     decoration: InputDecoration(
                       hintText: 'Search recycle items...',
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.search),
+                      hintStyle: TextStyle(color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.green),
+                      ),
+                      suffixIcon: Icon(Icons.search, color: Colors.green),
                     ),
                     onChanged: (value) {
                       filterItems(value, selectedCategory);
@@ -250,30 +256,46 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                 ),
                 SizedBox(width: 10),
-                Expanded(
-                  flex: 2,
-                  child: DropdownButtonFormField<String>(
-                    value: selectedCategory,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                    ),
-                    items: categories
-                        .map((category) => DropdownMenuItem<String>(
-                      value: category,
-                      child: Text(category),
-                    ))
-                        .toList(),
-                    onChanged: (value) {
+                GestureDetector(
+                  onTap: () async {
+                    final String? selected = await showDialog<String>(
+                      context: context,
+                      builder: (context) {
+                        return SimpleDialog(
+                          title: Text('Select Category'),
+                          children: categories
+                              .map((category) => SimpleDialogOption(
+                            onPressed: () {
+                              Navigator.pop(context, category);
+                            },
+                            child: Text(category),
+                          ))
+                              .toList(),
+                        );
+                      },
+                    );
+                    if (selected != null) {
                       setState(() {
-                        selectedCategory = value!;
+                        selectedCategory = selected;
                         filterItems(searchController.text, selectedCategory);
                       });
-                    },
+                    }
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.filter_alt_rounded,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],
             ),
+
             SizedBox(height: 20),
             Expanded(
               child: filteredItems.isEmpty
@@ -297,11 +319,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 },
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
+
+        ])));
+
+    }
 }
 class WalletPage extends StatelessWidget {
   @override
