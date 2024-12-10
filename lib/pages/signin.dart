@@ -144,7 +144,8 @@ class _signinState extends State<signin> {
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.email, color: Colors.white70),
                       filled: true,
-                      fillColor: Colors.green[400],
+                      fillColor: Colors.black12,
+
                       hintText: "Email",
                       hintStyle: TextStyle(color: Colors.white70),
                       border: OutlineInputBorder(
@@ -170,7 +171,8 @@ class _signinState extends State<signin> {
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.lock, color: Colors.white70),
                       filled: true,
-                      fillColor: Colors.green[400],
+                      fillColor: Colors.black12,
+
                       hintText: "Password",
                       hintStyle: TextStyle(color: Colors.white70),
                       border: OutlineInputBorder(
