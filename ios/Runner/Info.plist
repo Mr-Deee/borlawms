@@ -30,7 +30,10 @@
     <string>This app requires access to the photo library.</string>
 
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>We need your location to show the directions on the map.</string>
+    <string>We need your location to show nearby places.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>We need your location to provide better services.</string>
+
     <key>LSApplicationQueriesSchemes</key>
     <array>
     <string>googlemaps</string>
