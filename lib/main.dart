@@ -101,6 +101,7 @@ print('three:$wmstype');
   if (FirebaseAuth.instance.currentUser == null) {
     return '/Onboarding';
   } else if (detailComp == true) {
+    print('detail$detailComp');
     // Additional conditional routing based on WMSTYPE
     if (wmstype == "BinSale") {
       return '/binsale';

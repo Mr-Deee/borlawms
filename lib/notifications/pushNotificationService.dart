@@ -1,6 +1,7 @@
 
 
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -46,18 +47,45 @@ class PushNotificationService {
     }
   }
 
+  Future<void> getToken() async {
+    try {
+      // Check if Firebase is initialized
+      await Firebase.initializeApp();
 
+      // Get the FCM token
+      String? token = await messaging.getToken();
 
-  Future getToken() async {
-    String? token = await messaging.getToken();
-    print("This is token :: ");
-    print(token);
-    WMSDBtoken.child("token").set(token);
+      if (token != null) {
+        print("This is token :: $token");
+        // Save the token to Firebase Realtime Database
+        await WMSDBtoken.child("token").set(token);
 
-    print("JUST GOT IT::"+'$token');
-    messaging.subscribeToTopic("alldrivers");
-    messaging.subscribeToTopic("allusers");
+        // Print the token (for debugging)
+        print("JUST GOT IT: $token");
+
+        // Subscribe to topics
+        await messaging.subscribeToTopic("alldrivers");
+        await messaging.subscribeToTopic("allusers");
+
+        print("Successfully subscribed to topics: alldrivers, allusers");
+      } else {
+        print("Failed to get the token.");
+      }
+    } catch (e) {
+      print("Error getting token: $e");
+    }
   }
+
+  // Future getToken() async {
+  //   String? token = await messaging.getToken();
+  //   print("This is token :: ");
+  //   print(token);
+  //   WMSDBtoken.child("token").set(token);
+  //
+  //   print("JUST GOT IT::"+'$token');
+  //   messaging.subscribeToTopic("alldrivers");
+  //   messaging.subscribeToTopic("allusers");
+  // }
 
   String getRideRequestId(Map<String, dynamic> message) {
     String rideRequestId = "";
