@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
@@ -155,6 +156,7 @@ class _homepageState extends State<homepage> {
     AssistantMethod.getCurrentOnlineUserInfo(context);
     getCurrentWMSInfo();
     requestLocationPermission();
+    requestNotificationPermission();
     AssistantMethod.getCurrentrequestinfo(context);
     AssistantMethod.obtainTripRequestsHistoryData(context);
 
@@ -358,10 +360,11 @@ class _homepageState extends State<homepage> {
       "email": Provider.of<WMS>(context, listen: false).riderInfo?.email!,
 
     };
+
     WastemanagementRef.set("searching");
     Geofire.initialize("availableWMS");
     Geofire.setLocation(
-      currentfirebaseUser!.uid,
+FirebaseAuth.instance.currentUser!.uid,
       currentPosition!.latitude,
       currentPosition!.longitude,
     );
@@ -370,6 +373,25 @@ class _homepageState extends State<homepage> {
     WastemanagementRef.onValue.listen((event) {});
   }
 
+
+
+  void requestNotificationPermission() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+    } else {
+      print('User declined or has not granted permission');
+    }
+
+
+  }
   void getLocationLiveUpdates() {
     homeTabPageStreamSubscription =
         Geolocator.getPositionStream().listen((Position position) {
