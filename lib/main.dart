@@ -71,8 +71,7 @@ DatabaseReference WastemanagementRef = FirebaseDatabase.instance.ref().child(
 DatabaseReference clients = FirebaseDatabase.instance.ref().child("Clients");
 DatabaseReference WMSDB = FirebaseDatabase.instance.ref().child("WMS");
 DatabaseReference WMSDBtoken = FirebaseDatabase.instance.ref()
-    .child("WMS")
-    .child(uid!);
+    .child("WMS").child(uid!);
 DatabaseReference WMSAvailable = FirebaseDatabase.instance.ref().child(
     "availableWMS").child(uid!);
 Future<String> getInitialRoute() async {

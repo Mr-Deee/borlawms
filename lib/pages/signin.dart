@@ -295,11 +295,11 @@ class _signinState extends State<signin> {
 
               // Navigate based on WMSTYPE
               if (wmstype == "BinSale") {
-                Navigator.of(context).pushNamed("/binsale");
+                Navigator.of(context).pushNamedAndRemoveUntil("/binsale", (route) => false);
               } else if (wmstype == "Recycle") {
-                Navigator.of(context).pushNamed("/recycle");
+                Navigator.of(context).pushNamedAndRemoveUntil("/recycle", (route) => false);
               } else {
-                Navigator.of(context).pushNamed("/Homepage");
+                Navigator.of(context).pushNamedAndRemoveUntil("/Homepage", (route) => false);
               }
 
               displayToast("Logged in successfully", context);
