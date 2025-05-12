@@ -30,7 +30,7 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
-pod 'Firebase/Database', '11.4.0'
+pod 'Firebase/Database', '11.10.0'
 pod 'GoogleMaps'
 
             pod 'GeoFire', :git => 'https://github.com/mrdishant/geofire-objc'
