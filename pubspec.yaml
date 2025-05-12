@@ -66,6 +66,8 @@ dependencies:
   geolocator_web:
   js: ^0.7.1
   smooth_page_indicator: ^1.2.0+3
+  animated_text_kit:
+  font_awesome_flutter: ^10.8.0
 
 
 dev_dependencies:

@@ -20,6 +20,7 @@ import 'dart:math';
 import '../Assistant/assistantmethods.dart';
 import '../configMaps.dart';
 import '../main.dart';
+import 'GuestMode.dart';
 import 'forgotpassword.dart';
 import 'homepage.dart';
 
@@ -243,6 +244,20 @@ class _signinState extends State<signin> {
                 ),
 
                 SizedBox(height: 30.0),
+                SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => GuestModeScreen()));
+                  },
+                  child: Text(
+                    "Guest Mode",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
