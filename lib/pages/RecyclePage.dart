@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:borlawms/Assistant/assistantmethods.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,7 +28,7 @@ class _RecyclePageState extends State<RecyclePage> {
   final List<Widget> _pages = [
     DashboardPage(),
     WalletPage(),
-    SuccessPage(),
+    RecyclingCompanyProfile(),
   ];
 @override
   void initState() {
@@ -60,8 +63,8 @@ class _RecyclePageState extends State<RecyclePage> {
             label: 'Wallet',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.check_circle),
-            label: 'Success',
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),
@@ -327,6 +330,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
     }
 }
+
+
 class WalletPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -388,50 +393,554 @@ class WalletPage extends StatelessWidget {
   }
 }
 
-class SuccessPage extends StatelessWidget {
+
+
+class RecyclingCompanyProfile extends StatefulWidget {
+  @override
+  _RecyclingCompanyProfileState createState() => _RecyclingCompanyProfileState();
+}
+
+class _RecyclingCompanyProfileState extends State<RecyclingCompanyProfile> {
+  // Sample data - replace with your actual data fetching logic
+  Map<String, dynamic> companyData = {
+    "email": "martey123@gmail.com",
+    "phone": "020874526",
+    "riderImageUrl": "",
+    "wasteManagementInfo": {
+      "DirectorName": "John Mensah",
+      "FullName": "Smart company",
+      "GPSAddress": "gh56432789994",
+      "WMSTYPE": "Recycle",
+      "compRegUrl": null,
+      "detailsComp": true,
+      "employees": "5",
+      "ghMobileNumber": "020854365",
+      "ghanaCardNumber": "gh0665412",
+      "landmark": "kasoa Nyanyano",
+      "location": "kasoa",
+      "registrationDocUrl": null,
+    },
+    "branches": [
+      {
+        "branchName": "Main Branch",
+        "branchLocation": "Kasoa",
+        "branchGPS": "gh56432789994",
+        "branchPhone": "020874526"
+      }
+    ]
+  };
+
+  File? _imageFile;
+  final ImagePicker _picker = ImagePicker();
+  bool _isEditing = false;
+  final _formKey = GlobalKey<FormState>();
+
+  // Controllers for editable fields
+  late TextEditingController _directorNameController;
+  late TextEditingController _companyNameController;
+  late TextEditingController _gpsController;
+  late TextEditingController _employeesController;
+  late TextEditingController _mobileController;
+  late TextEditingController _ghanaCardController;
+  late TextEditingController _landmarkController;
+  late TextEditingController _locationController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
+    _directorNameController = TextEditingController(text: companyData['wasteManagementInfo']['DirectorName']);
+    _companyNameController = TextEditingController(text: companyData['wasteManagementInfo']['FullName']);
+    _gpsController = TextEditingController(text: companyData['wasteManagementInfo']['GPSAddress']);
+    _employeesController = TextEditingController(text: companyData['wasteManagementInfo']['employees']);
+    _mobileController = TextEditingController(text: companyData['wasteManagementInfo']['ghMobileNumber']);
+    _ghanaCardController = TextEditingController(text: companyData['wasteManagementInfo']['ghanaCardNumber']);
+    _landmarkController = TextEditingController(text: companyData['wasteManagementInfo']['landmark']);
+    _locationController = TextEditingController(text: companyData['wasteManagementInfo']['location']);
+    _emailController = TextEditingController(text: companyData['email']);
+    _phoneController = TextEditingController(text: companyData['phone']);
+  }
+
+  @override
+  void dispose() {
+    _directorNameController.dispose();
+    _companyNameController.dispose();
+    _gpsController.dispose();
+    _employeesController.dispose();
+    _mobileController.dispose();
+    _ghanaCardController.dispose();
+    _landmarkController.dispose();
+    _locationController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  // Future<void> _pickImage() async {
+  //   final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _imageFile = File(pickedFile.path);
+  //     });
+  //   }
+  // }
+
+  void _toggleEditing() {
+    setState(() {
+      _isEditing = !_isEditing;
+      if (!_isEditing) {
+        // Save changes
+        _saveChanges();
+      }
+    });
+  }
+
+  void _saveChanges() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        companyData['wasteManagementInfo']['DirectorName'] = _directorNameController.text;
+        companyData['wasteManagementInfo']['FullName'] = _companyNameController.text;
+        companyData['wasteManagementInfo']['GPSAddress'] = _gpsController.text;
+        companyData['wasteManagementInfo']['employees'] = _employeesController.text;
+        companyData['wasteManagementInfo']['ghMobileNumber'] = _mobileController.text;
+        companyData['wasteManagementInfo']['ghanaCardNumber'] = _ghanaCardController.text;
+        companyData['wasteManagementInfo']['landmark'] = _landmarkController.text;
+        companyData['wasteManagementInfo']['location'] = _locationController.text;
+        companyData['email'] = _emailController.text;
+        companyData['phone'] = _phoneController.text;
+      });
+      // Here you would typically send the updated data to your backend
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Profile updated successfully')),
+      );
+    }
+  }
+
+  void _addNewBranch() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddBranchPage(
+          onBranchAdded: (newBranch) {
+            setState(() {
+              companyData['branches'].add(newBranch);
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  void _editBranch(int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddBranchPage(
+          branch: companyData['branches'][index],
+          onBranchAdded: (updatedBranch) {
+            setState(() {
+              companyData['branches'][index] = updatedBranch;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Success'),
-        centerTitle: true,
+        title: Text('Company Profile'),
+        actions: [
+          IconButton(
+            icon: Icon(_isEditing ? Icons.save : Icons.edit),
+            onPressed: _toggleEditing,
+          ),
+        ],
       ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Profile Image Section
+              Center(
+                child: Stack(
                   children: [
-                    Icon(Icons.check_circle, color: Colors.green, size: 60),
-                    SizedBox(height: 16),
-                    Text('Success', style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
-                    Text('Your password is successfully created'),
-                    SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Text('Continue'),
+                    CircleAvatar(
+                      radius: 60,
+                      backgroundImage: _imageFile != null
+                          ? FileImage(_imageFile!)
+                          : (companyData['riderImageUrl'] != null && companyData['riderImageUrl'].isNotEmpty)
+                          ? NetworkImage(companyData['riderImageUrl'])
+                          : AssetImage('assets/default_company.png') as ImageProvider,
                     ),
+                    // if (_isEditing)
+                      // Positioned(
+                      //   bottom: 0,
+                      //   right: 0,
+                      //   child: Container(
+                      //     decoration: BoxDecoration(
+                      //       color: Colors.blue,
+                      //       shape: BoxShape.circle,
+                      //     ),
+                      //     child: IconButton(
+                      //       icon: Icon(Icons.camera_alt, color: Colors.white),
+                      //       onPressed: _pickImage,
+                      //     ),
+                      //   ),
+                      // ),
                   ],
                 ),
               ),
-            );
-          },
-          child: Text('Show Success Dialog'),
+              SizedBox(height: 20),
+
+              // Company Type Badge
+              Center(
+                child: Chip(
+                  label: Text(
+                    companyData['wasteManagementInfo']['WMSTYPE'] ?? 'Recycle',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: Colors.green,
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Company Information Section
+              Text(
+                'Company Information',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              Divider(),
+
+              _buildEditableField(
+                label: 'Company Name',
+                controller: _companyNameController,
+                icon: Icons.business,
+              ),
+              _buildEditableField(
+                label: 'Director Name',
+                controller: _directorNameController,
+                icon: Icons.person,
+              ),
+              _buildEditableField(
+                label: 'Email',
+                controller: _emailController,
+                icon: Icons.email,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              _buildEditableField(
+                label: 'Phone',
+                controller: _phoneController,
+                icon: Icons.phone,
+                keyboardType: TextInputType.phone,
+              ),
+              _buildEditableField(
+                label: 'Mobile Number',
+                controller: _mobileController,
+                icon: Icons.phone_android,
+                keyboardType: TextInputType.phone,
+              ),
+              _buildEditableField(
+                label: 'Ghana Card Number',
+                controller: _ghanaCardController,
+                icon: Icons.credit_card,
+              ),
+              _buildEditableField(
+                label: 'Number of Employees',
+                controller: _employeesController,
+                icon: Icons.people,
+                keyboardType: TextInputType.number,
+              ),
+              _buildEditableField(
+                label: 'Location',
+                controller: _locationController,
+                icon: Icons.location_on,
+              ),
+              _buildEditableField(
+                label: 'Landmark',
+                controller: _landmarkController,
+                icon: Icons.place,
+              ),
+              _buildEditableField(
+                label: 'GPS Address',
+                controller: _gpsController,
+                icon: Icons.map,
+              ),
+
+              SizedBox(height: 20),
+
+              // Registration Documents Section
+              Text(
+                'Registration Documents',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Divider(),
+              _buildDocumentItem(
+                'Company Registration',
+                companyData['wasteManagementInfo']['compRegUrl'],
+              ),
+              _buildDocumentItem(
+                'Registration Document',
+                companyData['wasteManagementInfo']['registrationDocUrl'],
+              ),
+
+              SizedBox(height: 20),
+
+              // Branches Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Branches',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  if (_isEditing)
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: _addNewBranch,
+                    ),
+                ],
+              ),
+              Divider(),
+              ...companyData['branches'].map<Widget>((branch) => _buildBranchCard(branch, companyData['branches'].indexOf(branch))).toList(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditableField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: _isEditing
+          ? TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon),
+          border: OutlineInputBorder(),
+        ),
+        keyboardType: keyboardType,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter $label';
+          }
+          return null;
+        },
+      )
+          : ListTile(
+        leading: Icon(icon),
+        title: Text(label),
+        subtitle: Text(controller.text),
+      ),
+    );
+  }
+
+  Widget _buildDocumentItem(String title, String? url) {
+    return ListTile(
+      leading: Icon(Icons.insert_drive_file),
+      title: Text(title),
+      subtitle: url == null || url.isEmpty
+          ? Text('Not uploaded', style: TextStyle(color: Colors.red))
+          : Text('View document', style: TextStyle(color: Colors.blue)),
+      trailing: _isEditing
+          ? IconButton(
+        icon: Icon(Icons.upload_file),
+        onPressed: () {
+          // Implement document upload functionality
+        },
+      )
+          : null,
+      onTap: url == null || url.isEmpty
+          ? null
+          : () {
+        // Implement document viewing functionality
+      },
+    );
+  }
+
+  Widget _buildBranchCard(Map<String, dynamic> branch, int index) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      child: Padding(
+        padding: EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  branch['branchName'],
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                if (_isEditing)
+                  IconButton(
+                    icon: Icon(Icons.edit, size: 20),
+                    onPressed: () => _editBranch(index),
+                  ),
+              ],
+            ),
+            SizedBox(height: 8),
+            Text('Location: ${branch['branchLocation']}'),
+            Text('GPS: ${branch['branchGPS']}'),
+            Text('Phone: ${branch['branchPhone']}'),
+          ],
         ),
       ),
     );
   }
 }
 
+
+
+class AddBranchPage extends StatefulWidget {
+  final Map<String, dynamic>? branch;
+  final Function(Map<String, dynamic>) onBranchAdded;
+
+  AddBranchPage({this.branch, required this.onBranchAdded});
+
+  @override
+  _AddBranchPageState createState() => _AddBranchPageState();
+}
+
+class _AddBranchPageState extends State<AddBranchPage> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+  late TextEditingController _locationController;
+  late TextEditingController _gpsController;
+  late TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.branch?['branchName'] ?? '');
+    _locationController = TextEditingController(text: widget.branch?['branchLocation'] ?? '');
+    _gpsController = TextEditingController(text: widget.branch?['branchGPS'] ?? '');
+    _phoneController = TextEditingController(text: widget.branch?['branchPhone'] ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _locationController.dispose();
+    _gpsController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  void _saveBranch() {
+    if (_formKey.currentState!.validate()) {
+      final newBranch = {
+        'branchName': _nameController.text,
+        'branchLocation': _locationController.text,
+        'branchGPS': _gpsController.text,
+        'branchPhone': _phoneController.text,
+      };
+      widget.onBranchAdded(newBranch);
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.branch == null ? 'Add New Branch' : 'Edit Branch'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Branch Name',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter branch name';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _locationController,
+                decoration: InputDecoration(
+                  labelText: 'Location',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter location';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _gpsController,
+                decoration: InputDecoration(
+                  labelText: 'GPS Address',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter GPS address';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _phoneController,
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter phone number';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _saveBranch,
+                child: Text('Save Branch'),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 50),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 class CategoryItem extends StatelessWidget {
   final String title;
   final IconData icon;
