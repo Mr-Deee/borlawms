@@ -12,7 +12,6 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_selector/file_selector.dart';
 
-
 class RecyclingForm extends StatefulWidget {
   @override
   _RecyclingFormState createState() => _RecyclingFormState();
@@ -23,9 +22,11 @@ class _RecyclingFormState extends State<RecyclingForm> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
   final FirebaseStorage _storage = FirebaseStorage.instance;
+
   File? _logoFile;
   File? _compRegFile;
   File? _registrationDocFile;
+
   final ImagePicker _imagePicker = ImagePicker();
 
   final TextEditingController _fullnameController = TextEditingController();
@@ -40,8 +41,8 @@ class _RecyclingFormState extends State<RecyclingForm> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final width = size.width;
     final height = size.height;
+
     return Form(
       key: _formKey,
       child: Column(
@@ -52,34 +53,31 @@ class _RecyclingFormState extends State<RecyclingForm> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               BusinessReGUploadButton(),
-              logoUploadButton()
+              logoUploadButton(),
             ],
           ),
-
           Container(
-                height: height / 1.2,
-                width: 400,
-                decoration: BoxDecoration(
-                  color: Color(0xFFE9EBED),
-                  borderRadius: BorderRadius.circular(13),
-                ),
-
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: Column(
-                  children: [
-                    textField('Company Name', _fullnameController,icon: Icons.business),
-                    textField('Director Name', _DirectornameController,icon: Icons.person),
-                    textField('Landmark close to location', _landmarkController,icon: Icons.landscape),
-                    textField('Location', _locationController,icon: Icons.location_on),
-                    textField('GPS ', _gpsController,icon: Icons.gps_fixed_outlined),
-                    textField('Number of Employees', _employeesController, icon: Icons.people),
-                    textField('GH Mobile Number', _ghMobileNumberController, icon: Icons.phone),
-                    textField('Ghana Card Number', _ghanaCardNumberController,icon: Icons.credit_card),
-                  ],
-                ),
-              )),
-
+            height: height / 1.2,
+            width: 400,
+            decoration: BoxDecoration(
+              color: Color(0xFFE9EBED),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  textField('Company Name', _fullnameController, icon: Icons.business),
+                  textField('Director Name', _DirectornameController, icon: Icons.person),
+                  textField('Landmark close to location', _landmarkController, icon: Icons.landscape),
+                  textField('Location', _locationController, icon: Icons.location_on),
+                  textField('GPS', _gpsController, icon: Icons.gps_fixed_outlined),
+                  textField('Number of Employees', _employeesController, icon: Icons.people),
+                  textField('GH Mobile Number', _ghMobileNumberController, icon: Icons.phone),
+                  textField('Ghana Card Number', _ghanaCardNumberController, icon: Icons.credit_card),
+                ],
+              ),
+            ),
+          ),
           SizedBox(height: 20),
           submitButton(),
         ],
@@ -87,30 +85,13 @@ class _RecyclingFormState extends State<RecyclingForm> {
     );
   }
 
-  Widget uploadButton(String text, File? file, Function(File) onFilePicked) {
-    return Column(
-      children: [
-        if (file != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Image.file(
-              file,
-              width: 100,
-              height: 100,
-            ),
-          ),
-        ElevatedButton(
-          onPressed: () async {
-            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-            if (pickedFile != null) {
-              setState(() {
-                onFilePicked(File(pickedFile.path));
-              });
-            }
-          },
-          child: Text(text),
-        ),
-      ],
+  Widget sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        title,
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
     );
   }
 
@@ -128,8 +109,8 @@ class _RecyclingFormState extends State<RecyclingForm> {
         child: TextFormField(
           decoration: InputDecoration(
             labelText: label,
-            prefixIcon: icon != null ? Icon(icon) : null, // Add an icon if provided
-            border: InputBorder.none, // Remove the default border
+            prefixIcon: icon != null ? Icon(icon) : null,
+            border: InputBorder.none,
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -144,31 +125,21 @@ class _RecyclingFormState extends State<RecyclingForm> {
     );
   }
 
-  Widget sectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        title,
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
   Widget submitButton() {
     return Center(
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent, // Ensure the button background is transparent
-          shadowColor: Colors.transparent,     // Remove shadow to match the gradient container
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12), // Match the container's border radius
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         onPressed: _submitForm,
         child: Ink(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.green, Colors.lightGreenAccent], // Define the gradient colors
+              colors: [Colors.green, Colors.lightGreenAccent],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -184,63 +155,37 @@ class _RecyclingFormState extends State<RecyclingForm> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) {
-      return; // Exit early if form validation fails
-    }
+    if (!_formKey.currentState!.validate()) return;
 
-    // Show progress dialog
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
-        return ProgressDialog(
-          message: "Updating, please wait.....",
-        );
-      },
+      builder: (_) => ProgressDialog(message: "Updating, please wait....."),
     );
 
     User? user = _auth.currentUser;
     if (user == null) {
-      Navigator.of(context).pop(); // Close dialog
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User not signed in')),
-      );
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User not signed in')));
       return;
     }
 
     String userId = user.uid;
-    List<Future<String?>> uploadTasks = [];
 
-    // Upload files concurrently
-    if (_logoFile != null) {
-      uploadTasks.add(uploadFile(_logoFile!, 'CompanyLogo'));
-    } else {
-      uploadTasks.add(Future.value(null));
-    }
-    if (_compRegFile != null) {
-      uploadTasks.add(uploadFile(_compRegFile!, 'CompanyRegistration'));
-    } else {
-      uploadTasks.add(Future.value(null));
-    }
-    if (_registrationDocFile != null) {
-      uploadTasks.add(uploadFile(_registrationDocFile!, 'BusinessRegistration'));
-    } else {
-      uploadTasks.add(Future.value(null));
-    }
+    List<Future<String?>> uploadTasks = [
+      _logoFile != null ? uploadFile(_logoFile!, 'CompanyLogo') : Future.value(null),
+      _compRegFile != null ? uploadFile(_compRegFile!, 'CompanyRegistration') : Future.value(null),
+      _registrationDocFile != null ? uploadFile(_registrationDocFile!, 'BusinessRegistration') : Future.value(null),
+    ];
 
-    // Wait for all uploads to complete
     List<String?> uploadResults = await Future.wait(uploadTasks);
-    String? logoUrl = uploadResults[0];
-    String? compRegUrl = uploadResults[1];
-    String? registrationDocUrl = uploadResults[2];
 
-    // Prepare form data
     Map<String, dynamic> formData = {
-      'logoUrl': logoUrl,
+      'logoUrl': uploadResults[0],
       'WMSTYPE': "Recycle",
       'detailsComp': true,
-      'compRegUrl': compRegUrl.toString(),
-      'registrationDocUrl': registrationDocUrl.toString(),
+      'compRegUrl': uploadResults[1].toString(),
+      'registrationDocUrl': uploadResults[2].toString(),
       'FullName': _fullnameController.text,
       'DirectorName': _DirectornameController.text,
       'landmark': _landmarkController.text,
@@ -251,21 +196,13 @@ class _RecyclingFormState extends State<RecyclingForm> {
       'ghanaCardNumber': _ghanaCardNumberController.text,
     };
 
-    // Update database
     await _database.child('WMS').child(userId).child('wasteManagementInfo').set(formData);
-  _database
-        .child('WMS')
-        .child(userId)
-        .update({'detailsComp': true});
+    await _database.child('WMS').child(userId).update({'detailsComp': true});
 
-    // Close dialog and navigate
     Navigator.of(context).pop();
     Navigator.of(context).pushNamed("/SignIn");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Data submitted successfully')),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data submitted successfully')));
   }
-
 
   Future<String> uploadFile(File file, String folderName) async {
     Reference reference = _storage.ref().child('$folderName/${Path.basename(file.path)}');
@@ -274,48 +211,36 @@ class _RecyclingFormState extends State<RecyclingForm> {
     return await snapshot.ref.getDownloadURL();
   }
 
-
   Widget logoUploadButton() {
-    return Column(children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Column(
-            children: [
-              Text("Upload Logo"),
-              GestureDetector(
-                onTap: () async {
-                  final pickedFile =
-                  await _imagePicker.pickImage(source: ImageSource.gallery);
-                  if (pickedFile != null) {
-                    setState(() {
-                      _logoFile = File(pickedFile.path);
-                    });
-                  }
-                },
-                child: Container(
-                  width: 100, // Set a fixed width for the image container
-                  height: 105, // Set a fixed height for the image container
-                  child: _logoFile != null
-                      ? Image.file(_logoFile!) // Display the uploaded image
-                      : Icon(Icons
-                      .drive_folder_upload), // Display the icon if no image is uploaded
-                ),
-              ),
-            ],
+    return Column(
+      children: [
+        Text("Upload Logo"),
+        GestureDetector(
+          onTap: () async {
+            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+            if (pickedFile != null) {
+              setState(() {
+                _logoFile = File(pickedFile.path);
+              });
+            }
+          },
+          child: Container(
+            width: 100,
+            height: 105,
+            child: _logoFile != null ? Image.file(_logoFile!) : Icon(Icons.drive_folder_upload),
           ),
-        ],
-      )
-    ]);
+        ),
+      ],
+    );
   }
+
   Widget BusinessReGUploadButton() {
     return Column(
       children: [
         Text("Business Registration"),
         GestureDetector(
           onTap: () async {
-            final pickedFile =
-            await _imagePicker.pickImage(source: ImageSource.gallery);
+            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
             if (pickedFile != null) {
               setState(() {
                 _compRegFile = File(pickedFile.path);
@@ -325,9 +250,7 @@ class _RecyclingFormState extends State<RecyclingForm> {
           child: Container(
             width: 100,
             height: 100,
-            child: _compRegFile != null
-                ? Image.file(_compRegFile!)
-                : Icon(Icons.drive_folder_upload),
+            child: _compRegFile != null ? Image.file(_compRegFile!) : Icon(Icons.drive_folder_upload),
           ),
         ),
       ],

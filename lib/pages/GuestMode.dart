@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:borlawms/pages/addwmsdetails.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -424,18 +425,18 @@ class _GuestModeScreenState extends State<GuestModeScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // _buildActionCard(
-                      //   title: 'Privacy',
-                      //   icon: Icons.privacy_tip,
-                      //   onTap: () {
-                      //     Navigator.push(
-                      //         context,
-                      //         MaterialPageRoute(
-                      //           builder: (context) => Pr(),
-                      //         )
-                      //     );
-                      //   },
-                      // ),
+                      _buildActionCard(
+                        title: 'Additional Branch',
+                        icon: Icons.privacy_tip,
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Addwmsdetails(),
+                              )
+                          );
+                        },
+                      ),
                       _buildActionCard(
                         title: 'Bin Sale',
                         icon: Icons.location_on,
@@ -505,7 +506,7 @@ class BinSalePage extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/onbb.jpg'),
+                  image: AssetImage('assets/images/onb1.jpg'),
                   fit: BoxFit.cover,
                 ),
               ),

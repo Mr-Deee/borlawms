@@ -253,7 +253,7 @@ class _signinState extends State<signin> {
                     "Guest Mode",
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.green,
+                      color: Colors.black,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
