@@ -24,8 +24,6 @@ class RecyclePage extends StatefulWidget {
 }
 
 class _RecyclePageState extends State<RecyclePage> {
-
-
   int _currentIndex = 0;
 
   // List of pages
@@ -34,21 +32,24 @@ class _RecyclePageState extends State<RecyclePage> {
     WalletPage(),
     RecyclingCompanyProfile(),
   ];
-@override
+
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
     AssistantMethod.getCurrentOnlineUserInfo(context);
   }
+
   @override
   Widget build(BuildContext context) {
     var email = Provider.of<WMS>(context, listen: false).riderInfo?.email ?? "";
-    var fclientname = Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "";
-    var lclientname = Provider.of<WMS>(context, listen: false).riderInfo?.lastname ?? "";
+    var fclientname =
+        Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "";
+    var lclientname =
+        Provider.of<WMS>(context, listen: false).riderInfo?.lastname ?? "";
     var phoneNumber =
         Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "";
     return Scaffold(
-
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -130,9 +131,9 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
-
   Future<void> openGoogleMaps(String location) async {
-    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$location');
+    final Uri url =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$location');
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
@@ -140,14 +141,15 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     var email = Provider.of<WMS>(context, listen: false).riderInfo?.email ?? "";
-    var fclientname = Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "";
-    var lclientname = Provider.of<WMS>(context, listen: false).riderInfo?.lastname ?? "";
-    var phoneNumber = Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "";
+    var fclientname =
+        Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "";
+    var lclientname =
+        Provider.of<WMS>(context, listen: false).riderInfo?.lastname ?? "";
+    var phoneNumber =
+        Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "";
 
     // Determine the time-based salutation
     String getTimeBasedSalutation() {
@@ -162,179 +164,179 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Dashboard'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              showDialog<void>(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Sign Out'),
-                    backgroundColor: Colors.white,
-                    content: SingleChildScrollView(
+        appBar: AppBar(
+          title: Text('Dashboard'),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Sign Out'),
+                      backgroundColor: Colors.white,
+                      content: SingleChildScrollView(
+                        child: Column(
+                          children: <Widget>[
+                            Text('Are you certain you want to Sign Out?'),
+                          ],
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('Yes',
+                              style: TextStyle(color: Colors.black)),
+                          onPressed: () {
+                            FirebaseAuth.instance.signOut();
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, "/SignIn", (route) => false);
+                          },
+                        ),
+                        TextButton(
+                          child: Text('Cancel',
+                              style: TextStyle(color: Colors.red)),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              icon: const Icon(Icons.logout, color: Colors.black),
+            ),
+          ],
+        ),
+        body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                '${getTimeBasedSalutation()}\nStart Today! - $fclientname',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       child: Column(
-                        children: <Widget>[
-                          Text('Are you certain you want to Sign Out?'),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 5),
+                          Text('Total waste collected',
+                              style: TextStyle(color: Colors.grey)),
+                          SizedBox(height: 5),
+                          LinearProgressIndicator(
+                            value: 0.75,
+                            backgroundColor: Colors.grey[200],
+                            color: Colors.green,
+                          ),
                         ],
                       ),
                     ),
-                    actions: <Widget>[
-                      TextButton(
-                        child: Text('Yes', style: TextStyle(color: Colors.black)),
-                        onPressed: () {
-                          FirebaseAuth.instance.signOut();
-                          Navigator.pushNamedAndRemoveUntil(
-                              context, "/SignIn", (route) => false);
-                        },
-                      ),
-                      TextButton(
-                        child: Text('Cancel', style: TextStyle(color: Colors.red)),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            icon: const Icon(Icons.logout, color: Colors.black),
-          ),
-        ],
-            ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${getTimeBasedSalutation()}\nStart Today! - $fclientname',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 5),
-                        Text('Total waste collected', style: TextStyle(color: Colors.grey)),
-                        SizedBox(height: 5),
-                        LinearProgressIndicator(
-                          value: 0.75,
-                          backgroundColor: Colors.grey[200],
-                          color: Colors.green,
-                        ),
-                      ],
-                    ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: TextField(
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search recycle items...',
-                      hintStyle: TextStyle(color: Colors.grey),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.green),
-                      ),
-                      suffixIcon: Icon(Icons.search, color: Colors.green),
-                    ),
-                    onChanged: (value) {
-                      filterItems(value, selectedCategory);
-                    },
-                  ),
-                ),
-                SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () async {
-                    final String? selected = await showDialog<String>(
-                      context: context,
-                      builder: (context) {
-                        return SimpleDialog(
-                          title: Text('Select Category'),
-                          children: categories
-                              .map((category) => SimpleDialogOption(
-                            onPressed: () {
-                              Navigator.pop(context, category);
-                            },
-                            child: Text(category),
-                          ))
-                              .toList(),
-                        );
-                      },
-                    );
-                    if (selected != null) {
-                      setState(() {
-                        selectedCategory = selected;
-                        filterItems(searchController.text, selectedCategory);
-                      });
-                    }
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.filter_alt_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 20),
-            Expanded(
-              child: filteredItems.isEmpty
-                  ? Center(child: Text('No items found'))
-                  : ListView.builder(
-                itemCount: filteredItems.length,
-                itemBuilder: (context, index) {
-                  final item = filteredItems[index];
-                  return ListTile(
-                    leading: item['image_url'] != null
-                        ? Image.network(item['image_url'],
-                        width: 50, height: 50, fit: BoxFit.cover)
-                        : Icon(Icons.image),
-                    title: Text(item['RecycleType'] ?? 'Unknown'),
-                    subtitle: Text(item['description'] ?? 'No description'),
-                    trailing: IconButton(
-                      icon: Icon(Icons.directions),
-                      onPressed: () => openGoogleMaps(item['location']),
-                    ),
-                  );
-                },
+                ],
               ),
-            ),
-
-        ])));
-
-    }
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: TextField(
+                      controller: searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search recycle items...',
+                        hintStyle: TextStyle(color: Colors.grey),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.green),
+                        ),
+                        suffixIcon: Icon(Icons.search, color: Colors.green),
+                      ),
+                      onChanged: (value) {
+                        filterItems(value, selectedCategory);
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: () async {
+                      final String? selected = await showDialog<String>(
+                        context: context,
+                        builder: (context) {
+                          return SimpleDialog(
+                            title: Text('Select Category'),
+                            children: categories
+                                .map((category) => SimpleDialogOption(
+                                      onPressed: () {
+                                        Navigator.pop(context, category);
+                                      },
+                                      child: Text(category),
+                                    ))
+                                .toList(),
+                          );
+                        },
+                      );
+                      if (selected != null) {
+                        setState(() {
+                          selectedCategory = selected;
+                          filterItems(searchController.text, selectedCategory);
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.filter_alt_rounded,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Expanded(
+                child: filteredItems.isEmpty
+                    ? Center(child: Text('No items found'))
+                    : ListView.builder(
+                        itemCount: filteredItems.length,
+                        itemBuilder: (context, index) {
+                          final item = filteredItems[index];
+                          return ListTile(
+                            leading: item['image_url'] != null
+                                ? Image.network(item['image_url'],
+                                    width: 50, height: 50, fit: BoxFit.cover)
+                                : Icon(Icons.image),
+                            title: Text(item['RecycleType'] ?? 'Unknown'),
+                            subtitle:
+                                Text(item['description'] ?? 'No description'),
+                            trailing: IconButton(
+                              icon: Icon(Icons.directions),
+                              onPressed: () => openGoogleMaps(item['location']),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ])));
+  }
 }
-
 
 class WalletPage extends StatelessWidget {
   @override
@@ -397,14 +399,10 @@ class WalletPage extends StatelessWidget {
   }
 }
 
-
-
-
-
-
 class RecyclingCompanyProfile extends StatefulWidget {
   @override
-  _RecyclingCompanyProfileState createState() => _RecyclingCompanyProfileState();
+  _RecyclingCompanyProfileState createState() =>
+      _RecyclingCompanyProfileState();
 }
 
 class _RecyclingCompanyProfileState extends State<RecyclingCompanyProfile> {
@@ -453,7 +451,7 @@ class _RecyclingCompanyProfileState extends State<RecyclingCompanyProfile> {
 
   void _setupRealtimeListener() {
     _dataSubscription = _userService.getUserDataStream().listen(
-          (data) {
+      (data) {
         setState(() {
           _companyData = data;
           _isLoading = false;
@@ -472,14 +470,22 @@ class _RecyclingCompanyProfileState extends State<RecyclingCompanyProfile> {
   void _updateControllersWithData() {
     if (_companyData == null) return;
 
-    _directorNameController.text = _companyData!['wasteManagementInfo']['DirectorName'] ?? '';
-    _companyNameController.text = _companyData!['wasteManagementInfo']['FullName'] ?? '';
-    _gpsController.text = _companyData!['wasteManagementInfo']['GPSAddress'] ?? '';
-    _employeesController.text = _companyData!['wasteManagementInfo']['employees']?.toString() ?? '';
-    _mobileController.text = _companyData!['wasteManagementInfo']['ghMobileNumber'] ?? '';
-    _ghanaCardController.text = _companyData!['wasteManagementInfo']['ghanaCardNumber'] ?? '';
-    _landmarkController.text = _companyData!['wasteManagementInfo']['landmark'] ?? '';
-    _locationController.text = _companyData!['wasteManagementInfo']['location'] ?? '';
+    _directorNameController.text =
+        _companyData!['wasteManagementInfo']['DirectorName'] ?? '';
+    _companyNameController.text =
+        _companyData!['wasteManagementInfo']['FullName'] ?? '';
+    _gpsController.text =
+        _companyData!['wasteManagementInfo']['GPSAddress'] ?? '';
+    _employeesController.text =
+        _companyData!['wasteManagementInfo']['employees']?.toString() ?? '';
+    _mobileController.text =
+        _companyData!['wasteManagementInfo']['ghMobileNumber'] ?? '';
+    _ghanaCardController.text =
+        _companyData!['wasteManagementInfo']['ghanaCardNumber'] ?? '';
+    _landmarkController.text =
+        _companyData!['wasteManagementInfo']['landmark'] ?? '';
+    _locationController.text =
+        _companyData!['wasteManagementInfo']['location'] ?? '';
     _emailController.text = _companyData!['email'] ?? '';
     _phoneController.text = _companyData!['phone'] ?? '';
   }
@@ -569,7 +575,8 @@ class _RecyclingCompanyProfileState extends State<RecyclingCompanyProfile> {
               });
             } catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Failed to add branch: ${e.toString()}')),
+                SnackBar(
+                    content: Text('Failed to add branch: ${e.toString()}')),
               );
             }
           },
@@ -579,7 +586,8 @@ class _RecyclingCompanyProfileState extends State<RecyclingCompanyProfile> {
   }
 
   void _editBranch(int index) {
-    final branches = List<Map<String, dynamic>>.from(_companyData?['branches'] ?? []);
+    final branches =
+        List<Map<String, dynamic>>.from(_companyData?['branches'] ?? []);
     if (index >= branches.length) return;
 
     Navigator.push(
@@ -599,7 +607,8 @@ class _RecyclingCompanyProfileState extends State<RecyclingCompanyProfile> {
               });
             } catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Failed to update branch: ${e.toString()}')),
+                SnackBar(
+                    content: Text('Failed to update branch: ${e.toString()}')),
               );
             }
           },
@@ -635,102 +644,93 @@ class _RecyclingCompanyProfileState extends State<RecyclingCompanyProfile> {
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-            // Profile Image Section
-            Center(
-            child: Stack(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-              radius: 60,
-              backgroundImage: _imageFile != null
-                  ? FileImage(_imageFile!)
-                  : (_companyData!['riderImageUrl'] != null &&
-                  _companyData!['riderImageUrl'].isNotEmpty)
-                  ? NetworkImage(_companyData!['riderImageUrl'])
-                  : AssetImage('assets/default_company.png') as ImageProvider,
-            ),
-            if (_isEditing)
-        Positioned(
-        bottom: 0,
-        right: 0,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            shape: BoxShape.circle,
-          ),
-          child: IconButton(
-            icon: Icon(Icons.camera_alt, color: Colors.white),
-            onPressed: _pickImage,
+              // Profile Image Section
+              Center(
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 60,
+                      backgroundImage: _imageFile != null
+                          ? FileImage(_imageFile!)
+                          : (_companyData!['riderImageUrl'] != null &&
+                                  _companyData!['riderImageUrl'].isNotEmpty)
+                              ? NetworkImage(_companyData!['riderImageUrl'])
+                              : AssetImage('assets/default_company.png')
+                                  as ImageProvider,
+                    ),
+                    if (_isEditing)
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: Icon(Icons.camera_alt, color: Colors.white),
+                            onPressed: _pickImage,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+              // Company Information Section
+              Text(
+                'Company Information',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              Divider(),
+
+              _buildEditableField(
+                label: 'Company Name',
+                controller: _companyNameController,
+                icon: Icons.business,
+              ),
+              _buildEditableField(
+                label: 'Director Name',
+                controller: _directorNameController,
+                icon: Icons.person,
+              ),
+              // Add all other fields as before...
+
+              // Branches Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Branches',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  if (_isEditing)
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: _addNewBranch,
+                    ),
+                ],
+              ),
+              Divider(),
+              if (_companyData?['branches'] != null)
+                ...List<Widget>.from(
+                  (_companyData!['branches'] as List).map((branch) {
+                    final index =
+                        (_companyData!['branches'] as List).indexOf(branch);
+                    return _buildBranchCard(
+                      Map<String, dynamic>.from(branch),
+                      index,
+                    );
+                  }),
+                )
+            ],
           ),
         ),
       ),
-      ],
-    ),
-    ),
-
-    // Company Type Badge
-    Center(
-    child: Chip(
-    label: Text(
-    _companyData!['wasteManagementInfo']['WMSTYPE'] ?? 'Recycle',
-    style: TextStyle(color: Colors.white),
-    ),
-    backgroundColor: Colors.green,
-    ),
-    ),
-    SizedBox(height: 20),
-
-    // Company Information Section
-    Text(
-    'Company Information',
-    style: Theme.of(context).textTheme.bodyMedium,
-    ),
-    Divider(),
-
-    _buildEditableField(
-    label: 'Company Name',
-    controller: _companyNameController,
-    icon: Icons.business,
-    ),
-    _buildEditableField(
-    label: 'Director Name',
-    controller: _directorNameController,
-    icon: Icons.person,
-    ),
-    // Add all other fields as before...
-
-    // Branches Section
-    Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-    Text(
-    'Branches',
-    style: Theme.of(context).textTheme.bodyMedium,
-    ),
-    if (_isEditing)
-    IconButton(
-    icon: Icon(Icons.add),
-    onPressed: _addNewBranch,
-    ),
-    ],
-    ),
-    Divider(),
-    if (_companyData?['branches'] != null)
-    ...List<Widget>.from(
-    (_companyData!['branches'] as List).map((branch) {
-    final index = (_companyData!['branches'] as List).indexOf(branch);
-    return _buildBranchCard(
-    Map<String, dynamic>.from(branch),
-    index,
-    );
-    }),
-    )],
-    ),
-    ),
-    ),
     );
   }
 
@@ -744,25 +744,25 @@ class _RecyclingCompanyProfileState extends State<RecyclingCompanyProfile> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: _isEditing
           ? TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon),
-          border: OutlineInputBorder(),
-        ),
-        keyboardType: keyboardType,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter $label';
-          }
-          return null;
-        },
-      )
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: label,
+                prefixIcon: Icon(icon),
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: keyboardType,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter $label';
+                }
+                return null;
+              },
+            )
           : ListTile(
-        leading: Icon(icon),
-        title: Text(label),
-        subtitle: Text(controller.text),
-      ),
+              leading: Icon(icon),
+              title: Text(label),
+              subtitle: Text(controller.text),
+            ),
     );
   }
 
@@ -798,6 +798,7 @@ class _RecyclingCompanyProfileState extends State<RecyclingCompanyProfile> {
     );
   }
 }
+
 class AddBranchPage extends StatefulWidget {
   final Map<String, dynamic>? branch;
   final Function(Map<String, dynamic>) onBranchAdded;
@@ -818,10 +819,14 @@ class _AddBranchPageState extends State<AddBranchPage> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.branch?['branchName'] ?? '');
-    _locationController = TextEditingController(text: widget.branch?['branchLocation'] ?? '');
-    _gpsController = TextEditingController(text: widget.branch?['branchGPS'] ?? '');
-    _phoneController = TextEditingController(text: widget.branch?['branchPhone'] ?? '');
+    _nameController =
+        TextEditingController(text: widget.branch?['branchName'] ?? '');
+    _locationController =
+        TextEditingController(text: widget.branch?['branchLocation'] ?? '');
+    _gpsController =
+        TextEditingController(text: widget.branch?['branchGPS'] ?? '');
+    _phoneController =
+        TextEditingController(text: widget.branch?['branchPhone'] ?? '');
   }
 
   @override
@@ -929,6 +934,7 @@ class _AddBranchPageState extends State<AddBranchPage> {
     );
   }
 }
+
 class CategoryItem extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -943,8 +949,12 @@ class CategoryItem extends StatelessWidget {
     );
 
     try {
-      DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('recycle_items');
-      final snapshot = await databaseReference.orderByChild('RecycleType').equalTo(title).get();
+      DatabaseReference databaseReference =
+          FirebaseDatabase.instance.ref().child('recycle_items');
+      final snapshot = await databaseReference
+          .orderByChild('RecycleType')
+          .equalTo(title)
+          .get();
 
       Navigator.pop(context); // Close the loading dialog
 
@@ -985,7 +995,8 @@ class CategoryItem extends StatelessWidget {
       Navigator.pop(context); // Close the loading dialog
       print('Error fetching items: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch items. Please try again later.')),
+        SnackBar(
+            content: Text('Failed to fetch items. Please try again later.')),
       );
     }
   }
@@ -1010,9 +1021,9 @@ class CategoryItem extends StatelessWidget {
 }
 
 class UserService {
-  final DatabaseReference _database = FirebaseDatabase.instance.ref().child("WMS");
+  final DatabaseReference _database =
+      FirebaseDatabase.instance.ref().child("WMS");
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
 
   // Get current user's recycling company data
   Future<Map<String, dynamic>> getCurrentUserData() async {
@@ -1044,7 +1055,7 @@ class UserService {
       User? user = _auth.currentUser;
       if (user == null) throw Exception('No user logged in');
 
-      await _database.child('recyclingCompanies/${user.uid}').update(data);
+      await _database.child('${user.uid}').update(data);
     } catch (e) {
       print('Error updating user data: $e');
       rethrow;
@@ -1064,6 +1075,7 @@ class UserService {
     });
   }
 }
+
 // Reusable Chip Widget
 class InfoChip extends StatelessWidget {
   final String count;
@@ -1075,7 +1087,8 @@ class InfoChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(count, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(count,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         Text(label, style: TextStyle(color: Colors.grey)),
       ],
     );
