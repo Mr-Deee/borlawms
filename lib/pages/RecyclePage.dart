@@ -85,15 +85,9 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   TextEditingController searchController = TextEditingController();
   String selectedCategory = 'All'; // Default dropdown value
-  List<String> categories = ['All', 'Metal', 'Plastic', 'Glass', 'Organic'];
   List<Map<dynamic, dynamic>> allItems = [];
   List<Map<dynamic, dynamic>> filteredItems = [];
 
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
 
   void fetchData() async {
     final database = FirebaseDatabase.instance.ref('recycle_items');
@@ -132,209 +126,232 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> openGoogleMaps(String location) async {
-    final Uri url =
-        Uri.parse('https://www.google.com/maps/search/?api=1&query=$location');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
+    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(location)}');
+
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
     }
   }
 
+
+  String email = "";
+  String fclientname = "";
+  String lclientname = "";
+  String phoneNumber = "";
+  bool isDataLoaded = false;
+
+  final List<String> categories = ['All', 'Plastic', 'Metal', 'Glass'];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final riderInfo = Provider.of<WMS>(context, listen: false).riderInfo;
+      setState(() {
+        email = riderInfo?.email ?? "";
+        fclientname = riderInfo?.firstname ?? "";
+        lclientname = riderInfo?.lastname ?? "";
+        phoneNumber = riderInfo?.phone ?? "";
+        isDataLoaded = true;
+      });
+    });
+  }
+
+  String getTimeBasedSalutation() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  }
+
+  // void filterItems(String query, String category) {
+  //   // TODO: Implement filtering logic
+  //   // Example:
+  //   // filteredItems = allItems.where((item) => item['RecycleType'].contains(query)).toList();
+  //   setState(() {});
+  // }
+
+  // void openGoogleMaps(String? location) {
+  //   // TODO: Implement map opening
+  //   // You can use url_launcher package
+  // }
+
   @override
   Widget build(BuildContext context) {
-    var email = Provider.of<WMS>(context, listen: false).riderInfo?.email ?? "";
-    var fclientname =
-        Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "";
-    var lclientname =
-        Provider.of<WMS>(context, listen: false).riderInfo?.lastname ?? "";
-    var phoneNumber =
-        Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "";
-
-    // Determine the time-based salutation
-    String getTimeBasedSalutation() {
-      final hour = DateTime.now().hour;
-      if (hour < 12) {
-        return 'Good Morning';
-      } else if (hour < 17) {
-        return 'Good Afternoon';
-      } else {
-        return 'Good Evening';
-      }
-    }
-
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Dashboard'),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text('Sign Out'),
-                      backgroundColor: Colors.white,
-                      content: SingleChildScrollView(
-                        child: Column(
-                          children: <Widget>[
-                            Text('Are you certain you want to Sign Out?'),
-                          ],
-                        ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: Text('Yes',
-                              style: TextStyle(color: Colors.black)),
-                          onPressed: () {
-                            FirebaseAuth.instance.signOut();
-                            Navigator.pushNamedAndRemoveUntil(
-                                context, "/SignIn", (route) => false);
-                          },
-                        ),
-                        TextButton(
-                          child: Text('Cancel',
-                              style: TextStyle(color: Colors.red)),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              icon: const Icon(Icons.logout, color: Colors.black),
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        centerTitle: true,
+        backgroundColor: Colors.green,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () => _showSignOutDialog(context),
+          ),
+        ],
+      ),
+      body: isDataLoaded
+          ? Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${getTimeBasedSalutation()}, $fclientname!',
+              style: const TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 20),
+            _buildStatsCard(),
+            const SizedBox(height: 20),
+            _buildSearchAndFilter(),
+            const SizedBox(height: 20),
+            Expanded(child: _buildItemList()),
           ],
         ),
-        body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
-                '${getTimeBasedSalutation()}\nStart Today! - $fclientname',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+      )
+          : const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildStatsCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.green.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Total Waste Collected',
+              style: TextStyle(fontSize: 14, color: Colors.grey)),
+          const SizedBox(height: 10),
+          LinearProgressIndicator(
+            value: 0.75,
+            backgroundColor: Colors.grey[300],
+            color: Colors.green,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchAndFilter() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: TextField(
+            controller: searchController,
+            onChanged: (value) => filterItems(value, selectedCategory),
+            decoration: InputDecoration(
+              hintText: 'Search recycle items...',
+              hintStyle: const TextStyle(color: Colors.grey),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 5),
-                          Text('Total waste collected',
-                              style: TextStyle(color: Colors.grey)),
-                          SizedBox(height: 5),
-                          LinearProgressIndicator(
-                            value: 0.75,
-                            backgroundColor: Colors.grey[200],
-                            color: Colors.green,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+              suffixIcon: const Icon(Icons.search, color: Colors.green),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        GestureDetector(
+          onTap: () async {
+            final String? selected = await showDialog<String>(
+              context: context,
+              builder: (context) => SimpleDialog(
+                title: const Text('Select Category'),
+                children: categories
+                    .map((category) => SimpleDialogOption(
+                  onPressed: () => Navigator.pop(context, category),
+                  child: Text(category),
+                ))
+                    .toList(),
               ),
-              SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Search recycle items...',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.green),
-                        ),
-                        suffixIcon: Icon(Icons.search, color: Colors.green),
-                      ),
-                      onChanged: (value) {
-                        filterItems(value, selectedCategory);
-                      },
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: () async {
-                      final String? selected = await showDialog<String>(
-                        context: context,
-                        builder: (context) {
-                          return SimpleDialog(
-                            title: Text('Select Category'),
-                            children: categories
-                                .map((category) => SimpleDialogOption(
-                                      onPressed: () {
-                                        Navigator.pop(context, category);
-                                      },
-                                      child: Text(category),
-                                    ))
-                                .toList(),
-                          );
-                        },
-                      );
-                      if (selected != null) {
-                        setState(() {
-                          selectedCategory = selected;
-                          filterItems(searchController.text, selectedCategory);
-                        });
-                      }
-                    },
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.filter_alt_rounded,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Expanded(
-                child: filteredItems.isEmpty
-                    ? Center(child: Text('No items found'))
-                    : ListView.builder(
-                        itemCount: filteredItems.length,
-                        itemBuilder: (context, index) {
-                          final item = filteredItems[index];
-                          return ListTile(
-                            leading: item['image_url'] != null
-                                ? Image.network(item['image_url'],
-                                    width: 50, height: 50, fit: BoxFit.cover)
-                                : Icon(Icons.image),
-                            title: Text(item['RecycleType'] ?? 'Unknown'),
-                            subtitle:
-                                Text(item['description'] ?? 'No description'),
-                            trailing: IconButton(
-                              icon: Icon(Icons.directions),
-                              onPressed: () => openGoogleMaps(item['location']),
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ])));
+            );
+            if (selected != null) {
+              setState(() {
+                selectedCategory = selected;
+                filterItems(searchController.text, selectedCategory);
+              });
+            }
+          },
+          child: Container(
+            padding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.filter_alt_rounded, color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildItemList() {
+    return filteredItems.isEmpty
+        ? const Center(child: Text('No items found'))
+        : ListView.builder(
+      itemCount: filteredItems.length,
+      itemBuilder: (context, index) {
+        final item = filteredItems[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          child: ListTile(
+            leading: item['image_url'] != null
+                ? Image.network(
+              item['image_url'],
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+            )
+                : const Icon(Icons.image_not_supported),
+            title: Text(item['RecycleType'] ?? 'Unknown'),
+            subtitle:
+            Text(item['description'] ?? 'No description available'),
+            trailing: IconButton(
+              icon: const Icon(Icons.directions),
+              onPressed: () => openGoogleMaps(item['location']),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSignOutDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you certain you want to sign out?'),
+        actions: [
+          TextButton(
+            child: const Text('Cancel', style: TextStyle(color: Colors.red)),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          TextButton(
+            child: const Text('Yes', style: TextStyle(color: Colors.black)),
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+              Navigator.pushNamedAndRemoveUntil(
+                  context, "/SignIn", (route) => false);
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -380,15 +397,15 @@ class WalletPage extends StatelessWidget {
               child: ListView.builder(
                 itemCount: 5,
                 itemBuilder: (context, index) => ListTile(
-                  leading: CircleAvatar(
-                    child: Icon(Icons.recycling),
-                  ),
-                  title: Text('Soda Can'),
-                  subtitle: Text('1.0 Kg'),
-                  trailing: Text(
-                    '+ 2.099\$',
-                    style: TextStyle(color: Colors.green),
-                  ),
+                  // leading: CircleAvatar(
+                  //   child: Icon(Icons.recycling),
+                  // ),
+                  // title: Text('Soda Can'),
+                  // subtitle: Text('1.0 Kg'),
+                  // trailing: Text(
+                  //   '+ 2.099\$',
+                  //   style: TextStyle(color: Colors.green),
+                  // ),
                 ),
               ),
             ),
@@ -1094,66 +1111,5 @@ class InfoChip extends StatelessWidget {
     );
   }
 }
-// }
-//   @override
-//   Widget build(BuildContext context) {
-//     return  Scaffold(
-//       appBar: AppBar(
-//         actions: [IconButton(
-//           onPressed: () {
-//
-//
-//             showDialog<void>(
-//               context: context,
-//               barrierDismissible: false, // user must tap button!
-//               builder: (BuildContext context) {
-//                 return AlertDialog(
-//                   title: Text('Sign Out'),
-//                   backgroundColor: Colors.white,
-//                   content: SingleChildScrollView(
-//                     child: Column(
-//                       children: <Widget>[
-//                         Text('Are you certain you want to Sign Out?'),
-//                       ],
-//                     ),
-//                   ),
-//                   actions: <Widget>[
-//                     TextButton(
-//                       child: Text(
-//                         'Yes',
-//                         style: TextStyle(color: Colors.black),
-//                       ),
-//                       onPressed: () {
-//                         print('yes');
-//                         FirebaseAuth.instance.signOut();
-//                         Navigator.pushNamedAndRemoveUntil(
-//                             context, "/SignIn", (route) => false);
-//                         // Navigator.of(context).pop();
-//                       },
-//                     ),
-//                     TextButton(
-//                       child: Text(
-//                         'Cancel',
-//                         style: TextStyle(color: Colors.red),
-//                       ),
-//                       onPressed: () {
-//                         Navigator.of(context).pop();
-//                       },
-//                     ),
-//                   ],
-//                 );
-//               },
-//             );
-//           },
-//           icon: const Icon(
-//             Icons.logout,
-//             color: Colors.black,
-//           ),
-//         ),],
-//       ),
-//       body:Column(children: [
-//
-//       ],)
-//     );
-//   }
-// }
+
+
