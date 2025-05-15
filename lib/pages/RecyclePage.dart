@@ -8,6 +8,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../Model/WMSDB.dart';
+import 'RecyclerMapRoute.dart';
 
 class RecyclePage extends StatefulWidget {
   const RecyclePage({super.key});
@@ -305,23 +307,40 @@ class _DashboardPageState extends State<DashboardPage> {
       itemCount: filteredItems.length,
       itemBuilder: (context, index) {
         final item = filteredItems[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          child: ListTile(
-            leading: item['image_url'] != null
-                ? Image.network(
-              item['image_url'],
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-            )
-                : const Icon(Icons.image_not_supported),
-            title: Text(item['RecycleType'] ?? 'Unknown'),
-            subtitle:
-            Text(item['description'] ?? 'No description available'),
-            trailing: IconButton(
-              icon: const Icon(Icons.directions),
-              onPressed: () => openGoogleMaps(item['location']),
+        return GestureDetector(
+          onTap: (){
+            final locationData = item['location']; // should be a Map with 'lat' and 'lng'
+            final destination = LatLng(locationData['lat'], locationData['lng']);
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MapRoutePage(
+                  destination: destination,
+                  weight: item['weight'] ?? '0kg',
+                  paused: item['paused'] ?? 'No',
+                ),
+              ),
+            );
+          },
+          child: Card(
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            child: ListTile(
+              leading: item['image_url'] != null
+                  ? Image.network(
+                item['image_url'],
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              )
+                  : const Icon(Icons.image_not_supported),
+              title: Text(item['RecycleType'] ?? 'Unknown'),
+              subtitle:
+              Text(item['description'] ?? 'No description available'),
+              trailing: IconButton(
+                icon: const Icon(Icons.directions),
+                onPressed: () => openGoogleMaps(item['location']),
+              ),
             ),
           ),
         );
