@@ -309,8 +309,7 @@ class _DashboardPageState extends State<DashboardPage> {
         final item = filteredItems[index];
         return GestureDetector(
           onTap: (){
-            final locationData = item['client_Coordinates']; // should be a Map with 'lat' and 'lng'
-            final destination = LatLng(locationData['latitude'], locationData['longitude']);
+            final destination = LatLng(item['latitude'], item['longitude']);
 
             Navigator.push(
               context,
