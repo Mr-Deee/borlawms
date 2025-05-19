@@ -60,7 +60,7 @@ class _BinSalePageState extends State<BinSalePage> {
                 0.8, // 80% of screen height
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Colors.blue, Colors.lightGreen],
+                colors: [Colors.green, Colors.lightGreen],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -123,10 +123,12 @@ class _BinSalePageState extends State<BinSalePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: const Text(
           'Bin Sale',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(color:Colors.white,fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -176,70 +178,93 @@ class _BinSalePageState extends State<BinSalePage> {
             },
             icon: const Icon(
               Icons.logout,
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
         ],
       ),
       drawer: _buildCustomDrawer(userName ?? ""),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Colors.white, Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+
+
+          // Background Image with Filter
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bg4.jpg'), // Your background image
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.1), // Dark overlay
+                  BlendMode.darken,
+                ),
+              ),
+            ),
           ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Hello, $userName!',
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Category',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+          Container(
+            decoration: const BoxDecoration(
+              // gradient: const LinearGradient(
+              //   // colors: [Colors.white, Colors.white],
+              //   begin: Alignment.topLeft,
+              //   end: Alignment.bottomRight,
+              // ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
                 children: [
-                  GestureDetector(
-                    onTap: _showBinsDialog, // Show dialog when tapped
-                    child: _buildCategoryCard(
-                        'My Bins',
-                        soldBins.length,
-                        Colors.blue, // Start of gradient
+
+                  SizedBox(height: 54,),
+                  Text(
+                    'Hello, $userName!',
+                    style:
+                        const TextStyle(fontSize: 20, color:Colors.white,fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Category',
+                    style: TextStyle(fontSize: 18, color:Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: _showBinsDialog, // Show dialog when tapped
+                        child: _buildCategoryCard(
+                            'My Bins',
+                            soldBins.length,
+                            Colors.blue, // Start of gradient
+                            Colors.green, // End of gradient
+                            'assets/images/bin.png'),
+                      ),
+                      _buildCategoryCard(
+                          'Bin Requests',
+                          3,
+                          Colors.blue, // Start of gradient
+                          Colors.green, // End of gradient
+                          'assets/images/b1.png'),
+                      _buildCategoryCard(
+                        'Meeting', 2, Colors.white, // Start of gradient
                         Colors.green, // End of gradient
-                        'assets/images/bin.png'),
+                        'assets/images/',
+                      ),
+                    ],
                   ),
-                  _buildCategoryCard(
-                      'Bin Requests',
-                      3,
-                      Colors.blue, // Start of gradient
-                      Colors.green, // End of gradient
-                      'assets/images/b1.png'),
-                  _buildCategoryCard(
-                    'Meeting', 2, Colors.blue, // Start of gradient
-                    Colors.green, // End of gradient
-                    'assets/images/',
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Bin Requests",
+                    style: TextStyle(color:Colors.white,fontSize: 18, fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 8),
                 ],
               ),
-              const SizedBox(height: 16),
-              const Text(
-                "Bin Requests",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -258,7 +283,7 @@ class _BinSalePageState extends State<BinSalePage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.white10,
+                  backgroundColor: Colors.white,
                   radius: 43,
                   backgroundImage: AssetImage('assets/images/bwmslogo.png'),
                   foregroundColor: Colors.black,
