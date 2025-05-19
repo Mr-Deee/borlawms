@@ -24,6 +24,7 @@ class _BinSalePageState extends State<BinSalePage> {
     super.initState();
     AssistantMethod.getCurrentOnlineUserInfo(context);
     _fetchUserInfo();
+    fetchBinRequests();
   }
 
   Future<void> _fetchUserInfo() async {
@@ -248,7 +249,7 @@ class _BinSalePageState extends State<BinSalePage> {
                           Colors.green, // End of gradient
                           'assets/images/b1.png'),
                       _buildCategoryCard(
-                        'Meeting', 2, Colors.white, // Start of gradient
+                        'Sold Bins', 2, Colors.white, // Start of gradient
                         Colors.green, // End of gradient
                         'assets/images/',
                       ),
@@ -260,6 +261,90 @@ class _BinSalePageState extends State<BinSalePage> {
                     style: TextStyle(color:Colors.white,fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
+
+                  SizedBox(
+                    height: 900,
+                    child: FutureBuilder<List<Map<String, dynamic>>>(
+                      future: fetchBinRequests(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child:  CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return const Text('No bin requests found.');
+                        }
+
+                        final binRequests = snapshot.data!;
+                        return SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 16),
+
+
+                              ...binRequests.map((bin) => Container(
+                                margin: const EdgeInsets.symmetric(vertical: 8),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.white38),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Image.asset(
+                                      bin['image'] ?? 'assets/images/wms.png',
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            bin['binType'] ?? 'Unknown Bin',
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            "Company: ${bin['company'] ?? 'N/A'}",
+                                            style: const TextStyle(color: Colors.white70),
+                                          ),
+                                          Text(
+                                            "Price: GHS ${bin['price'] ?? '0'}",
+                                            style: const TextStyle(color: Colors.white70),
+                                          ),
+                                          if (bin.containsKey('totalRequests'))
+                                            Text(
+                                              "Requests: ${bin['totalRequests']}",
+                                              style: const TextStyle(color: Colors.white70),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  )
+
+
+
+
+
+
+
                 ],
               ),
             ),
@@ -332,6 +417,23 @@ class _BinSalePageState extends State<BinSalePage> {
         ],
       ),
     );
+  }
+
+
+
+  Future<List<Map<String, dynamic>>> fetchBinRequests() async {
+    final ref = FirebaseDatabase.instance.ref("RequestBins");
+    final snapshot = await ref.get();
+
+    if (snapshot.exists) {
+      final data = snapshot.value as Map<dynamic, dynamic>;
+      return data.entries.map((entry) {
+        final value = Map<String, dynamic>.from(entry.value);
+        return value;
+      }).toList();
+    } else {
+      return [];
+    }
   }
 
   Widget _buildCategoryCard(String title, int tasks, Color gradientStart,
