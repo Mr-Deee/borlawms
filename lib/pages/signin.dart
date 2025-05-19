@@ -1,5 +1,6 @@
-
 // import 'package:borla_client/pages/smscode.dart';
+import 'dart:ui';
+
 import 'package:borlawms/pages/progressdialog.dart';
 import 'package:borlawms/pages/signup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
+
 // import 'package:flutter_sms/flutter_sms.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:math';
@@ -62,8 +64,6 @@ Future<void> verifyPhoneNumber() async {
   );
 }
 
-
-
 Future<void> writeEmailToDatabase(String userId, String email) async {
   // Write the email to the database under the user's ID
   _userRef.child(userId).set({'email': email});
@@ -91,20 +91,35 @@ class _signinState extends State<signin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text("Login Page"),
-      // ),
-      body: Container(
-
-        padding: EdgeInsets.all(20.0),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.green.shade400, Colors.greenAccent.shade200],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+        // appBar: AppBar(
+        //   title: Text("Login Page"),
+        // ),
+        body: Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/bg4.jpg'),
+              // Replace with your image path
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(0.5),
+                // Adjust the opacity as needed
+                BlendMode.darken, // Try BlendMode.softLight or others too
+              ),
+            ),
           ),
         ),
-        child: Center(
+
+        // Blur Filter
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+          child: Container(
+            color: Colors.black.withOpacity(0.1), // Optional: tint overlay
+          ),
+        ),
+
+        Center(
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -117,16 +132,17 @@ class _signinState extends State<signin> {
                   child: Image.asset('assets/images/wms.png'),
                 ),
 
-
-
                 // Subheader Text
                 Row(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left:20.0),
+                      padding: const EdgeInsets.only(left: 20.0),
                       child: Text(
                         "Login to continue using the app",
-                        style: TextStyle(fontSize: 14, color: Colors.black45,fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black45,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -146,7 +162,6 @@ class _signinState extends State<signin> {
                       prefixIcon: Icon(Icons.email, color: Colors.white70),
                       filled: true,
                       fillColor: Colors.black12,
-
                       hintText: "Email",
                       hintStyle: TextStyle(color: Colors.white70),
                       border: OutlineInputBorder(
@@ -168,12 +183,10 @@ class _signinState extends State<signin> {
                     ),
                     obscureText: true,
                     controller: passwordcontroller,
-
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.lock, color: Colors.white70),
                       filled: true,
                       fillColor: Colors.black12,
-
                       hintText: "Password",
                       hintStyle: TextStyle(color: Colors.white70),
                       border: OutlineInputBorder(
@@ -193,7 +206,8 @@ class _signinState extends State<signin> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                          MaterialPageRoute(
+                              builder: (context) => ForgotPasswordPage()),
                         );
                       },
                       child: Text(
@@ -247,7 +261,10 @@ class _signinState extends State<signin> {
                 SizedBox(height: 10),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => GuestModeScreen()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => GuestModeScreen()));
                   },
                   child: Text(
                     "Guest Mode",
@@ -262,15 +279,13 @@ class _signinState extends State<signin> {
             ),
           ),
         ),
-      )
-    );
+      ],
+    ));
   }
 
   // final FirebaseAuth _aut= FirebaseAuth.instance;
 
   final Random random = Random();
-
-
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
@@ -287,7 +302,8 @@ class _signinState extends State<signin> {
 
     try {
       // Attempt to sign in with email and password
-      UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+      UserCredential userCredential =
+          await _firebaseAuth.signInWithEmailAndPassword(
         email: emailcontroller.text.trim(),
         password: passwordcontroller.text.trim(),
       );
@@ -299,22 +315,30 @@ class _signinState extends State<signin> {
         String userId = firebaseUser.uid;
 
         // Fetch the user's WMSTYPE from Firebase Realtime Database
-        DatabaseReference userRef = FirebaseDatabase.instance.ref().child("WMS").child(userId).child("wasteManagementInfo");
+        DatabaseReference userRef = FirebaseDatabase.instance
+            .ref()
+            .child("WMS")
+            .child(userId)
+            .child("wasteManagementInfo");
 
         userRef.once().then((DatabaseEvent event) {
           if (event.snapshot.exists) {
-            Map<dynamic, dynamic>? userData = event.snapshot.value as Map<dynamic, dynamic>?;
+            Map<dynamic, dynamic>? userData =
+                event.snapshot.value as Map<dynamic, dynamic>?;
 
             if (userData != null && userData['WMSTYPE'] != null) {
               String wmstype = userData['WMSTYPE'];
 
               // Navigate based on WMSTYPE
               if (wmstype == "BinSale") {
-                Navigator.of(context).pushNamedAndRemoveUntil("/binsale", (route) => false);
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil("/binsale", (route) => false);
               } else if (wmstype == "Recycle") {
-                Navigator.of(context).pushNamedAndRemoveUntil("/recycle", (route) => false);
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil("/recycle", (route) => false);
               } else {
-                Navigator.of(context).pushNamedAndRemoveUntil("/Homepage", (route) => false);
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil("/Homepage", (route) => false);
               }
 
               displayToast("Logged in successfully", context);
@@ -337,8 +361,6 @@ class _signinState extends State<signin> {
     }
   }
 
-
-
   displayToast(String message, BuildContext context) {
     Fluttertoast.showToast(msg: message);
 
@@ -346,6 +368,7 @@ class _signinState extends State<signin> {
   }
 
   GoogleMapController? newGoogleMapController;
+
   void locatePosition() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
@@ -354,10 +377,10 @@ class _signinState extends State<signin> {
     LatLng latLatPosition = LatLng(position.latitude, position.longitude);
 
     CameraPosition cameraPosition =
-    new CameraPosition(target: latLatPosition, zoom: 14);
-    newGoogleMapController?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+        new CameraPosition(target: latLatPosition, zoom: 14);
+    newGoogleMapController
+        ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
   }
-
 
   Future<void> requestLocationPermission() async {
     final serviceStatusLocation = await Permission.locationWhenInUse.isGranted;
