@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../Model/WMSDB.dart';
 import 'Profilepage.dart';
@@ -18,6 +19,7 @@ class _BinSalePageState extends State<BinSalePage> {
   List<dynamic> soldBins = [];
   final String uid = FirebaseAuth.instance.currentUser!.uid;
   var userName;
+  int reqcount = 0; // Declare this in your class or as a global variable if needed
 
   @override
   void initState() {
@@ -25,6 +27,7 @@ class _BinSalePageState extends State<BinSalePage> {
     AssistantMethod.getCurrentOnlineUserInfo(context);
     _fetchUserInfo();
     fetchBinRequests();
+    _loadBinRequestCount();
   }
 
   Future<void> _fetchUserInfo() async {
@@ -245,14 +248,14 @@ class _BinSalePageState extends State<BinSalePage> {
                         ),
                         _buildCategoryCard(
                             'Bin Requests',
-                            3,
+                            reqcount,
                             Colors.blue, // Start of gradient
                             Colors.green, // End of gradient
                             'assets/images/b1.png'),
                         _buildCategoryCard(
                           'Sold Bins', 2, Colors.white, // Start of gradient
                           Colors.green, // End of gradient
-                          'assets/images/',
+                          'assets/images/cash.png',
                         ),
                       ],
                     ),
@@ -292,41 +295,93 @@ class _BinSalePageState extends State<BinSalePage> {
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(color: Colors.white38),
                                   ),
-                                  child: Row(
+                                  child:Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
+                                      // Bin image
                                       Image.asset(
                                         bin['image'] ?? 'assets/images/100l.png',
                                         width: 60,
                                         height: 60,
                                         fit: BoxFit.cover,
                                       ),
+
                                       const SizedBox(width: 12),
+
+                                      // Bin info and call button
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              bin['ClientName'] ?? 'Unknown Bin',
-                                              style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold),
+                                            // Client name
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  bin['ClientName'] ?? 'Unknown Bin',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                // Company name
+                                                Text(
+                                                  " ${bin['company'] ?? 'N/A'}",
+                                                  style: const TextStyle(color: Colors.white70),
+                                                ),
+
+                                              ],
                                             ),
+
                                             const SizedBox(height: 4),
-                                            Text(
-                                              "Company: ${bin['company'] ?? 'N/A'}",
-                                              style: const TextStyle(color: Colors.white70),
+
+
+                                            // Price
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                // Text(
+                                                //   "Price: GHS ${bin['price'] ?? '0'}",
+                                                //   style: const TextStyle(color: Colors.white70),
+                                                // ),
+
+
+                                                // Requests
+                                                if (bin.containsKey('totalRequests'))
+                                                  Text(
+                                                    "Requests: ${bin['totalRequests']}",
+                                                    style: const TextStyle(color: Colors.white70),
+                                                  ),
+
+                                                // Call button
+                                                if (bin['ClientPhone'] != null)
+                                                  GestureDetector(
+                                                    onTap: () async {
+                                                      final Uri url = Uri(scheme: 'tel', path: bin['ClientPhone']);
+                                                      if (await canLaunchUrl(url)) {
+                                                        await launchUrl(url);
+                                                      } else {
+                                                        throw 'Could not launch $url';
+                                                      }
+                                                    },
+                                                    child: Row(
+                                                      children: const [
+                                                        Icon(Icons.phone, color: Colors.green, size: 20),
+                                                        SizedBox(width: 6),
+                                                        Text(
+                                                          "Call",
+                                                          style: TextStyle(color: Colors.greenAccent),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                              ],
                                             ),
-                                            Text(
-                                              "Price: GHS ${bin['price'] ?? '0'}",
-                                              style: const TextStyle(color: Colors.white70),
-                                            ),
-                                            if (bin.containsKey('totalRequests'))
-                                              Text(
-                                                "Requests: ${bin['totalRequests']}",
-                                                style: const TextStyle(color: Colors.white70),
-                                              ),
+
+                                       const SizedBox(height: 10),
+
+
                                           ],
                                         ),
                                       ),
@@ -423,17 +478,40 @@ class _BinSalePageState extends State<BinSalePage> {
 
 
 
+  // This is used for initState and setState
+  Future<void> _loadBinRequestCount() async {
+    final ref = FirebaseDatabase.instance.ref("RequestBins");
+    final snapshot = await ref.get();
+
+    if (snapshot.exists) {
+      final data = snapshot.value as Map<dynamic, dynamic>;
+      setState(() {
+        reqcount = data.length;
+      });
+    } else {
+      setState(() {
+        reqcount = 0;
+      });
+    }
+  }
+
+
   Future<List<Map<String, dynamic>>> fetchBinRequests() async {
     final ref = FirebaseDatabase.instance.ref("RequestBins");
     final snapshot = await ref.get();
 
     if (snapshot.exists) {
       final data = snapshot.value as Map<dynamic, dynamic>;
+
+      reqcount = data.length; // ✅ Correct count of bin requests
+      print('Bin Request Count: $reqcount');
+
       return data.entries.map((entry) {
         final value = Map<String, dynamic>.from(entry.value);
         return value;
       }).toList();
     } else {
+      reqcount = 0;
       return [];
     }
   }
