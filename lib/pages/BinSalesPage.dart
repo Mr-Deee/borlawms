@@ -354,28 +354,32 @@ class _BinSalePageState extends State<BinSalePage> {
                                                     style: const TextStyle(color: Colors.white70),
                                                   ),
 
-                                                // Call button
-                                                if (bin['ClientPhone'] != null)
-                                                  GestureDetector(
-                                                    onTap: () async {
-                                                      final Uri url = Uri(scheme: 'tel', path: bin['ClientPhone']);
-                                                      if (await canLaunchUrl(url)) {
-                                                        await launchUrl(url);
-                                                      } else {
-                                                        throw 'Could not launch $url';
-                                                      }
-                                                    },
-                                                    child: Row(
-                                                      children: const [
-                                                        Icon(Icons.phone, color: Colors.green, size: 20),
-                                                        SizedBox(width: 6),
-                                                        Text(
-                                                          "Call",
-                                                          style: TextStyle(color: Colors.greenAccent),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.directions),
+                                                  onPressed: () => openGoogleMaps(bin['location']),
+                                                )
+                                                // // Call button
+                                                // if (bin['ClientPhone'] != null)
+                                                //   GestureDetector(
+                                                //     onTap: () async {
+                                                //       final Uri url = Uri(scheme: 'tel', path: bin['ClientPhone']);
+                                                //       if (await canLaunchUrl(url)) {
+                                                //         await launchUrl(url);
+                                                //       } else {
+                                                //         throw 'Could not launch $url';
+                                                //       }
+                                                //     },
+                                                //     child: Row(
+                                                //       children: const [
+                                                //         Icon(Icons.phone, color: Colors.green, size: 20),
+                                                //         SizedBox(width: 6),
+                                                //         Text(
+                                                //           "Call",
+                                                //           style: TextStyle(color: Colors.greenAccent),
+                                                //         ),
+                                                //       ],
+                                                //     ),
+                                                //   ),
                                               ],
                                             ),
 
@@ -409,6 +413,13 @@ class _BinSalePageState extends State<BinSalePage> {
         ],
       ),
     );
+  }
+  Future<void> openGoogleMaps(String location) async {
+    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(location)}');
+
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $url';
+    }
   }
 
   Widget _buildCustomDrawer(String userName) {
