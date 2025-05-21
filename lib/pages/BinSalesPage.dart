@@ -508,7 +508,7 @@ class _BinSalePageState extends State<BinSalePage> {
 
 
   Future<List<Map<String, dynamic>>> fetchBinRequests() async {
-    final ref = FirebaseDatabase.instance.ref("RequestBins");
+    final ref = FirebaseDatabase.instance.ref("RequestBins").child("SoldBins");
     final snapshot = await ref.get();
 
     if (snapshot.exists) {

@@ -103,9 +103,9 @@ class _signinState extends State<signin> {
               // Replace with your image path
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.5),
+                Colors.white54.withOpacity(0.5),
                 // Adjust the opacity as needed
-                BlendMode.darken, // Try BlendMode.softLight or others too
+                BlendMode.color, // Try BlendMode.softLight or others too
               ),
             ),
           ),
@@ -141,7 +141,7 @@ class _signinState extends State<signin> {
                         "Login to continue using the app",
                         style: TextStyle(
                             fontSize: 14,
-                            color: Colors.black45,
+                            color: Colors.white60,
                             fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -172,7 +172,7 @@ class _signinState extends State<signin> {
                   ),
                 ),
 
-                SizedBox(height: 10.0),
+                SizedBox(height: 24.0),
 
                 // Password Input Field
                 Padding(

@@ -426,18 +426,18 @@ class _GuestModeScreenState extends State<GuestModeScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // _buildActionCard(
-                      //   title: 'Additional Branch',
-                      //   icon: Icons.privacy_tip,
-                      //   onTap: () {
-                      //     Navigator.push(
-                      //         context,
-                      //         MaterialPageRoute(
-                      //           builder: (context) => RecyclePage(),
-                      //         )
-                      //     );
-                      //   },
-                      // ),
+                      _buildActionCard(
+                        title: 'PrivacyPolicy',
+                        icon: Icons.privacy_tip,
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RecyclePage(),
+                              )
+                          );
+                        },
+                      ),
                       _buildActionCard(
                         title: 'Bin Sale',
                         icon: Icons.location_on,
