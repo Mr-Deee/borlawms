@@ -55,14 +55,13 @@ class _signupState extends State<signup> {
                   // Replace with your image path
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.5),
+                    Colors.white54.withOpacity(0.5),
                     // Adjust the opacity as needed
-                    BlendMode.darken, // Try BlendMode.softLight or others too
+                    BlendMode.color, // Try BlendMode.softLight or others too
                   ),
                 ),
               ),
             ),
-
             // Blur Filter
             BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
@@ -137,7 +136,7 @@ class _signupState extends State<signup> {
                             alignment: Alignment.center,
                             padding: EdgeInsets.only(right: size.width / 30),
                             decoration: BoxDecoration(
-                              color:  Colors.green,
+                              color:  Colors.black12,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: TextField(
@@ -174,7 +173,7 @@ class _signupState extends State<signup> {
                             padding: EdgeInsets.only(
                                 right: size.width / 30),
                             decoration: BoxDecoration(
-                              color:  Colors.green,
+                              color:  Colors.black12,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: TextField(
@@ -213,7 +212,7 @@ class _signupState extends State<signup> {
                             padding: EdgeInsets.only(
                                 right: size.width / 30),
                             decoration: BoxDecoration(
-                              color:  Colors.green,
+                              color:  Colors.black12,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: TextField(
@@ -253,7 +252,7 @@ class _signupState extends State<signup> {
                             padding: EdgeInsets.only(
                                 right: size.width / 30),
                             decoration: BoxDecoration(
-                              color:  Colors.green,
+                              color:  Colors.black12,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: TextField(
