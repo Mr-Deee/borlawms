@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:borlawms/pages/RecyclePage.dart';
 import 'package:borlawms/pages/addwmsdetails.dart';
+import 'package:borlawms/widgets/PrivacyPolicy.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -322,7 +323,7 @@ class _GuestModeScreenState extends State<GuestModeScreen> {
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/onb21.jpg'),
+                  image: AssetImage('assets/images/bg4.jpg'),
                   // Add your background image
                   fit: BoxFit.cover,
                 ),
@@ -433,7 +434,7 @@ class _GuestModeScreenState extends State<GuestModeScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => RecyclePage(),
+                                builder: (context) => Privacypolicy(),
                               )
                           );
                         },

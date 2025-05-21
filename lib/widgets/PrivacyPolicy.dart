@@ -25,7 +25,7 @@ class _PrivacypolicyState extends State<Privacypolicy> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/images/BG.jpg"),
+                image: AssetImage("assets/images/bg4.jpg"),
                 // Add your image to assets
                 fit: BoxFit.cover,
               ),
