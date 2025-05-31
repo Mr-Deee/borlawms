@@ -114,141 +114,102 @@ print('three:$wmstype');
 }
 
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  void initState() {
-    // super.initState();
-
-    final FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-
-// PROBLEM STARTS HERE
-    Future initialize(context) async {
-      print("Start here");
-
-
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        print('Got a message whilst in the foreground!');
-        // retrieveRideRequestInfo(getRideRequestId(message.data), context);
-
-
-      });
-
-
-      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-        print('in the foreground!');
-        //retrieveRideRequestInfo(getRideRequestId(message.data), context);
-      });
-
-
-      final RemoteMessage? initialMessage = await FirebaseMessaging.instance
-          .getInitialMessage();
-      if (initialMessage != null) {
-        //retrieveRideRequestInfo(getRideRequestId(context), context);
-      }
-    }
-  }
-
-
-  Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-        future: getInitialRoute(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Container(
-
-              decoration: BoxDecoration(
-                  color: Colors.white
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Image.asset(
-                      'assets/images/wms.png',
-                      // Replace with your app's icon image path
-                      width: 200,
-                      height: 180,
-                      // Optionally, you can add a color filter or other styling here
-                    ),
-                  ),
-                  CircularProgressIndicator()
-                ],),
-            ); // Or a splash screen
-          } else {
-            String? initialRoute = snapshot.data;
-
-            // Handle null case if necessary
-            if (initialRoute == null) {
-              initialRoute = '/Onboarding'; // Or any default route you want to use
-            }
-
-            return MaterialApp(
-                title: 'BorlApp_wms',
-                debugShowCheckedModeBanner: false,
-                theme: ThemeData(
-
-
-                  colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
-                  useMaterial3: true,
-                ),
-
-
-                initialRoute: initialRoute,
-
-                //'/addmoredetails',
-
-                //initialRoute,
-
-                // FirebaseAuth.instance.currentUser == null ? '/Onboarding' : '/Homepage',
-                // '/Homepage',
-                //'/Onboarding'
-                routes: {
-                  "/SignUP": (context) => signup(),
-                  "/addmoredetails": (context) => Addwmsdetails(),
-                  "/Onboarding": (context) => OnBoardingPage(),
-                  "/About": (context) => AboutPage(),
-                  "/binsale": (context) => BinSalePage(),
-                  "/recycle": (context) => RecyclePage(),
-                  // "/OnBoarding": (context) => ,
-                  "/SignIn": (context) => signin(),
-                  "/Profile": (context) => ProfilePage(),
-                  "/Homepage": (context) => homepage(),
-                  //    "/addproduct":(context)=>addproduct()
-                }
-            );
-          }
-        });
-  }
-
-  Widget routeGenerator(RouteSettings settings) {
-    switch (settings.name) {
-      case '/Onboarding':
-        return OnBoardingPage();
-      case '/Main':
-        return homepage();
-      case '/addmoredetails':
-        return Addwmsdetails();
-
-      case '/SignUP':
-        return signup();
-      case '/SignIn':
-        return signin();
-      case '/Homepage':
-        return homepage();
-      default:
-        return Scaffold(
-          body: Center(
-            child: Text('Route not found: ${settings.name}'),
-          ),
-        );
-    }
-  }
-
-
+  State<MyApp> createState() => _MyAppState();
 }
 
+class _MyAppState extends State<MyApp> {
+
+  @override
+  void initState() {
+    super.initState();
+    initializeFCM(context);
+  }
+
+  Future<void> initializeFCM(BuildContext context) async {
+    print("Initializing FCM");
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message whilst in the foreground!');
+      // Handle foreground notification
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('App opened via notification!');
+      // Handle background/opened app notification
+    });
+
+    final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      // Handle notification that opened the app from terminated state
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: getInitialRoute(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            color: Colors.white,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/wms.png',
+                  width: 200,
+                  height: 180,
+                ),
+                CircularProgressIndicator(),
+              ],
+            ),
+          );
+        } else {
+          String? initialRoute = snapshot.data ?? '/Onboarding';
+          return MaterialApp(
+            title: 'BorlApp_wms',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+              useMaterial3: true,
+            ),
+            initialRoute: initialRoute,
+            routes: {
+              "/SignUP": (context) => signup(),
+              "/addmoredetails": (context) => Addwmsdetails(),
+              "/Onboarding": (context) => OnBoardingPage(),
+              "/About": (context) => AboutPage(),
+              "/binsale": (context) => BinSalePage(),
+              "/recycle": (context) => RecyclePage(),
+              "/SignIn": (context) => signin(),
+              "/Profile": (context) => ProfilePage(),
+              "/Homepage": (context) => homepage(),
+            },
+          );
+        }
+      },
+    );
+  }
+}
+Future<void> initializeFCM(BuildContext context) async {
+  print("Initializing FCM");
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Got a message whilst in the foreground!');
+    // Handle foreground notification
+  });
+
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print('App opened via notification!');
+    // Handle background/opened app notification
+  });
+
+  final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+  if (initialMessage != null) {
+    // Handle notification that opened the app from terminated state
+  }
+}
