@@ -10,6 +10,7 @@ import 'package:borlawms/pages/signin.dart';
 import 'package:borlawms/pages/signup.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -21,12 +22,35 @@ import 'Model/appstate.dart';
 import 'Model/otherUserModel.dart';
 import 'appData.dart';
 import 'firebase_options.dart';
+import 'notifications/pushNotificationService.dart';
+
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  PushNotificationService pushNotificationService = PushNotificationService();
+  await pushNotificationService.initialize(navigatorKey.currentContext!);
+
+  // iOS-specific setup
+  if (defaultTargetPlatform == TargetPlatform.iOS) {
+    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true, // Required to display a heads-up notification
+      badge: true,
+      sound: true,
+    );
+
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+  }
+
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider<AppData>(
       create: (context) => AppData(),
@@ -59,6 +83,25 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Handle the notification here when the app is in the background.
 }
 
+Future<void> requestNotificationPermissions() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+  if (settings.authorizationStatus == AuthorizationStatus.denied) {
+    print("Notification permission denied");
+  } else {
+    print("Notification permission granted");
+    // saveFCMToken(); // Fetch token after permission is granted
+  }
+}
 
 
 final FirebaseAuth auth = FirebaseAuth.instance;
