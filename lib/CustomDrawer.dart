@@ -2,9 +2,11 @@
 import 'package:borlawms/pages/Aboutpage.dart';
 import 'package:borlawms/pages/Profilepage.dart';
 import 'package:borlawms/pages/Requests.dart';
+import 'package:borlawms/pages/Subscriptions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'Assistant/assistantmethods.dart';
@@ -144,16 +146,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
           // ),
 
 
-
-
           const SizedBox(height: 9),
           ListTile(
-            onTap: (){
+            onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => Requestpage(),
-                ),);
+                MaterialPageRoute(builder: (context) => Requestpage()),
+              );
             },
             leading: Container(
               decoration: const BoxDecoration(
@@ -162,21 +161,18 @@ class _CustomDrawerState extends State<CustomDrawer> {
               ),
               child: const Padding(
                 padding: EdgeInsets.all(10.0),
-                child: Icon(
-                  Icons.fire_truck_outlined,
+                child: FaIcon(
+                  FontAwesomeIcons.truck, // Replaces fire_truck_outlined
                   color: Colors.white,
                 ),
               ),
             ),
             title: const Text(
               "My requests",
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
-            trailing: const Icon(
-              Icons.arrow_forward_ios,
+            trailing: const FaIcon(
+              FontAwesomeIcons.angleRight, // Replaces arrow_forward_ios
               size: 18,
             ),
           ),
@@ -186,10 +182,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: ((context) => const ProfilePage()),
-                  ));
+                context,
+                MaterialPageRoute(builder: ((context) => const ProfilePage())),
+              );
             },
             leading: Container(
               decoration: const BoxDecoration(
@@ -198,72 +193,29 @@ class _CustomDrawerState extends State<CustomDrawer> {
               ),
               child: const Padding(
                 padding: EdgeInsets.all(10.0),
-                child: Icon(
-                  CupertinoIcons.person_alt_circle,
+                child: FaIcon(
+                  FontAwesomeIcons.userCircle, // Replaces CupertinoIcons.person_alt_circle
                   color: Colors.white,
                 ),
               ),
             ),
             title: const Text(
               "Profile",
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
-            trailing: const Icon(
-              Icons.arrow_forward_ios,
+            trailing: const FaIcon(
+              FontAwesomeIcons.angleRight,
               size: 18,
             ),
           ),
-          // const SizedBox(height: 9),
-          // ListTile(
-          //   onTap: (){
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //         builder: (context) => Requestpage(),
-          //       ),);
-          //   },
-          //   leading: Container(
-          //     decoration: const BoxDecoration(
-          //       shape: BoxShape.circle,
-          //       color: Colors.green,
-          //     ),
-          //     child: const Padding(
-          //       padding: EdgeInsets.all(10.0),
-          //       child: Icon(
-          //         Icons.bim,
-          //         color: Colors.white,
-          //       ),
-          //     ),
-          //   ),
-          //   title: const Text(
-          //     "My Bins",
-          //     style: TextStyle(
-          //       fontSize: 15,
-          //       fontWeight: FontWeight.w500,
-          //     ),
-          //   ),
-          //   trailing: const Icon(
-          //     Icons.arrow_forward_ios,
-          //     size: 18,
-          //   ),
-          // ),
 
-
-
-
-
-
-          const SizedBox(height: 19),
+          const SizedBox(height: 9),
           ListTile(
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => AboutPage(),
-                ),);
+                MaterialPageRoute(builder: (context) => Requestpage()),
+              );
             },
             leading: Container(
               decoration: const BoxDecoration(
@@ -272,21 +224,78 @@ class _CustomDrawerState extends State<CustomDrawer> {
               ),
               child: const Padding(
                 padding: EdgeInsets.all(10.0),
-                child: Icon(
-                  Icons.info_outline_rounded,
+                child: FaIcon(
+                  FontAwesomeIcons.calendarCheck, // Replaces schedule
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            title: const Text(
+              "Schedules",
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+            trailing: const FaIcon(
+              FontAwesomeIcons.angleRight,
+              size: 18,
+            ),
+          ),
+          const SizedBox(height: 9),
+          ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Subscriptions()),
+              );
+            },
+            leading: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.green,
+              ),
+              child: const Padding(
+                padding: EdgeInsets.all(10.0),
+                child: FaIcon(
+                  FontAwesomeIcons.bell, // Replaces schedule
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            title: const Text(
+              "Subscription",
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+            trailing: const FaIcon(
+              FontAwesomeIcons.angleRight,
+              size: 18,
+            ),
+          ),
+          const SizedBox(height: 19),
+          ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AboutPage()),
+              );
+            },
+            leading: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.green,
+              ),
+              child: const Padding(
+                padding: EdgeInsets.all(10.0),
+                child: FaIcon(
+                  FontAwesomeIcons.circleInfo, // Replaces info_outline_rounded
                   color: Colors.white,
                 ),
               ),
             ),
             title: const Text(
               "About",
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
-            trailing: const Icon(
-              Icons.arrow_forward_ios,
+            trailing: const FaIcon(
+              FontAwesomeIcons.angleRight,
               size: 18,
             ),
           ),
@@ -298,7 +307,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
               height: 20,
             ),
           ),
-
 
           const SizedBox(height: 19),
           // ListTile(

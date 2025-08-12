@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:borlawms/pages/Aboutpage.dart';
 import 'package:borlawms/pages/BinSalesPage.dart';
 import 'package:borlawms/pages/Profilepage.dart';
@@ -25,15 +27,20 @@ import 'firebase_options.dart';
 import 'notifications/pushNotificationService.dart';
 
 
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  PushNotificationService pushNotificationService = PushNotificationService();
-  await pushNotificationService.initialize(navigatorKey.currentContext!);
+  // Initialize push notification service
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
 
   // iOS-specific setup
   if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -169,27 +176,32 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initializeFCM(context);
+
+
+    _requestNotificationPermissions();
+
+
   }
 
-  Future<void> initializeFCM(BuildContext context) async {
-    print("Initializing FCM");
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      // Handle foreground notification
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('App opened via notification!');
-      // Handle background/opened app notification
-    });
-
-    final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-    if (initialMessage != null) {
-      // Handle notification that opened the app from terminated state
-    }
-  }
+  // Future<void> initializeFCM(BuildContext context) async {
+  //   print("Initializing FCM");
+  //
+  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  //     print('Got a message whilst in the foreground!');
+  //     PushNotificationService._handleMessage;
+  //     // Handle foreground notification
+  //   });
+  //
+  //   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+  //     print('App opened via notification!');
+  //     // Handle background/opened app notification
+  //   });
+  //
+  //   final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+  //   if (initialMessage != null) {
+  //     // Handle notification that opened the app from terminated state
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -238,6 +250,8 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+final FirebaseMessaging messaging = FirebaseMessaging.instance;
+
 Future<void> initializeFCM(BuildContext context) async {
   print("Initializing FCM");
 
@@ -254,5 +268,32 @@ Future<void> initializeFCM(BuildContext context) async {
   final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
   if (initialMessage != null) {
     // Handle notification that opened the app from terminated state
+  }
+}
+
+void setupFCMTokenListener() {
+  FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+    // saveFCMToken(); // Save new token when it changes
+  }).onError((err) {
+    print("FCM Token Refresh Error: $err");
+  });
+}
+
+Future<void> _requestNotificationPermissions() async {
+  if (Platform.isIOS) {
+    await messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+
+    print('Notification permissions granted: ${settings.authorizationStatus}');
   }
 }

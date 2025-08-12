@@ -34,12 +34,15 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This app requires location access to provide location-based features and improve user experience.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>We need your location to provide better services.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We need your location to show nearby places.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Your location is used to send notifications about nearby service providers and allow real-time updates, even when the app is in the background.</string>
+
+<key>NSLocationAlwaysUsageDescription</key>
+<string>We use your location to track service status and notify you about nearby updates, even when the app is not actively in use.</string>
+
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>We use your location to show nearby service providers and calculate distances for accurate pricing and service availability.</string>
+
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>This app requires read and write access to the photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -51,6 +54,12 @@
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
+
+	<!-- Permission messages -->
+    <key>NSUserNotificationAlertStyle</key>
+    <string>alert</string>
+
+
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -68,5 +77,15 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+
+
+	<key>NSAppTransportSecurity</key>
+    <dict>
+      <key>NSAllowsArbitraryLoads</key>
+      <true/>
+    </dict>
+    <key>NSUserNotificationUsageDescription</key>
+    <string>We use notifications to inform you about requests and updates.</string>
 </dict>
 </plist>

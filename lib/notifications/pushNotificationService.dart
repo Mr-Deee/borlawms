@@ -13,50 +13,88 @@ class PushNotificationService {
   final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   Future<void> initialize(BuildContext context) async {
-    print("Initializing push notifications");
+    print("Initializing push notifications...");
 
-    // Request permissions (especially important for iOS)
-    await _requestNotificationPermissions();
-
-    // Set up foreground message handler
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Foreground message received');
-      _handleMessage(message, context);
-    });
-
-    // Set up background/opened app handler
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('App opened from notification');
-      _handleMessage(message, context);
-    });
-
-    // Check for initial notification (app launched from terminated state)
-    final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-    if (initialMessage != null) {
-      print('App launched from terminated state via notification');
-      _handleMessage(initialMessage, context);
+    try {
+      print("Step 1: Requesting iOS notification permissions...");
+      await _requestNotificationPermissions();
+      print("Step 1 Complete: Permissions requested.");
+    } catch (e) {
+      print("Error during notification permission request: $e");
     }
 
-    // Get and save the FCM token
-    await getToken();
+    try {
+      print("Step 2: Setting up foreground message listener...");
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        print('Foreground message received: ${message.messageId}');
+        _handleMessage(message, context);
+      });
+      print("Step 2 Complete: Foreground listener set.");
+    } catch (e) {
+      print("Error setting up onMessage listener: $e");
+    }
+
+    try {
+      print("Step 3: Setting up background message tap listener...");
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        print('App opened from notification: ${message.messageId}');
+        _handleMessage(message, context);
+      });
+      print("Step 3 Complete: onMessageOpenedApp listener set.");
+    } catch (e) {
+      print("Error setting up onMessageOpenedApp listener: $e");
+    }
+
+    try {
+      print("Step 4: Checking for initial notification...");
+      final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+      if (initialMessage != null) {
+        print('Initial notification found: ${initialMessage.messageId}');
+        _handleMessage(initialMessage, context);
+      } else {
+        print("No initial notification found.");
+      }
+      print("Step 4 Complete: Initial message check done.");
+    } catch (e) {
+      print("Error fetching initial message: $e");
+    }
+
+    try {
+      print("Step 5: Getting FCM token and subscribing to topics...");
+      await getToken();
+      print("Step 5 Complete: Token retrieved and topics subscribed.");
+    } catch (e) {
+      print("Error getting token or subscribing to topics: $e");
+    }
+
+    print("Push notification initialization complete.");
   }
 
   Future<void> _requestNotificationPermissions() async {
     if (Platform.isIOS) {
-      await messaging.setForegroundNotificationPresentationOptions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      print("Requesting iOS notification permissions...");
 
-      NotificationSettings settings = await messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-        provisional: false,
-      );
+      try {
+        await messaging.setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+        print("Foreground presentation options set.");
 
-      print('Notification permissions granted: ${settings.authorizationStatus}');
+        NotificationSettings settings = await messaging.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+          provisional: false,
+        );
+
+        print('iOS Notification permission status: ${settings.authorizationStatus}');
+      } catch (e) {
+        print("Error requesting iOS permissions: $e");
+      }
+    } else {
+      print("Notification permissions not required for non-iOS platforms.");
     }
   }
 

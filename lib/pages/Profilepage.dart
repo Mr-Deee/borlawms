@@ -105,11 +105,49 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                 ),
 
-                // ProfileMenuItem(
-                //   icon: Icons.info,
-                //   title: 'Information',
-                //   onTap: () {},
-                // ),
+                ProfileMenuItem(
+                  title: "Delete Account",
+                  icon: Icons.delete,
+                  onTap: () async {
+                    try {
+                      User? user = FirebaseAuth.instance.currentUser;
+
+                      if (user != null) {
+                        final uid = user.uid;
+
+                        // Delete user data from Realtime Database
+                        await FirebaseDatabase.instance.ref().child("WMS").child(uid).remove();
+
+                        // Delete user authentication account
+                        await user.delete();
+
+                        // Optionally navigate or notify
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Account and data deleted successfully.')),
+                        );
+
+                        // Example navigation
+                        // Navigator.pushReplacementNamed(context, '/login');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('No user is currently signed in.')),
+                        );
+                      }
+                    } on FirebaseAuthException catch (e) {
+                      if (e.code == 'requires-recent-login') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Please re-authenticate to delete your account.')),
+                        );
+                        // Redirect to re-authentication logic
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to delete account: ${e.message}')),
+                        );
+                      }
+                    }
+                  },
+                ),
+
                 // ProfileMenuItem(
                 //   icon: Icons.logout,
                 //   title: 'Log Out',
