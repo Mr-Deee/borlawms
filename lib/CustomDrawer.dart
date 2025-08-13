@@ -3,6 +3,7 @@ import 'package:borlawms/pages/Aboutpage.dart';
 import 'package:borlawms/pages/Profilepage.dart';
 import 'package:borlawms/pages/Requests.dart';
 import 'package:borlawms/pages/Subscriptions.dart';
+import 'package:borlawms/widgets/Schedules.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -226,6 +227,36 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 padding: EdgeInsets.all(10.0),
                 child: FaIcon(
                   FontAwesomeIcons.calendarCheck, // Replaces schedule
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            title: const Text(
+              "Request History",
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+            trailing: const FaIcon(
+              FontAwesomeIcons.angleRight,
+              size: 18,
+            ),
+          ),
+          const SizedBox(height: 9),
+          ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ScheduleRequestsScreen()),
+              );
+            },
+            leading: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.green,
+              ),
+              child: const Padding(
+                padding: EdgeInsets.all(10.0),
+                child: FaIcon(
+                  FontAwesomeIcons.clock, // Replaces schedule
                   color: Colors.white,
                 ),
               ),
