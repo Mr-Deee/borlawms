@@ -53,13 +53,13 @@ class _NavigationPageState extends State<NavigationPage> {
     // Custom vehicle icon (you can replace with your asset)
     vehicleIcon = await BitmapDescriptor.fromAssetImage(
       const ImageConfiguration(size: Size(48, 48)),
-      'assets/images/car_marker.png', // Add this asset to your project
+      'assets/images/BCAR.png', // Add this asset to your project
     );
 
     // Custom destination icon
     destinationIcon = await BitmapDescriptor.fromAssetImage(
-      const ImageConfiguration(size: Size(48, 48)),
-      'assets/images/destination_marker.png', // Add this asset to your project
+      const ImageConfiguration(size: Size(18, 18)),
+      'assets/images/destin.png', // Add this asset to your project
     );
   }
 

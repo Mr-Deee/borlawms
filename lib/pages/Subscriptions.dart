@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../widgets/SubscriptionNavigation.dart' show NavigationPage;
@@ -40,22 +42,87 @@ class _SubscriptionsState extends State<Subscriptions> with SingleTickerProvider
             child: const Text("Cancel"),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => NavigationPage(
-                    clientLat: sub['lat'],
-                    clientLng: sub['lng'], clientName: sub['name'],
+            onPressed: () async {
+              try {
+                // 1. Send notification (requires FCM token stored with the client)
+                await sendNotificationToClient(
+                  token: sub['fcmToken'],
+                  title: "Service Started",
+                  body: "Your subscription service has begun!",
+                );
+
+                // 2. Update Realtime Database
+                final email = sub['email'];
+
+                DatabaseReference ref = FirebaseDatabase.instance.ref("subscriptions");
+
+                // Query subscriptions by email
+                DatabaseEvent event = await ref.orderByChild("email").equalTo(email).once();
+
+                if (event.snapshot.value != null) {
+                  Map data = event.snapshot.value as Map;
+
+                  data.forEach((key, value) async {
+                    await ref.child(key).update({
+                      "status": "in_progress",
+                      "wms": {
+                        "lat": sub['lat'],
+                        "lng": sub['lng'],
+                        "startedAt": ServerValue.timestamp,
+                      }
+                    });
+                  });
+                }
+
+                // 3. Navigate
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => NavigationPage(
+                      clientLat: sub['lat'],
+                      clientLng: sub['lng'],
+                      clientName: sub['name'],
+                    ),
                   ),
-                ),
-              );
+                );
+              } catch (e) {
+                print("Error: $e");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Failed to start subscription")),
+                );
+              }
             },
             child: const Text("Begin"),
-          ),
+          )
         ],
       ),
+    );
+  }
+
+
+  Future<void> sendNotificationToClient({
+    required String token,
+    required String title,
+    required String body,
+  }) async {
+    const String serverKey = "YOUR_SERVER_KEY_FROM_FIREBASE"; // put your FCM server key
+    final url = Uri.parse("https://fcm.googleapis.com/fcm/send");
+
+    await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "key=$serverKey",
+      },
+      body: jsonEncode({
+        "to": token,
+        "notification": {
+          "title": title,
+          "body": body,
+        },
+        "priority": "high",
+      }),
     );
   }
 
