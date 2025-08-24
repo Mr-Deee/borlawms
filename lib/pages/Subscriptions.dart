@@ -1,7 +1,7 @@
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
 import '../widgets/SubscriptionNavigation.dart' show NavigationPage;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -44,45 +44,69 @@ class _SubscriptionsState extends State<Subscriptions> with SingleTickerProvider
           ElevatedButton(
             onPressed: () async {
               try {
-                // 1. Send notification (requires FCM token stored with the client)
-                await sendNotificationToClient(
-                  token: sub['fcmToken'],
-                  title: "Service Started",
-                  body: "Your subscription service has begun!",
-                );
+                final email = sub['email'] ?? "";
+                final lat = sub['lat'] ?? 0.0;
+                final lng = sub['lng'] ?? 0.0;
+                final name = sub['name'] ?? "Unknown";
 
-                // 2. Update Realtime Database
-                final email = sub['email'];
-
-                DatabaseReference ref = FirebaseDatabase.instance.ref("subscriptions");
-
-                // Query subscriptions by email
-                DatabaseEvent event = await ref.orderByChild("email").equalTo(email).once();
-
-                if (event.snapshot.value != null) {
-                  Map data = event.snapshot.value as Map;
-
-                  data.forEach((key, value) async {
-                    await ref.child(key).update({
-                      "status": "in_progress",
-                      "wms": {
-                        "lat": sub['lat'],
-                        "lng": sub['lng'],
-                        "startedAt": ServerValue.timestamp,
-                      }
-                    });
-                  });
+                // 1️⃣ Get current Firebase user ID
+                final userId = FirebaseAuth.instance.currentUser?.uid;
+                if (userId == null) {
+                  print("⚠️ No logged-in user, cannot fetch token");
+                  return;
                 }
 
-                // 3. Navigate
+                // 2️⃣ Fetch token from wms/{userId}
+                final wmsRef = FirebaseDatabase.instance.ref("wms/$userId/token");
+                final tokenSnap = await wmsRef.get();
+                final token = tokenSnap.value?.toString() ?? "";
+
+                print("DEBUG: token=$token, email=$email");
+
+                // 3️⃣ Send notification if token exists
+                if (token.isNotEmpty) {
+                  await sendNotificationToClient(
+                    token: token,
+                    title: "Service Started",
+                    body: "Your subscription service has begun!",
+                  );
+                } else {
+                  print("⚠️ No token found in wms/$userId");
+                }
+
+                // 4️⃣ Update subscription in Realtime DB
+                if (email.isNotEmpty) {
+                  DatabaseReference ref =
+                  FirebaseDatabase.instance.ref("subscriptions");
+
+                  DatabaseEvent event =
+                  await ref.orderByChild("email").equalTo(email).once();
+
+                  if (event.snapshot.value != null) {
+                    Map data = event.snapshot.value as Map;
+
+                    data.forEach((key, value) async {
+                      await ref.child(key).update({
+                        "status": "in_progress",
+                        "wms": {
+                          "lat": lat,
+                          "lng": lng,
+                          "startedAt": ServerValue.timestamp,
+                        }
+                      });
+                    });
+                  }
+                }
+
+                // 5️⃣ Navigate
                 Navigator.pop(ctx);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => NavigationPage(
-                      clientLat: sub['lat'],
-                      clientLng: sub['lng'],
-                      clientName: sub['name'],
+                      clientLat: lat,
+                      clientLng: lng,
+                      clientName: name,
                     ),
                   ),
                 );
@@ -106,14 +130,14 @@ class _SubscriptionsState extends State<Subscriptions> with SingleTickerProvider
     required String title,
     required String body,
   }) async {
-    const String serverKey = "YOUR_SERVER_KEY_FROM_FIREBASE"; // put your FCM server key
+    const String serverToken = "key=AAAAVtKD6xg:APA91bFcNoAC4CKFdKqZEU8eNWWvcl_mHtWI12bMDChOUvq7lFTxs5QzDiiInaRwMCgN9YuuQPEgJ64Po4w9GujcG2maNOe18cvFUVavbq31giVxmu0wRGY84iDRd884azPUKkruthhl";// put your FCM server key
     final url = Uri.parse("https://fcm.googleapis.com/fcm/send");
 
     await http.post(
       url,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "key=$serverKey",
+        "Authorization": "key=$serverToken",
       },
       body: jsonEncode({
         "to": token,
@@ -196,18 +220,20 @@ class _SubscriptionsState extends State<Subscriptions> with SingleTickerProvider
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(Icons.email, size: 16, color: Colors.grey[600]),
-                                const SizedBox(width: 4),
-                                Text(
-                                  sub['email'],
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
+                            SingleChildScrollView(
+                              child: Row(
+                                children: [
+                                  Icon(Icons.email, size: 16, color: Colors.grey[600]),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    sub['email'],
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Row(

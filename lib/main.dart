@@ -164,6 +164,32 @@ print('three:$wmstype');
 }
 
 
+Future<void> initFCM(String email) async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // Request permission (iOS)
+  await messaging.requestPermission();
+
+  // Get token
+  String? token = await messaging.getToken();
+  print("✅ Device FCM Token: $token");
+
+  if (token != null) {
+    // Save token under subscriptions (match by email)
+    DatabaseReference ref = FirebaseDatabase.instance.ref("subscriptions");
+
+    DatabaseEvent event = await ref.orderByChild("email").equalTo(email).once();
+
+    if (event.snapshot.value != null) {
+      Map data = event.snapshot.value as Map;
+      data.forEach((key, value) async {
+        await ref.child(key).update({
+          "fcmToken": token,
+        });
+      });
+    }
+  }
+}
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
