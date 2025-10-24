@@ -57,6 +57,8 @@ dependencies:
   intl: ^0.20.1
   google_fonts: ^6.0.0
   googleapis_auth:
+  shimmer: ^3.0.0
+
   flutter_polyline_points: ^2.0.0
   introduction_screen: ^3.1.14
   animate_do: ^4.2.0

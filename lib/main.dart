@@ -1,6 +1,7 @@
 
 import 'dart:io';
 
+import 'package:borlawms/Model/RequestModel.dart';
 import 'package:borlawms/pages/Aboutpage.dart';
 import 'package:borlawms/pages/BinSalesPage.dart';
 import 'package:borlawms/pages/Profilepage.dart';
@@ -64,6 +65,9 @@ void main() async {
     ),
     ChangeNotifierProvider<Users>(
       create: (context) => Users(),
+    ),
+    ChangeNotifierProvider<ReqModel>(
+      create: (context) => ReqModel(),
     ),
     ChangeNotifierProvider<WMS>(
       create: (context) => WMS(),
