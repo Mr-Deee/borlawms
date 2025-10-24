@@ -49,32 +49,52 @@ class _SubscriptionsState extends State<Subscriptions> with SingleTickerProvider
                 final lng = sub['lng'] ?? 0.0;
                 final name = sub['name'] ?? "Unknown";
 
-                // 1️⃣ Get current Firebase user ID
+                // 1️⃣ Get current Firebase user ID (WMS)
                 final userId = FirebaseAuth.instance.currentUser?.uid;
                 if (userId == null) {
                   print("⚠️ No logged-in user, cannot fetch token");
                   return;
                 }
 
-                // 2️⃣ Fetch token from wms/{userId}
+                // 2️⃣ Fetch WMS token
                 final wmsRef = FirebaseDatabase.instance.ref("wms/$userId/token");
-                final tokenSnap = await wmsRef.get();
-                final token = tokenSnap.value?.toString() ?? "";
+                final wmsSnap = await wmsRef.get();
+                final wmsToken = wmsSnap.value?.toString() ?? "";
 
-                print("DEBUG: token=$token, email=$email");
+                print("DEBUG: WMS token=$wmsToken, email=$email");
 
-                // 3️⃣ Send notification if token exists
-                if (token.isNotEmpty) {
+                // 3️⃣ Fetch Client token by email
+                String clientToken = "";
+                if (email.isNotEmpty) {
+                  final clientRef = FirebaseDatabase.instance.ref("Clients");
+                  final clientEvent =
+                  await clientRef.orderByChild("email").equalTo(email).once();
+
+                  if (clientEvent.snapshot.value != null) {
+                    final data = clientEvent.snapshot.value as Map;
+                    data.forEach((key, value) {
+                      clientToken = value["token"] ?? "";
+                    });
+                  }
+                }
+
+                print("DEBUG: Client token=$clientToken");
+
+                // 4️⃣ Send notification to client
+                if (clientToken.isNotEmpty) {
                   await sendNotificationToClient(
-                    token: token,
+                    token: clientToken,
                     title: "Service Started",
                     body: "Your subscription service has begun!",
                   );
+                  print("⚠️ client token found for $email");
+
+
                 } else {
-                  print("⚠️ No token found in wms/$userId");
+                  print("⚠️ No client token found for $email");
                 }
 
-                // 4️⃣ Update subscription in Realtime DB
+                // 5️⃣ Update subscription in Realtime DB
                 if (email.isNotEmpty) {
                   DatabaseReference ref =
                   FirebaseDatabase.instance.ref("subscriptions");
@@ -98,7 +118,7 @@ class _SubscriptionsState extends State<Subscriptions> with SingleTickerProvider
                   }
                 }
 
-                // 5️⃣ Navigate
+                // 6️⃣ Navigate and pass clientToken forward
                 Navigator.pop(ctx);
                 Navigator.push(
                   context,
@@ -107,6 +127,7 @@ class _SubscriptionsState extends State<Subscriptions> with SingleTickerProvider
                       clientLat: lat,
                       clientLng: lng,
                       clientName: name,
+                      clientToken: clientToken, // ✅ now you have it
                     ),
                   ),
                 );
@@ -119,37 +140,18 @@ class _SubscriptionsState extends State<Subscriptions> with SingleTickerProvider
             },
             child: const Text("Begin"),
           )
+
         ],
       ),
     );
   }
-
-
   Future<void> sendNotificationToClient({
     required String token,
     required String title,
     required String body,
   }) async {
-    const String serverToken = "key=AAAAVtKD6xg:APA91bFcNoAC4CKFdKqZEU8eNWWvcl_mHtWI12bMDChOUvq7lFTxs5QzDiiInaRwMCgN9YuuQPEgJ64Po4w9GujcG2maNOe18cvFUVavbq31giVxmu0wRGY84iDRd884azPUKkruthhl";// put your FCM server key
-    final url = Uri.parse("https://fcm.googleapis.com/fcm/send");
-
-    await http.post(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "key=$serverToken",
-      },
-      body: jsonEncode({
-        "to": token,
-        "notification": {
-          "title": title,
-          "body": body,
-        },
-        "priority": "high",
-      }),
-    );
+   
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -221,6 +223,7 @@ class _SubscriptionsState extends State<Subscriptions> with SingleTickerProvider
                             ),
                             const SizedBox(height: 4),
                             SingleChildScrollView(
+                                // scrollDirection: Axis.horizontal,
                               child: Row(
                                 children: [
                                   Icon(Icons.email, size: 16, color: Colors.grey[600]),

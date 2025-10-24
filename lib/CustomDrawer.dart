@@ -245,7 +245,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ScheduleRequestsScreen()),
+                MaterialPageRoute(builder: (context) => Subscriptions()),
               );
             },
             leading: Container(
@@ -262,7 +262,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
               ),
             ),
             title: const Text(
-              "Schedules",
+              "Schedules and Subscriptions",
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
             trailing: const FaIcon(
@@ -275,7 +275,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Subscriptions()),
+                MaterialPageRoute(builder: (context) => SubscriptionAndSchedulePage()),
               );
             },
             leading: Container(

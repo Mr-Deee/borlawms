@@ -1,21 +1,27 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'package:borlawms/configMaps.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class NavigationPage extends StatefulWidget {
   final double clientLat;
   final double clientLng;
   final String clientName;
+  final String clientToken; // ✅ add this
 
   const NavigationPage({
     super.key,
     required this.clientLat,
     required this.clientLng,
     required this.clientName,
+    required this.clientToken, // ✅ add this
+
   });
 
   @override
@@ -163,6 +169,124 @@ class _NavigationPageState extends State<NavigationPage> {
     );
   }
 
+
+
+
+
+  bool collected = false;
+
+  Future<void> _handleArrival() async {
+    // 1️⃣ Send "Arrived" notification
+    await sendNotificationToClient(
+      token: widget.clientToken,
+      title: "WMS Update",
+      body: "Your WMS has arrived at your location.",
+    );
+
+    setState(() {
+      arrived = true;
+    });
+  }
+
+
+
+
+
+
+  Future<void> sendNotificationToClient({
+    required String token,
+    required String title,
+    required String body,
+  }) async {
+    // ⚠️ Replace with your Firebase project's server key
+    const String serverKey = "key=AAAAVtKD6xg:APA91bFcNoAC4CKFdKqZEU8eNWWvcl_mHtWI12bMDChOUvq7lFTxs5QzDiiInaRwMCgN9YuuQPEgJ64Po4w9GujcG2maNOe18cvFUVavbq31giVxmu0wRGY84iDRd884azPUKkruthhl"; // 🔑 Your FCM server key
+
+
+    final url = Uri.parse("https://fcm.googleapis.com/fcm/send");
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "key=$serverKey",
+      },
+      body: jsonEncode({
+        "to": token,
+        "notification": {
+          "title": title,
+          "body": body,
+        },
+        "priority": "high",
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      print("❌ FCM Error: ${response.body}");
+    } else {
+      print("✅ Notification sent: $title");
+    }
+  }
+
+  Future<void> _handleCollection() async {
+    // 2️⃣ Send "Trash Collected" notification
+    await sendNotificationToClient(
+      token: widget.clientToken,
+      title: "WMS Update",
+      body: "Trash has been collected.",
+    );
+
+    setState(() {
+      collected = true;
+    });
+
+    // 3️⃣ Show dialog for WMS to input price
+    _showPriceInputDialog();
+  }
+
+  Future<void> _showPriceInputDialog() async {
+    final controller = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Enter Price"),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            hintText: "Enter collection price",
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final price = controller.text.trim();
+              Navigator.pop(ctx);
+
+              if (price.isNotEmpty) {
+                // 4️⃣ Send notification with price to client
+                await sendNotificationToClient(
+                  token: widget.clientToken,
+                  title: "Payment Request",
+                  body: "Your WMS has set a price of GHS $price for collection.",
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Price sent to client: GHS $price")),
+                );
+              }
+            },
+            child: const Text("Send"),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _getPolyline() async {
     try {
       final result = await polylinePoints.getRouteBetweenCoordinates(
@@ -224,26 +348,26 @@ class _NavigationPageState extends State<NavigationPage> {
     }
   }
 
-  void _handleArrival() {
-    setState(() {
-      arrived = true;
-    });
-    locationUpdateTimer?.cancel();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Arrived at Destination"),
-        content: const Text("You have successfully reached the client location."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          ),
-        ],
-      ),
-    );
-  }
+  // void _handleArrival() {
+  //   setState(() {
+  //     arrived = true;
+  //   });
+  //   locationUpdateTimer?.cancel();
+  //
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: const Text("Arrived at Destination"),
+  //       content: const Text("You have successfully reached the client location."),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           child: const Text("OK"),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -316,26 +440,37 @@ class _NavigationPageState extends State<NavigationPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: arrived ? Colors.grey : Colors.green,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 3,
-                      ),
-                      onPressed: arrived ? null : _handleArrival,
-                      child: Text(
-                        arrived ? "Arrived" : "I've Arrived",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+    style: ElevatedButton.styleFrom(
+    backgroundColor: collected
+    ? Colors.grey
+        : arrived
+    ? Colors.orange
+        : Colors.green,
+    padding: const EdgeInsets.symmetric(vertical: 14),
+    shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+    ),
+    elevation: 3,
+    ),
+    onPressed: collected
+    ? null
+        : arrived
+    ? _handleCollection
+        : _handleArrival,
+    child: Text(
+    collected
+    ? "Completed"
+        : arrived
+    ? "Collected Trash"
+        : "I've Arrived",
+    style: const TextStyle(
+    fontSize: 16,
+    color: Colors.white,
+    fontWeight: FontWeight.bold,
+    ),
+    ),
                   ),
-                ],
+                  )],
               ),
             ),
           ),
