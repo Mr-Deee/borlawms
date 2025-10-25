@@ -1,10 +1,16 @@
 
+import 'dart:convert';
+import 'dart:io';
+import 'package:googleapis_auth/auth_io.dart' as auth;
+import 'package:http/http.dart' as http;
 import 'package:borlawms/Assistant/requestAssistant.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:googleapis_auth/auth_io.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../Model/RequestModel.dart';
@@ -133,56 +139,73 @@ class AssistantMethod{
   }
 
 
-  // static void retrieveHistoryInfo(context)
-  // {
-  //   //retrieve and display Trip History
-  //   clientRequestRef.orderByChild("client_name").once().then((event)
-  //   {
-  //     final dataSnapshot = event.snapshot;
-  //     if(dataSnapshot.value != null)
-  //     {
-  //       print('assistant methods step 84::{}');
-  //       //update total number of trip counts to provider
-  //       Map<dynamic, dynamic> keys = dataSnapshot as Map;
-  //       int tripCounter = keys.length;
-  //       Provider.of<AppData>(context, listen: false).updateTripsCounter(tripCounter);
-  //       print('assistant methods step 84::{}');
-  //       //update trip keys to provider
-  //       List<String> tripHistoryKeys = [];
-  //       keys.forEach((key, value)
-  //       {
-  //         tripHistoryKeys.add(key);
-  //       });
-  //       Provider.of<AppData>(context, listen: false).updateTripKeys(tripHistoryKeys);
-  //       obtainTripRequestsHistoryData(context);
-  //     }
-  //   });
-  // }
 
-  // static void obtainTripRequestsHistoryData(context)
-  // {
-  //   // var keys = Provider.of<AppData>(context, listen: false).tripHistoryKeys;
-  //
-  //   for(String key in keys)
-  //   {
-  //     clientRequestRef.child(key).once().then((event) {
-  //       final snapshot = event.snapshot;
-  //       if(snapshot.value != null)
-  //       {
-  //         clientRequestRef.child(key).once().then((event)
-  //         {
-  //           // final snap = event.snapshot;
-  //           final name = event.snapshot;
-  //           if(name!=null)
-  //          {
-  //             // var history = History.fromSnapshot(snapshot);
-  //             // Provider.of<AppData>(context, listen: false).updateTripHistoryData(history);
-  //           }
-  //         });
-  //       }
-  //     });
-  //   }
-  // }
+  static Future<auth.AccessCredentials> _getAccessToken() async {
+    final serviceAccountJson =
+    await rootBundle.loadString('assets/firebase_service_account.json');
+    final serviceAccount = json.decode(serviceAccountJson);
+    final credentials = auth.ServiceAccountCredentials.fromJson(serviceAccount);
+
+    final scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
+
+    final auth.AccessCredentials accessCredentials =
+    await auth.obtainAccessCredentialsViaServiceAccount(
+      credentials,
+      scopes,
+      http.Client(),
+    );
+    print("accessCred:${accessCredentials}");
+    return accessCredentials;
+  }
+
+  static const String projectId = 'borlagh-2cc0d'; // Your Firebase project ID
+  static const String fcmEndpoint = 'https://fcm.googleapis.com/v1/projects/$projectId/messages:send';
+
+  static sendNotificationToClient(String token, context, String wms_request_id) async {
+
+    print("notistart1");
+    // var destination = Provider.of<AppData>(context, listen: false).dropOfflocation;
+    try {
+      final credentials = await _getAccessToken();
+      final accessToken = credentials.accessToken.data;
+      print("notistarted2");
+      // FCM HTTP v1 API payload
+      Map<String, dynamic> notification = {
+        'message': {
+          'token': token,
+          'notification': {
+            'body': 'WMS Address',
+            'title': 'New BIN Request'
+          },
+          'data': {
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+            'id': '1',
+            'status': 'done',
+            'type': 'AccepetedSchedule', // ✅ Move type here
+
+            'wms_request_id': wms_request_id,
+          },
+        }
+      };
+      print("notimap");
+      final response = await http.post(
+        Uri.parse(fcmEndpoint),
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $accessToken',
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+        body: jsonEncode(notification),
+      );
+
+      if (response.statusCode == 200) {
+        print('Notification sent successfully.');
+      } else {
+        print('Failed to send notification. Error: ${response.body}');
+      }
+    } catch (e) {
+      print('Error sending notification: $e');
+    }
+  }
 
 
 

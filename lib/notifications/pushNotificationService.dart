@@ -9,6 +9,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'dart:io' show Platform;
+import '../Assistant/assistantmethods.dart';
 import '../configMaps.dart';
 import '../main.dart';
 import '../pages/clientDetails.dart';
@@ -188,64 +189,135 @@ class PushNotificationService {
 
       final data = Map<String, dynamic>.from(requestSnapshot.value as Map);
       final clientName = data['client_name'] ?? 'Unknown';
+      final requestId = data['Requesterid'] ?? 'Unknown';
+      final requeststreamId = data['request_id'] ?? 'Unknown';
       final clientPhone = data['client_phone'] ?? 'N/A';
       final scheduledTime = data['dateTime'] ?? 'Not set';
       final pickupLat = (data['latitude'] as num).toDouble();
       final pickupLng = (data['longitude'] as num).toDouble();
       final locationName = data['location_name'] ?? 'Unknown location';
+      BuildContext parentContext = context;
 
       // 🔹 Show the request details in a bottom sheet
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        builder: (BuildContext context) {
-          return Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
+      showDialog(
+        context: parentContext,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Text(
+              '🚗 Scheduled Pickup Request',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('🚗 Scheduled Pickup Request',
-                    style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 10),
                 Text('Client: $clientName'),
                 Text('Phone: $clientPhone'),
                 Text('Pickup: $locationName'),
                 Text('Scheduled Time: $scheduledTime'),
                 const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.map),
-                  label: const Text('Accept & View Route'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ScheduledMapScreen(
-                          clientName: clientName,
-                          clientPhone: clientPhone,
-                          pickupLat: pickupLat,
-                          pickupLng: pickupLng,
-                          pickupLocation: locationName,
-                          scheduledTime: scheduledTime,
-                        ),
-                      ),
-                    );
-                  },
-                ),
               ],
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Decline',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.check_circle, color: Colors.white),
+                label: const Text('Accept & View Route'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () async {
+                  final snapshot = await clients.once();
+
+                  final Map<dynamic, dynamic>? clientMap =
+                  snapshot.snapshot.value as Map<dynamic, dynamic>?;
+
+                  if (!snapshot.snapshot.exists) {
+                    print('⚠️ No WMS records found.');
+                    return;
+                  }
+                  for (var entry in clientMap!.entries) {
+                    final ClientKey = entry.key.toString();
+                    final ClientData = entry.value as Map<dynamic, dynamic>?;
+
+                    if (ClientData == null) continue;
+
+                    final token = ClientData["token"];
+                    final username = ClientData["Username"] ?? "Unknown";
+                    final orderID = ClientData["request_id"] ?? "Unknown";
+
+                    if (token != null && token
+                        .toString()
+                        .trim()
+                        .isNotEmpty) {
+                      print(
+                          '📨 Sending notification to $username ($ClientKey)...');
+
+                      print(
+                          '📨 Sending notification to  ($token)...');
+                      Navigator.pop(
+                          dialogContext); // close dialog using its own context
+
+                      // then use parentContext (still mounted)
+                      try {
+                        await FirebaseDatabase.instance
+                            .ref('Request/ScheduledRequest/$requeststreamId/status')
+                            .set('accepted');
+
+                        await AssistantMethod.sendNotificationToClient(
+                          token.toString(),
+                          context,
+                          requestId
+                        );
+
+                        ScaffoldMessenger.of(parentContext).showSnackBar(
+                          const SnackBar(content: Text(
+                              'Client notified of acceptance')),
+                        );
+
+                        Navigator.push(
+                          parentContext,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ScheduledMapScreen(
+                                  clientName: clientName,
+                                  clientPhone: clientPhone,
+                                  pickupLat: pickupLat,
+                                  pickupLng: pickupLng,
+                                  pickupLocation: locationName,
+                                  scheduledTime: scheduledTime,
+                                ),
+                          ),
+                        );
+                      } catch (e) {
+                        print("Error accepting request: $e");
+                        ScaffoldMessenger.of(parentContext).showSnackBar(
+                          const SnackBar(content: Text(
+                              'Failed to update request.')),
+                        );
+                      };
+                    }
+                  }
+
+                }),
+            ],
           );
         },
       );
+
     } catch (e, stack) {
       print("❌ Error in _handleScheduledRequest: $e");
       print(stack);
