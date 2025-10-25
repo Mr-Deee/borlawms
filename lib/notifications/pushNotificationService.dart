@@ -280,7 +280,7 @@ class PushNotificationService {
                         await AssistantMethod.sendNotificationToClient(
                           token.toString(),
                           context,
-                          requestId
+                            requeststreamId
                         );
 
                         ScaffoldMessenger.of(parentContext).showSnackBar(
@@ -527,7 +527,7 @@ class _ScheduledMapScreenState extends State<ScheduledMapScreen> {
                   const SizedBox(height: 10),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.navigation),
-                    label: const Text('Start Navigation'),
+                    label: const Text('Arrived'),
                     onPressed: () {
                       // You can add external navigation logic here (e.g., Google Maps intent)
                     },
