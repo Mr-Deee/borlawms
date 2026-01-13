@@ -149,7 +149,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             LiquidSignatureText(
               text: "By DANIEL NARTERH",
               gradientColors: [
-                Color(0xFF040404),
+                Color(0x5282B1FF),
                 Color(0xFFEEF7FA),
                 Color(0xFFEEF7FA),
               ],
@@ -161,7 +161,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             LiquidSignatureText(
               text: "Mlabstech",
               gradientColors: [
-                Color(0xFF040404),
+                Color(0x40404),
                 Color(0xFFEEF7FA),
                 Color(0xFFEEF7FA),
               ],
@@ -171,6 +171,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
             ),
           ],
         ),
+            SizedBox(height: 15),
+
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(

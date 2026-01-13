@@ -216,29 +216,60 @@ class AssistantMethod{
     Geofire.removeLocation(firebaseUser!.uid);
   }
 
-  static Future<DirectionDetails?> obtainPlaceDirectionDetails(
-      LatLng initialPosition, LatLng finalPosition) async
-  {
-    String directionUrl = "https://maps.googleapis.com/maps/api/directions/json?origin=${initialPosition
-        .latitude},${initialPosition.longitude}&destination=${finalPosition
-        .latitude},${finalPosition.longitude}&key=$mapKey";
+  // static Future<DirectionDetails?> obtainPlaceDirectionDetails(LatLng initialPosition, LatLng finalPosition) async {
+  //   String directionUrl = "https://maps.googleapis.com/maps/api/directions/json?origin=${initialPosition
+  //       .latitude},${initialPosition.longitude}&destination=${finalPosition
+  //       .latitude},${finalPosition.longitude}&key=$mapKey";
+  //
+  //   var res = await RequestAssistant.getRequest(directionUrl);
+  //   if (res == "failed") {
+  //     return null;
+  //   }
+  //   DirectionDetails directionDetails = DirectionDetails();
+  //   directionDetails.encodedPoints =
+  //   res["routes"][0]["overview_polyline"]["points"];
+  //   directionDetails.distanceText =
+  //   res["routes"][0]["legs"][0]["distance"]["text"];
+  //   directionDetails.distanceValue =
+  //   res["routes"][0]["legs"][0]["distance"]["value"];
+  //
+  //   directionDetails.durationText =
+  //   res["routes"][0]["legs"][0]["duration"]["text"];
+  //   directionDetails.durationValue =
+  //   res["routes"][0]["legs"][0]["duration"]["value"];
+  //
+  //   return directionDetails;
+  // }
+  static Future<DirectionDetails?> obtainPlaceDirectionDetails(LatLng initialPosition, LatLng finalPosition,) async {
+
+    String directionUrl =
+        "https://router.project-osrm.org/route/v1/driving/"
+        "${initialPosition.longitude},${initialPosition.latitude};"
+        "${finalPosition.longitude},${finalPosition.latitude}"
+        "?overview=full&geometries=polyline";
 
     var res = await RequestAssistant.getRequest(directionUrl);
-    if (res == "failed") {
+
+    if (res == null || res == "failed") {
       return null;
     }
-    DirectionDetails directionDetails = DirectionDetails();
-    directionDetails.encodedPoints =
-    res["routes"][0]["overview_polyline"]["points"];
-    directionDetails.distanceText =
-    res["routes"][0]["legs"][0]["distance"]["text"];
-    directionDetails.distanceValue =
-    res["routes"][0]["legs"][0]["distance"]["value"];
 
+    final route = res["routes"][0];
+
+    DirectionDetails directionDetails = DirectionDetails();
+
+    // ✅ Google-compatible encoded polyline
+    directionDetails.encodedPoints = route["geometry"];
+
+    // ✅ Distance (meters)
+    directionDetails.distanceValue = route["distance"].toInt();
+    directionDetails.distanceText =
+    "${(directionDetails.distanceValue! / 1000).toStringAsFixed(1)} km";
+
+    // ✅ Duration (seconds)
+    directionDetails.durationValue = route["duration"].toInt();
     directionDetails.durationText =
-    res["routes"][0]["legs"][0]["duration"]["text"];
-    directionDetails.durationValue =
-    res["routes"][0]["legs"][0]["duration"]["value"];
+    "${(directionDetails.durationValue! / 60).round()} mins";
 
     return directionDetails;
   }
