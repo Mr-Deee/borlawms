@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:google_fonts/google_fonts.dart';
@@ -101,6 +102,27 @@ class _homepageState extends State<homepage> {
   // List<ReqModel> rModel = [];
   Color _textColor = Colors.black;
 
+  Future<void> _initNotifications() async {
+    final pushNotificationService = PushNotificationService();
+    // initLocalNotifications();
+    await pushNotificationService.initialize(context);
+  }
+
+
+
+  // final FlutterLocalNotificationsPlugin localNotifications =
+  // FlutterLocalNotificationsPlugin();
+
+  // Future<void> initLocalNotifications() async {
+  //   const DarwinInitializationSettings iosInit =
+  //   DarwinInitializationSettings();
+  //
+  //   const InitializationSettings initSettings =
+  //   InitializationSettings(iOS: iosInit);
+  //
+  //   await localNotifications.initialize(settings: initSettings);
+  // }
+
   getartisanType() {
     WastemanagementRef.child(currentfirebaseUser!.uid)
         .child("WMS_type")
@@ -115,28 +137,36 @@ class _homepageState extends State<homepage> {
     });
   }
 
-  getCurrentWMSInfo() async {
-    currentfirebaseUser = await FirebaseAuth.instance.currentUser;
-    WMSDB.child(currentfirebaseUser!.uid).once().then((event) {
+  Future<void> getCurrentWMSInfo() async {
+    try {
+
+      // 🔐 AUTH
+      currentfirebaseUser = FirebaseAuth.instance.currentUser;
+      if (currentfirebaseUser == null) return;
+
+      // 🔐 FIREBASE READ (awaited)
+      final event = await WMSDB
+          .child(currentfirebaseUser!.uid)
+          .once();
+
       print("value::");
-      if (event.snapshot.value != null && event.snapshot.value is Map<String, dynamic>) {
-        riderinformation = WMS.fromMap(event.snapshot.value as Map<String, dynamic>);
-        print("value::+$riderinformation");
-        // riderinformation = WMS.fromMap(event.snapshot as Map<String, dynamic>);
+
+      if (event.snapshot.value != null &&
+          event.snapshot.value is Map) {
+        riderinformation =
+            WMS.fromMap(Map<String, dynamic>.from(
+                event.snapshot.value as Map));
+        print("value:: $riderinformation");
       }
 
-      PushNotificationService pushNotificationService = PushNotificationService();
-      pushNotificationService.initialize(context);
-      pushNotificationService.getToken();
-    });
 
-    // PushNotificationService pushNotificationService = PushNotificationService();
-    // pushNotificationService.initialize(context);
-    // pushNotificationService.getToken();
+      // 🧩 OTHER CALLS
+      getartisanType();
 
-    // AssistantMethod.retrieveHistoryInfo(context);
-    //getRatings();
-    getartisanType();
+    } catch (e, stack) {
+      print('getCurrentWMSInfo error: $e');
+      print(stack);
+    }
   }
 
   // Position? _currentPosition;
@@ -150,19 +180,29 @@ class _homepageState extends State<homepage> {
   @override
   void initState() {
         super.initState();
-        Provider.of<helper>(context, listen: false).getCurrentLocation();
-        Provider.of<helper>(context, listen: false).getAddressFromLatLng();
-    locatePosition();
-    AssistantMethod.getCurrentOnlineUserInfo(context);
-    getCurrentWMSInfo();
-    requestLocationPermission();
-    requestNotificationPermission();
-    AssistantMethod.getCurrentrequestinfo(context);
-    AssistantMethod.obtainTripRequestsHistoryData(context);
-
+_startupSequence();
   }
 
   bool isSwitched = false;
+
+
+
+  Future<void> _startupSequence() async {
+    // 🔔 1. Notifications FIRST (iOS critical)
+    await _initNotifications();
+
+    // 📍 2. Location permission AFTER notifications
+    await requestLocationPermission();
+    locatePosition();
+
+    // 🔐 3. Auth / user info
+    AssistantMethod.getCurrentOnlineUserInfo(context);
+    await getCurrentWMSInfo();
+
+    // 📦 4. Other data (safe now)
+    AssistantMethod.getCurrentrequestinfo(context);
+    AssistantMethod.obtainTripRequestsHistoryData(context);
+  }
 
   @override
   Widget build(BuildContext context) {

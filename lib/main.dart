@@ -33,32 +33,22 @@ import 'notifications/pushNotificationService.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  // Initialize push notification service
-  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
+
+
+  // iOS notification permission + foreground display
+  await FirebaseMessaging.instance.requestPermission(
     alert: true,
     badge: true,
     sound: true,
   );
 
-  // iOS-specific setup
-  if (defaultTargetPlatform == TargetPlatform.iOS) {
-    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      alert: true, // Required to display a heads-up notification
-      badge: true,
-      sound: true,
-    );
-
-    await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: false,
-    );
-  }
-
+  await FirebaseMessaging.instance
+      .setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider<AppData>(
       create: (context) => AppData(),
@@ -86,13 +76,36 @@ void main() async {
       create: (context) => AppState(),
     ),
   ], child: MyApp()));
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // Request permissions for notifications
+  await requestNotificationPermissions();
+
+  // Retrieve the APNS token
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  messaging.getAPNSToken().then((apnsToken) {
+    if (apnsToken != null) {
+      print("APNS Token: $apnsToken");
+    } else {
+      print("APNS Token not set");
+    }
+  });
+
+
+  FirebaseMessaging.instance
+      .setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 }
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("Handling a background message: ${message.messageId}");
-  // Handle the notification here when the app is in the background.
-}
+
+
+
+
+
 
 Future<void> requestNotificationPermissions() async {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -168,32 +181,37 @@ print('three:$wmstype');
 }
 
 
-Future<void> initFCM(String email) async {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
+// Future<void> initFCM(String email) async {
+//   FirebaseMessaging messaging = FirebaseMessaging.instance;
+//
+//   // Request permission (iOS)
+//   await messaging.requestPermission();
+//
+//   // Get token
+//   String? token = await messaging.getToken();
+//   print("✅ Device FCM Token: $token");
+//
+//   if (token != null) {
+//     // Save token under subscriptions (match by email)
+//     DatabaseReference ref = FirebaseDatabase.instance.ref("subscriptions");
+//
+//     DatabaseEvent event = await ref.orderByChild("email").equalTo(email).once();
+//
+//     if (event.snapshot.value != null) {
+//       Map data = event.snapshot.value as Map;
+//       data.forEach((key, value) async {
+//         await ref.child(key).update({
+//           "fcmToken": token,
+//         });
+//       });
+//     }
+//   }
+//
+//
+// }
 
-  // Request permission (iOS)
-  await messaging.requestPermission();
 
-  // Get token
-  String? token = await messaging.getToken();
-  print("✅ Device FCM Token: $token");
 
-  if (token != null) {
-    // Save token under subscriptions (match by email)
-    DatabaseReference ref = FirebaseDatabase.instance.ref("subscriptions");
-
-    DatabaseEvent event = await ref.orderByChild("email").equalTo(email).once();
-
-    if (event.snapshot.value != null) {
-      Map data = event.snapshot.value as Map;
-      data.forEach((key, value) async {
-        await ref.child(key).update({
-          "fcmToken": token,
-        });
-      });
-    }
-  }
-}
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -206,32 +224,14 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-
+initializeFCM(context);
 
     _requestNotificationPermissions();
 
 
   }
 
-  // Future<void> initializeFCM(BuildContext context) async {
-  //   print("Initializing FCM");
-  //
-  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-  //     print('Got a message whilst in the foreground!');
-  //     PushNotificationService._handleMessage;
-  //     // Handle foreground notification
-  //   });
-  //
-  //   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-  //     print('App opened via notification!');
-  //     // Handle background/opened app notification
-  //   });
-  //
-  //   final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-  //   if (initialMessage != null) {
-  //     // Handle notification that opened the app from terminated state
-  //   }
-  // }
+
 
   @override
   Widget build(BuildContext context) {
