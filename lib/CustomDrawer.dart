@@ -376,9 +376,9 @@ class LiquidSignatureText extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withOpacity(0.06),
-                            Colors.white.withOpacity(0.02),
-                            Colors.transparent,
+                            // Colors.white.withOpacity(0.06),
+                            // Colors.white.withOpacity(0.02),
+                            // Colors.transparent,
                           ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
