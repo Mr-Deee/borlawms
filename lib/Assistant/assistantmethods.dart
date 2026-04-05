@@ -58,32 +58,36 @@ class AssistantMethod{
 
   }
 
-  static int calculateFares(DirectionDetails directionDetails) {
-    //in terms of GHS
-    double timeTravelFare = (directionDetails.durationValue! / 60) * 0.20;
-    double distanceTraveledFare = (directionDetails.distanceValue! / 1000) *
-        0.20;
-    double totalFareAmount = timeTravelFare + distanceTraveledFare;
 
-    //1$ = 5.76
-    double totalLocalAmount = totalFareAmount * 160;
 
-    if (rideType == "Rev-x") {
-      double result = (totalFareAmount.truncate()) * 2.0;
-      return result.truncate();
+
+
+  static int calculateFares(DirectionDetails directionDetails, {double? estimatedWeight}) {
+    // Base fare
+    double baseFare = 5.00;
+
+    // Distance fare
+    double distanceFare = (directionDetails.distanceValue! / 1000) * 2.00;
+
+    // Weight-based fare (if weight is provided)
+    double weightFare = 0.00;
+    if (estimatedWeight != null && estimatedWeight > 0) {
+      // Assume weight in kg, charge 1 GHS per 5 kg
+      weightFare = (estimatedWeight / 5) * 1.00;
     }
-    else if (rideType == "Rev-Executive") {
-      return totalFareAmount.truncate();
+
+    // Time fare (for loading/unloading)
+    double timeFare = (directionDetails.durationValue! / 60) * 0.30;
+
+    double totalFareAmount = baseFare + weightFare;
+
+    // Minimum fare guarantee
+    if (totalFareAmount < 10.00) {
+      totalFareAmount = 10.00;
     }
-    else if (rideType == "Rev-standard") {
-      double result = (totalFareAmount.truncate()) / 2.0;
-      return result.truncate();
-    }
-    else {
-      return totalFareAmount.truncate();
-    }
+
+    return totalFareAmount.toInt();
   }
-
   static void enableHomeTabLiveLocationUpdates() {
     homeTabPageStreamSubscription!.resume();
     Geofire.setLocation(currentfirebaseUser!.uid, currentPosition!.latitude,

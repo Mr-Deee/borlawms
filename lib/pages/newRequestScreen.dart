@@ -522,63 +522,102 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       ),
     );
 
-    var currentLatLng = LatLng(myPosition!.latitude, myPosition!.longitude);
+    try {
+      String? rideRequestId = widget.clientDetails.artisan_request_id;
 
-    var directionalDetails = await AssistantMethod.obtainPlaceDirectionDetails(
-        widget.clientDetails.pickup!, currentLatLng);
-
-    Navigator.pop(context);
-
-    int fareAmount = AssistantMethod.calculateFares(directionalDetails!);
-
-    String? rideRequestId = widget.clientDetails.artisan_request_id;
-    clientRequestRef
-        .child(rideRequestId!)
-        .child("fares")
-        .set(fareAmount.toString());
-    clientRequestRef.child(rideRequestId).child("status").set("ended");
-    rideStreamSubscription?.cancel();
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) => CollectFareDialog(
-        paymentMethod: widget.clientDetails.payment_method,
-        fareAmount: fareAmount,
-      ),
-    );
-
-    saveEarnings(fareAmount);
-  }
-
-  void saveEarnings(int fareAmount) {
-    clientRequestRef
-        .child(currentfirebaseUser!.uid)
-        .child("earnings")
-        .once()
-        .then((event) {
-      if (event != null) {
-        double oldEarnings = double.parse(event.toString());
-        double totalEarnings = fareAmount + oldEarnings;
-
-        clientRequestRef
-            .child(currentfirebaseUser!.uid)
-            .child("earnings")
-            .set(totalEarnings.toStringAsFixed(2));
-      } else {
-        double totalEarnings = fareAmount.toDouble();
-        clientRequestRef
-            .child(currentfirebaseUser!.uid)
-            .child("earnings")
-            .set(totalEarnings.toStringAsFixed(2));
+      // Check if rideRequestId is null
+      if (rideRequestId == null) {
+        Navigator.pop(context); // Close progress dialog
+        throw Exception("Ride request ID is null");
       }
 
+      // Fetch fare amount from database instead of calculating
+      DatabaseReference rideRef = clientRequestRef.child(rideRequestId);
 
+      print('riderefhere$rideRequestId');
+      DataSnapshot snapshot = await rideRef.child("fare").get();
+      print('fare${snapshot.value.toString()}');
 
-    });
+      int fareAmount = 0;
+
+      if (snapshot.exists && snapshot.value != null) {
+        // Fare exists in database
+        fareAmount = int.tryParse(snapshot.value.toString()) ?? 0;
+        print("Fare from database: $fareAmount");
+      } else {
+        // Fallback: Calculate if not in database
+        print("No fare in database, calculating locally");
+        if (myPosition != null && widget.clientDetails.pickup != null) {
+          var currentLatLng = LatLng(myPosition!.latitude, myPosition!.longitude);
+          var directionalDetails = await AssistantMethod.obtainPlaceDirectionDetails(
+              widget.clientDetails.pickup!,
+              currentLatLng
+          );
+          // You need to extract fare from directionalDetails here
+          // fareAmount = directionalDetails.fare; // Adjust based on your implementation
+        } else {
+          throw Exception("Missing position or pickup data for fare calculation");
+        }
+      }
+
+      Navigator.pop(context); // Close progress dialog
+
+      // Update trip status
+      await rideRef.child("status").set("ended");
+
+      rideStreamSubscription?.cancel();
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => CollectFareDialog(
+          paymentMethod: widget.clientDetails.payment_method,
+          fareAmount: fareAmount,
+        ),
+      );
+
+       saveEarnings(fareAmount);
+
+    } catch (e) {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context); // Close dialog on error
+      }
+      print("Error ending trip: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error ending trip: $e")),
+      );
+    }
   }
-  displayToast(String message, BuildContext context) {
+
+  void saveEarnings(int fareAmount) async {
+    try {
+      if (currentfirebaseUser == null) {
+        print("Current user is null");
+        return;
+      }
+
+      DatabaseReference earningsRef = clientRequestRef
+          .child(currentfirebaseUser!.uid)
+          .child("earnings");
+
+      DataSnapshot event = (await earningsRef.once()) as DataSnapshot;
+
+      if (event.exists && event.value != null) {
+        double oldEarnings = double.tryParse(event.value.toString()) ?? 0;
+        double totalEarnings = fareAmount + oldEarnings;
+        await earningsRef.set(totalEarnings.toStringAsFixed(2));
+      } else {
+        double totalEarnings = fareAmount.toDouble();
+        await earningsRef.set(totalEarnings.toStringAsFixed(2));
+      }
+    } catch (e) {
+      print("Error saving earnings: $e");
+      // Don't throw here to prevent breaking the trip completion flow
+    }
+  }
+
+  void displayToast(String message, BuildContext context) {
     Fluttertoast.showToast(msg: message);
   }
-
 
 }
