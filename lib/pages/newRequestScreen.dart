@@ -1,6 +1,5 @@
 import 'dart:async';
 
-
 import 'package:borlawms/pages/progressdialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +48,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   double mapPaddingFromBottom = 0;
   var geoLocator = Geolocator();
   var locationOptions =
-      LocationSettings(accuracy: LocationAccuracy.bestForNavigation);
+  LocationSettings(accuracy: LocationAccuracy.bestForNavigation);
   BitmapDescriptor? animatingMarkerIcon;
   Position? myPosition;
   String status = "accepted";
@@ -58,24 +57,40 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   String btnTitle = "Arrived";
   Color btnColor = Colors.white;
   StreamSubscription<DatabaseEvent>? rideStreamSubscription;
+  StreamSubscription<Position>? positionStreamSubscription;
 
   Timer? timer;
   int durationCounter = 0;
 
+  // Flag to track if widget is disposed
+  bool _isDisposed = false;
+
   @override
   void initState() {
     super.initState();
-
     acceptRideRequest();
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    timer?.cancel();
+    rideStreamSubscription?.cancel();
+    positionStreamSubscription?.cancel();
+    newRideGoogleMapController?.dispose();
+    _controllerGoogleMap = Completer();
+    super.dispose();
   }
 
   void createIconMarker() {
     if (animatingMarkerIcon == null) {
       ImageConfiguration imageConfiguration =
-          createLocalImageConfiguration(context, size: Size(2, 2));
+      createLocalImageConfiguration(context, size: Size(2, 2));
       BitmapDescriptor.fromAssetImage(imageConfiguration, "images/tools.png")
           .then((value) {
-        animatingMarkerIcon = value;
+        if (!_isDisposed && mounted) {
+          animatingMarkerIcon = value;
+        }
       });
     }
   }
@@ -83,8 +98,12 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   void getRideLiveLocationUpdates() {
     LatLng oldPos = LatLng(0, 0);
 
-    // rideStreamSubscription =
-    Geolocator.getPositionStream().listen((Position position) {
+    positionStreamSubscription = Geolocator.getPositionStream().listen((Position position) {
+      if (_isDisposed || !mounted) {
+        positionStreamSubscription?.cancel();
+        return;
+      }
+
       currentPosition = position;
       myPosition = position;
       LatLng mPostion = LatLng(position.latitude, position.longitude);
@@ -100,254 +119,275 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
         infoWindow: InfoWindow(title: "Current Location"),
       );
 
-      setState(() {
-        CameraPosition cameraPosition =
-            new CameraPosition(target: mPostion, zoom: 17);
-        newRideGoogleMapController
-            ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+      if (mounted && !_isDisposed) {
+        setState(() {
+          CameraPosition cameraPosition =
+          CameraPosition(target: mPostion, zoom: 17);
+          newRideGoogleMapController
+              ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
-        markersSet
-            .removeWhere((marker) => marker.markerId.value == "animating");
-        markersSet.add(animatingMarker);
-      });
+          markersSet
+              .removeWhere((marker) => marker.markerId.value == "animating");
+          markersSet.add(animatingMarker);
+        });
+      }
+
       oldPos = mPostion;
       updateRideDetails();
 
       String? rideRequestId = widget.clientDetails.artisan_request_id;
-      Map locMap = {
-        "latitude": currentPosition?.latitude.toString(),
-        "longitude": currentPosition?.longitude.toString(),
-      };
-      clientRequestRef
-          .child(rideRequestId!)
-          .child("WMS_location")
-          .set(locMap);
+      if (rideRequestId != null) {
+        Map locMap = {
+          "latitude": currentPosition?.latitude.toString(),
+          "longitude": currentPosition?.longitude.toString(),
+        };
+        clientRequestRef
+            .child(rideRequestId)
+            .child("WMS_location")
+            .set(locMap);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isColapsed;
     createIconMarker();
     return Scaffold(
         body: Stack(children: [
-      GoogleMap(
-        padding: EdgeInsets.only(bottom: mapPaddingFromBottom),
-        mapType: MapType.normal,
-        myLocationButtonEnabled: true,
-        initialCameraPosition: NewRequestScreen._kGooglePlex,
-        myLocationEnabled: true,
-        markers: markersSet,
-        circles: circleSet,
-        polylines: polyLineSet,
-        onMapCreated: (GoogleMapController controller) async {
-          _controllerGoogleMap.complete(controller);
-          newRideGoogleMapController = controller;
-          setState(() {
-            mapPaddingFromBottom = 265.0;
-          });
+          GoogleMap(
+            padding: EdgeInsets.only(bottom: mapPaddingFromBottom),
+            mapType: MapType.normal,
+            myLocationButtonEnabled: true,
+            initialCameraPosition: NewRequestScreen._kGooglePlex,
+            myLocationEnabled: true,
+            markers: markersSet,
+            circles: circleSet,
+            polylines: polyLineSet,
+            onMapCreated: (GoogleMapController controller) async {
+              _controllerGoogleMap.complete(controller);
+              newRideGoogleMapController = controller;
+              if (mounted && !_isDisposed) {
+                setState(() {
+                  mapPaddingFromBottom = 265.0;
+                });
+              }
 
-          var currentLatLng =
-              LatLng(currentPosition!.latitude, currentPosition!.longitude);
-          var pickUpLatLng = widget.clientDetails.pickup;
+              if (currentPosition != null && widget.clientDetails.pickup != null) {
+                var currentLatLng =
+                LatLng(currentPosition!.latitude, currentPosition!.longitude);
+                var pickUpLatLng = widget.clientDetails.pickup;
+                await getPlaceDirection(currentLatLng, pickUpLatLng!);
+              }
 
-          await getPlaceDirection(currentLatLng, pickUpLatLng!);
-
-          getRideLiveLocationUpdates();
-        },
-      ),
-      Positioned(
-          left: 10.0,
-          right: 10.0,
-          bottom: 10.0,
-          child: SingleChildScrollView(
-              child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30.0),
-                      topRight: Radius.circular(30.0),
-                      bottomRight: Radius.circular(30.0),
-                      bottomLeft: Radius.circular(30.0),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black38,
-                        blurRadius: 16.0,
-                        spreadRadius: 0.5,
-                        offset: Offset(0.7, 0.7),
+              getRideLiveLocationUpdates();
+            },
+          ),
+          Positioned(
+              left: 10.0,
+              right: 10.0,
+              bottom: 10.0,
+              child: SingleChildScrollView(
+                  child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30.0),
+                          topRight: Radius.circular(30.0),
+                          bottomRight: Radius.circular(30.0),
+                          bottomLeft: Radius.circular(30.0),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black38,
+                            blurRadius: 16.0,
+                            spreadRadius: 0.5,
+                            offset: Offset(0.7, 0.7),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  height: 270.0,
-                  child: Padding(
-                    padding:
+                      height: 270.0,
+                      child: Padding(
+                        padding:
                         EdgeInsets.symmetric(horizontal: 30.0, vertical: 12.0),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Column(children: [
-                        Text(
-                          durationRide,
-                          style: TextStyle(
-                              fontSize: 14.0,
-                              fontFamily: "Brand Bold",
-                              color: Colors.black),
-                        ),
-                        SizedBox(
-                          height: 26.0,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: Column(children: [
                             Text(
-                              widget.clientDetails.client_name ?? "",
+                              durationRide,
                               style: TextStyle(
-                                  fontFamily: "Brand Bold", fontSize: 24.0),
+                                  fontSize: 14.0,
+                                  fontFamily: "Brand Bold",
+                                  color: Colors.black),
+                            ),
+                            SizedBox(
+                              height: 26.0,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  widget.clientDetails.client_name ?? "",
+                                  style: TextStyle(
+                                      fontFamily: "Brand Bold", fontSize: 24.0),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 10.0),
+                                  child: Icon(Icons.work),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 16.0,
+                            ),
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 18.0,
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    child: Text(
+                                      widget.clientDetails.client_Address ?? "",
+                                      style: TextStyle(fontSize: 18.0),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 26.0,
+                            ),
+                            SizedBox(
+                              height: 26.0,
                             ),
                             Padding(
-                              padding: EdgeInsets.only(right: 10.0),
-                              child: Icon(Icons.work),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 16.0,
-                        ),
-                        Row(
-                          children: [
-                            // Image.asset(
-                            //   "images/pickicon.png", height: 16.0,
-                            //   width: 16.0,),
-                            SizedBox(
-                              width: 18.0,
-                            ),
-                            Expanded(
-                              child: Container(
-                                child: Text(
-                                  widget.clientDetails.client_Address ?? "",
-                                  style: TextStyle(fontSize: 18.0),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 26.0,
-                        ),
-                        SizedBox(
-                          height: 26.0,
-                        ),
+                                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    if (status == "accepted") {
+                                      status = "arrived";
+                                      String? rideRequestId =
+                                          widget.clientDetails.artisan_request_id;
+                                      if (rideRequestId != null) {
+                                        clientRequestRef
+                                            .child(rideRequestId)
+                                            .child("status")
+                                            .set(status);
+                                      }
 
+                                      if (mounted && !_isDisposed) {
+                                        setState(() {
+                                          btnTitle = "Bin Picked Up";
+                                          btnColor = Colors.lightGreen;
+                                        });
+                                      }
 
+                                      if (mounted && !_isDisposed) {
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (BuildContext context) =>
+                                              ProgressDialog(
+                                                message: "Please wait...",
+                                              ),
+                                        );
+                                      }
 
+                                      if (widget.clientDetails.pickup != null &&
+                                          widget.clientDetails.dropoff != null) {
+                                        await getPlaceDirection(
+                                            widget.clientDetails.pickup!,
+                                            widget.clientDetails.dropoff!);
+                                      }
 
-                        Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            // ignore: deprecated_member_use
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                if (status == "accepted") {
-                                  status = "arrived";
-                                  String? rideRequestId =
-                                      widget.clientDetails.artisan_request_id;
-                                  clientRequestRef
-                                      .child(rideRequestId!)
-                                      .child("status")
-                                      .set(status);
+                                      if (mounted && !_isDisposed && Navigator.canPop(context)) {
+                                        Navigator.pop(context);
+                                      }
+                                    } else if (status == "arrived") {
+                                      status = "onride";
+                                      String? rideRequestId =
+                                          widget.clientDetails.artisan_request_id;
+                                      if (rideRequestId != null) {
+                                        clientRequestRef
+                                            .child(rideRequestId)
+                                            .child("status")
+                                            .set(status);
+                                      }
 
-                                  setState(() {
-                                    btnTitle = "Bin Picked Up";
-                                    btnColor = Colors.lightGreen;
-                                  });
+                                      if (mounted && !_isDisposed) {
+                                        setState(() {
+                                          btnTitle = "Done";
+                                          btnColor = Colors.redAccent;
+                                        });
+                                      }
 
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (BuildContext context) =>
-                                        ProgressDialog(
-                                      message: "Please wait...",
-                                    ),
-                                  );
-
-                                  await getPlaceDirection(
-                                      widget.clientDetails.pickup!,
-                                      widget.clientDetails.dropoff!);
-
-                                  Navigator.pop(context);
-                                } else if (status == "arrived") {
-                                  status = "onride";
-                                  String? rideRequestId =
-                                      widget.clientDetails.artisan_request_id;
-                                  clientRequestRef
-                                      .child(rideRequestId!)
-                                      .child("status")
-                                      .set(status);
-
-                                  setState(() {
-                                    btnTitle = "Done";
-                                    btnColor = Colors.redAccent;
-                                  });
-
-                                  initTimer();
-                                } else if (status == "onride") {
-                                  endTheTrip();
-                                }
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.all(17.0),
-                                child: Row(
-                                  mainAxisAlignment:
+                                      initTimer();
+                                    } else if (status == "onride") {
+                                      await endTheTrip();
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: EdgeInsets.all(17.0),
+                                    child: Row(
+                                      mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      btnTitle,
-                                      style: TextStyle(
-                                          fontSize: 20.0,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black),
+                                      children: [
+                                        Text(
+                                          btnTitle,
+                                          style: TextStyle(
+                                              fontSize: 20.0,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black),
+                                        ),
+                                        Icon(
+                                          Icons.work,
+                                          color: Colors.black,
+                                          size: 26.0,
+                                        ),
+                                      ],
                                     ),
-                                    Icon(
-                                      Icons.work,
-                                      color: Colors.black,
-                                      size: 26.0,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: btnColor,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(24.0),
-                                    side:
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: btnColor,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(24.0),
+                                        side:
                                         const BorderSide(color: Colors.white)),
-                              ),
-                            )),
-                      ]),
-                    ),
-                  ))))
-    ]));
+                                  ),
+                                )),
+                          ]),
+                        ),
+                      ))))
+        ]));
   }
 
   Future<void> getPlaceDirection(
       LatLng pickUpLatLng, LatLng dropOffLatLng) async {
+    if (!mounted || _isDisposed) return;
+
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (BuildContext context) => ProgressDialog(
-              message: "Please wait...",
-            ));
+          message: "Please wait...",
+        ));
 
     var details = await AssistantMethod.obtainPlaceDirectionDetails(
         pickUpLatLng, dropOffLatLng);
 
-    Navigator.pop(context);
+    if (mounted && !_isDisposed && Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
+
+    if (details == null) return;
 
     print("This is Encoded Points ::");
-    print(details!.encodedPoints);
+    print(details.encodedPoints);
 
     PolylinePoints polylinePoints = PolylinePoints();
     List<PointLatLng> decodedPolyLinePointsResult =
-        polylinePoints.decodePolyline(details.encodedPoints!);
+    polylinePoints.decodePolyline(details.encodedPoints!);
 
     polylineCoordinates.clear();
 
@@ -360,20 +400,22 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
 
     polyLineSet.clear();
 
-    setState(() {
-      Polyline polyline = Polyline(
-        color: Colors.black,
-        polylineId: PolylineId("PolylineID"),
-        jointType: JointType.round,
-        points: polylineCoordinates,
-        width: 5,
-        startCap: Cap.roundCap,
-        endCap: Cap.roundCap,
-        geodesic: true,
-      );
+    if (mounted && !_isDisposed) {
+      setState(() {
+        Polyline polyline = Polyline(
+          color: Colors.black,
+          polylineId: PolylineId("PolylineID"),
+          jointType: JointType.round,
+          points: polylineCoordinates,
+          width: 5,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+          geodesic: true,
+        );
 
-      polyLineSet.add(polyline);
-    });
+        polyLineSet.add(polyline);
+      });
+    }
 
     LatLngBounds latLngBounds;
     if (pickUpLatLng.latitude > dropOffLatLng.latitude &&
@@ -393,8 +435,8 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
           LatLngBounds(southwest: pickUpLatLng, northeast: dropOffLatLng);
     }
 
-    newRideGoogleMapController!
-        .animateCamera(CameraUpdate.newLatLngBounds(latLngBounds, 70));
+    newRideGoogleMapController
+        ?.animateCamera(CameraUpdate.newLatLngBounds(latLngBounds, 70));
 
     Marker pickUpLocMarker = Marker(
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
@@ -408,10 +450,12 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       markerId: MarkerId("dropOffId"),
     );
 
-    setState(() {
-      markersSet.add(pickUpLocMarker);
-      markersSet.add(dropOffLocMarker);
-    });
+    if (mounted && !_isDisposed) {
+      setState(() {
+        markersSet.add(pickUpLocMarker);
+        markersSet.add(dropOffLocMarker);
+      });
+    }
 
     Circle pickUpLocCircle = Circle(
       fillColor: Colors.blueAccent,
@@ -431,56 +475,64 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       circleId: CircleId("dropOffId"),
     );
 
-    setState(() {
-      circleSet.add(pickUpLocCircle);
-      circleSet.add(dropOffLocCircle);
-    });
+    if (mounted && !_isDisposed) {
+      setState(() {
+        circleSet.add(pickUpLocCircle);
+        circleSet.add(dropOffLocCircle);
+      });
+    }
   }
 
   void acceptRideRequest() {
-
     String? rideRequestId = widget.clientDetails.artisan_request_id;
-    clientRequestRef.child(rideRequestId!).child("status").set("accepted");
+    if (rideRequestId == null) return;
+
+    clientRequestRef.child(rideRequestId).child("status").set("accepted");
     clientRequestRef
         .child(rideRequestId)
         .child("WMS_name")
-        .set(Provider.of<WMS>(context,listen: false).riderInfo?.firstname??"");
+        .set(Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "");
     clientRequestRef
         .child(rideRequestId)
         .child("WMS_phone")
-        .set(Provider.of<WMS>(context,listen: false).riderInfo?.phone??"");
+        .set(Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "");
     clientRequestRef
         .child(rideRequestId)
         .child("WMS_id")
-        .set (WMSDBtoken.key);
-    // clientRequestRef.child(rideRequestId).child("artisan_details").set(
-    //     '${artisanInformation?.education} ● ${artisanInformation?.servicetype} ● ${artisanInformation?.phone}');
+        .set(WMSDBtoken.key);
 
     clientRequestRef
         .child(rideRequestId)
         .child("profilepicture")
         .set(riderinformation?.profilepicture);
 
-    Map locMap = {
-      "latitude": currentPosition?.latitude.toString(),
-      "longitude": currentPosition?.longitude.toString(),
-    };
-    clientRequestRef.child(rideRequestId).child("WMS_location").set(locMap);
+    if (currentPosition != null) {
+      Map locMap = {
+        "latitude": currentPosition?.latitude.toString(),
+        "longitude": currentPosition?.longitude.toString(),
+      };
+      clientRequestRef.child(rideRequestId).child("WMS_location").set(locMap);
+    }
 
-    WastemanagementRef
-        .child(firebaseUser!.uid)
-        .child("history")
-        .child(rideRequestId)
-        .set(true);
+    if (firebaseUser != null) {
+      WastemanagementRef
+          .child(firebaseUser!.uid)
+          .child("history")
+          .child(rideRequestId)
+          .set(true);
+    }
   }
 
   void updateRideDetails() async {
+    if (_isDisposed || !mounted) return;
+
     if (isRequestingDirection == false) {
       isRequestingDirection = true;
       if (myPosition == null) {
+        isRequestingDirection = false;
         return;
       }
-      //this the drivers position
+
       var posLatLng = LatLng(myPosition!.latitude, myPosition!.longitude);
       LatLng? destinationLatLng;
 
@@ -490,29 +542,36 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
         destinationLatLng = widget.clientDetails.dropoff;
       }
 
-      var directionDetails = await AssistantMethod.obtainPlaceDirectionDetails(
-          posLatLng, destinationLatLng!);
-      if (directionDetails != null) {
-        setState(() {
-          durationRide = directionDetails.durationText!;
-        });
+      if (destinationLatLng != null) {
+        var directionDetails = await AssistantMethod.obtainPlaceDirectionDetails(
+            posLatLng, destinationLatLng);
+
+        if (directionDetails != null && mounted && !_isDisposed) {
+          setState(() {
+            durationRide = directionDetails.durationText!;
+          });
+        }
       }
 
       isRequestingDirection = false;
     }
   }
 
-  // }
-
   void initTimer() {
     const interval = Duration(seconds: 1);
     timer = Timer.periodic(interval, (timer) {
-      durationCounter = durationCounter + 1;
+      if (!_isDisposed && mounted) {
+        durationCounter = durationCounter + 1;
+      } else {
+        timer.cancel();
+      }
     });
   }
 
-  endTheTrip() async {
+  Future<void> endTheTrip() async {
     timer?.cancel();
+
+    if (!mounted || _isDisposed) return;
 
     showDialog(
       context: context,
@@ -525,13 +584,11 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
     try {
       String? rideRequestId = widget.clientDetails.artisan_request_id;
 
-      // Check if rideRequestId is null
       if (rideRequestId == null) {
-        Navigator.pop(context); // Close progress dialog
+        if (Navigator.canPop(context)) Navigator.pop(context);
         throw Exception("Ride request ID is null");
       }
 
-      // Fetch fare amount from database instead of calculating
       DatabaseReference rideRef = clientRequestRef.child(rideRequestId);
 
       print('riderefhere$rideRequestId');
@@ -541,11 +598,9 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       int fareAmount = 0;
 
       if (snapshot.exists && snapshot.value != null) {
-        // Fare exists in database
         fareAmount = int.tryParse(snapshot.value.toString()) ?? 0;
         print("Fare from database: $fareAmount");
       } else {
-        // Fallback: Calculate if not in database
         print("No fare in database, calculating locally");
         if (myPosition != null && widget.clientDetails.pickup != null) {
           var currentLatLng = LatLng(myPosition!.latitude, myPosition!.longitude);
@@ -553,43 +608,52 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
               widget.clientDetails.pickup!,
               currentLatLng
           );
-          // You need to extract fare from directionalDetails here
-          // fareAmount = directionalDetails.fare; // Adjust based on your implementation
+          // Extract fare from directionalDetails if available
+          if (directionalDetails != null && directionalDetails.distanceValue != null) {
+            // Calculate fare based on distance - adjust formula as needed
+            fareAmount = (directionalDetails.distanceValue! * 0.5).toInt(); // Example calculation
+          }
         } else {
           throw Exception("Missing position or pickup data for fare calculation");
         }
       }
 
-      Navigator.pop(context); // Close progress dialog
+      if (mounted && !_isDisposed && Navigator.canPop(context)) {
+        Navigator.pop(context); // Close progress dialog
+      }
 
-      // Update trip status
       await rideRef.child("status").set("ended");
 
       rideStreamSubscription?.cancel();
+      positionStreamSubscription?.cancel();
 
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) => CollectFareDialog(
-          paymentMethod: widget.clientDetails.payment_method,
-          fareAmount: fareAmount,
-        ),
-      );
+      if (mounted && !_isDisposed) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => CollectFareDialog(
+            paymentMethod: widget.clientDetails.payment_method,
+            fareAmount: fareAmount,
+          ),
+        );
+      }
 
-       saveEarnings(fareAmount);
+      await saveEarnings(fareAmount);
 
     } catch (e) {
-      if (Navigator.canPop(context)) {
+      if (mounted && !_isDisposed && Navigator.canPop(context)) {
         Navigator.pop(context); // Close dialog on error
       }
       print("Error ending trip: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error ending trip: $e")),
-      );
+      if (mounted && !_isDisposed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error ending trip: $e")),
+        );
+      }
     }
   }
 
-  void saveEarnings(int fareAmount) async {
+  Future<void> saveEarnings(int fareAmount) async {
     try {
       if (currentfirebaseUser == null) {
         print("Current user is null");
@@ -612,12 +676,12 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       }
     } catch (e) {
       print("Error saving earnings: $e");
-      // Don't throw here to prevent breaking the trip completion flow
     }
   }
 
   void displayToast(String message, BuildContext context) {
-    Fluttertoast.showToast(msg: message);
+    if (mounted && !_isDisposed) {
+      Fluttertoast.showToast(msg: message);
+    }
   }
-
 }
