@@ -571,6 +571,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   Future<void> endTheTrip() async {
     timer?.cancel();
 
+    int? fareAmount;
     if (!mounted || _isDisposed) return;
 
     showDialog(
@@ -595,10 +596,9 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       DataSnapshot snapshot = await rideRef.child("fare").get();
       print('fare${snapshot.value.toString()}');
 
-      int fareAmount = 0;
 
       if (snapshot.exists && snapshot.value != null) {
-        fareAmount = int.tryParse(snapshot.value.toString()) ?? 0;
+        fareAmount =int.parse( snapshot.value.toString());
         print("Fare from database: $fareAmount");
       } else {
         print("No fare in database, calculating locally");
@@ -608,11 +608,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
               widget.clientDetails.pickup!,
               currentLatLng
           );
-          // Extract fare from directionalDetails if available
-          if (directionalDetails != null && directionalDetails.distanceValue != null) {
-            // Calculate fare based on distance - adjust formula as needed
-            fareAmount = (directionalDetails.distanceValue! * 0.5).toInt(); // Example calculation
-          }
+
         } else {
           throw Exception("Missing position or pickup data for fare calculation");
         }
@@ -638,7 +634,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
         );
       }
 
-      await saveEarnings(fareAmount);
+      await saveEarnings(fareAmount!);
 
     } catch (e) {
       if (mounted && !_isDisposed && Navigator.canPop(context)) {
