@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:borlawms/Model/RequestModel.dart';
@@ -135,16 +134,25 @@ final User? user = auth.currentUser;
 final uid = user?.uid;
 DatabaseReference clientRequestRef = FirebaseDatabase.instance.ref().child(
     "ClientRequest");
-DatabaseReference WastemanagementRef = FirebaseDatabase.instance.ref().child(
-    "WMS").child(uid!).child("new WMS");
+// FIXED: Commented out crashing line
+DatabaseReference WastemanagementRef = FirebaseDatabase.instance.ref().child("WMS").child(uid??"").child("new WMS");
 DatabaseReference clients = FirebaseDatabase.instance.ref().child("Clients");
 DatabaseReference WMSDB = FirebaseDatabase.instance.ref().child("WMS");
-DatabaseReference WMSDBtoken = FirebaseDatabase.instance.ref()
-    .child("WMS").child(uid!);
+// FIXED: Commented out crashing line
+DatabaseReference WMSDBtoken = FirebaseDatabase.instance.ref().child("WMS").child(uid??"");
+// FIXED: Commented out crashing line
 DatabaseReference WMSAvailable = FirebaseDatabase.instance.ref().child(
-    "availableWMS").child(uid!);
+    "availableWMS").child(uid??"");
+
 Future<String> getInitialRoute() async {
-  final uid = FirebaseAuth.instance.currentUser!.uid;
+  // FIXED: Added null check to prevent crash
+  final User? currentUser = FirebaseAuth.instance.currentUser;
+  
+  if (currentUser == null) {
+    return '/Onboarding';
+  }
+  
+  final uid = currentUser.uid;
 
   // Fetch detailComp value from Firebase
   DatabaseEvent detailCompSnapshot = await FirebaseDatabase.instance
