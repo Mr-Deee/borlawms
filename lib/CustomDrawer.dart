@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:shimmer/shimmer.dart';
-
 import 'package:borlawms/pages/Aboutpage.dart';
 import 'package:borlawms/pages/Profilepage.dart';
 import 'package:borlawms/pages/Requests.dart';
@@ -20,14 +19,27 @@ class CustomDrawer extends StatefulWidget {
 }
 
 class _CustomDrawerState extends State<CustomDrawer> {
+  bool _isDisposed = false;
+
   @override
   void initState() {
     super.initState();
-    AssistantMethod.getCurrentOnlineUserInfo(context);
+    _isDisposed = false;
+    if (mounted && !_isDisposed) {
+      AssistantMethod.getCurrentOnlineUserInfo(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!mounted || _isDisposed) return Container();
+
     final username = Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "";
     final lastname = Provider.of<WMS>(context, listen: false).riderInfo?.lastname ?? "";
     final phoneNumber = Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "";
@@ -104,75 +116,85 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
             _buildDrawerTile(
               icon: FontAwesomeIcons.clipboardList,
               title: "My Requests",
               color: const Color(0xFF2ECC71),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => Requestpage())),
+              onTap: () {
+                if (!mounted || _isDisposed) return;
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const Requestpage()));
+              },
             ),
             _buildDrawerTile(
               icon: FontAwesomeIcons.idCard,
               title: "Profile",
               color: const Color(0xFF27AE60),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage())),
+              onTap: () {
+                if (!mounted || _isDisposed) return;
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
+              },
             ),
             _buildDrawerTile(
               icon: FontAwesomeIcons.clockRotateLeft,
               title: "Request History",
               color: const Color(0xFF16A085),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => Requestpage())),
+              onTap: () {
+                if (!mounted || _isDisposed) return;
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const Requestpage()));
+              },
             ),
             _buildDrawerTile(
               icon: FontAwesomeIcons.calendarDays,
               title: "Schedules & Subscriptions",
               color: const Color(0xFF2980B9),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SubscriptionAndSchedulePage())),
+              onTap: () {
+                if (!mounted || _isDisposed) return;
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const SubscriptionAndSchedulePage()));
+              },
             ),
             _buildDrawerTile(
               icon: FontAwesomeIcons.circleQuestion,
               title: "About",
               color: const Color(0xFFF39C12),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AboutPage())),
+              onTap: () {
+                if (!mounted || _isDisposed) return;
+                Navigator.push(context, MaterialPageRoute(builder: (_) =>  AboutPage()));
+              },
             ),
-
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
               child: Divider(thickness: 1.2),
             ),
-
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children:  [
-            LiquidSignatureText(
-              text: "By DANIEL NARTERH",
-              gradientColors: [
-                Color(0x5282B1FF),
-                Color(0xFFEEF7FA),
-                Color(0xFFEEF7FA),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                LiquidSignatureText(
+                  text: "By DANIEL NARTERH",
+                  gradientColors: [
+                    Color(0x5282B1FF),
+                    Color(0xFFEEF7FA),
+                    Color(0xFFEEF7FA),
+                  ],
+                  baseOpacity: 0.3,
+                  blurIntensity: 8,
+                  width: 280,
+                ),
+                const SizedBox(height: 8),
+                LiquidSignatureText(
+                  text: "Mlabstech",
+                  gradientColors: [
+                    Color(0x40404),
+                    Color(0xFFEEF7FA),
+                    Color(0xFFEEF7FA),
+                  ],
+                  baseOpacity: 0.35,
+                  blurIntensity: 10,
+                  width: 220,
+                ),
               ],
-              baseOpacity: 0.3,
-              blurIntensity: 8,
-              width: 280,
             ),
-            SizedBox(height: 8),
-            LiquidSignatureText(
-              text: "Mlabstech",
-              gradientColors: [
-                Color(0x40404),
-                Color(0xFFEEF7FA),
-                Color(0xFFEEF7FA),
-              ],
-              baseOpacity: 0.35,
-              blurIntensity: 10,
-              width: 220,
-            ),
-          ],
-        ),
-            SizedBox(height: 15),
-
+            const SizedBox(height: 15),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
@@ -183,7 +205,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 ),
               ),
             ),
-
             const SizedBox(height: 60),
           ],
         ),
@@ -249,6 +270,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
   }
 
   void _confirmLogout(BuildContext context) {
+    if (!mounted || _isDisposed) return;
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -258,26 +281,25 @@ class _CustomDrawerState extends State<CustomDrawer> {
         actions: [
           TextButton(
             onPressed: () {
+              if (!mounted || _isDisposed) return;
               FirebaseAuth.instance.signOut();
-              Navigator.pushNamedAndRemoveUntil(context, "/SignIn", (_) => false);
+              if (mounted && !_isDisposed) {
+                Navigator.pushNamedAndRemoveUntil(context, "/SignIn", (_) => false);
+              }
             },
             child: const Text("Yes", style: TextStyle(color: Colors.redAccent)),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              if (mounted && !_isDisposed) Navigator.pop(context);
+            },
             child: const Text("Cancel", style: TextStyle(color: Colors.black54)),
           ),
         ],
       ),
     );
   }
-
-
-
-
 }
-
-
 
 class LiquidSignatureText extends StatelessWidget {
   final String text;
@@ -301,15 +323,12 @@ class LiquidSignatureText extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final shaderWidth = constraints.maxWidth > 0
-            ? constraints.maxWidth
-            : width; // adapt to container width
+        final shaderWidth = constraints.maxWidth > 0 ? constraints.maxWidth : width;
 
         return Center(
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // soft glow background (under text)
               Text(
                 text,
                 textAlign: TextAlign.center,
@@ -319,9 +338,7 @@ class LiquidSignatureText extends StatelessWidget {
                   letterSpacing: 1.9,
                   foreground: Paint()
                     ..shader = LinearGradient(
-                      colors: gradientColors
-                          .map((c) => c.withOpacity(0.8))
-                          .toList(),
+                      colors: gradientColors.map((c) => c.withOpacity(0.8)).toList(),
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ).createShader(Rect.fromLTWH(0, 0, shaderWidth, 100)),
@@ -337,8 +354,6 @@ class LiquidSignatureText extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // shimmering text overlay (kept crisp)
               Shimmer.fromColors(
                 baseColor: gradientColors.last.withOpacity(baseOpacity),
                 highlightColor: gradientColors.first.withOpacity(0.9),
@@ -359,8 +374,6 @@ class LiquidSignatureText extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // glass reflection glow underneath
               Positioned(
                 bottom: -5,
                 child: ClipRRect(
@@ -375,11 +388,7 @@ class LiquidSignatureText extends StatelessWidget {
                       height: 8,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
-                            // Colors.white.withOpacity(0.06),
-                            // Colors.white.withOpacity(0.02),
-                            // Colors.transparent,
-                          ],
+                          colors: [],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),

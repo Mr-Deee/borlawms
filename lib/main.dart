@@ -11,6 +11,7 @@ import 'package:borlawms/pages/homepage.dart';
 import 'package:borlawms/pages/onboarding.dart';
 import 'package:borlawms/pages/signin.dart';
 import 'package:borlawms/pages/signup.dart';
+import 'package:borlawms/widgets/Subscriptions&Schedules.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
@@ -18,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:shimmer/main.dart';
 import 'Assistant/helper.dart';
 import 'Model/Users.dart';
 import 'Model/WMSDB.dart';
@@ -272,7 +274,7 @@ initializeFCM(context);
               "/recycle": (context) => RecyclePage(),
               "/SignIn": (context) => signin(),
               "/Profile": (context) => ProfilePage(),
-              "/Homepage": (context) => homepage(),
+              "/Homepage": (context) =>homepage()
             },
           );
         }
@@ -282,24 +284,147 @@ initializeFCM(context);
 }
 final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
+
+// Add this to your main widget or app initialization
 Future<void> initializeFCM(BuildContext context) async {
   print("Initializing FCM");
 
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('Got a message whilst in the foreground!');
-    // Handle foreground notification
-  });
+  try {
+    // Request permissions first
+    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    print('App opened via notification!');
-    // Handle background/opened app notification
-  });
+    print('Notification permission status: ${settings.authorizationStatus}');
 
-  final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-  if (initialMessage != null) {
-    // Handle notification that opened the app from terminated state
+    // Handle foreground messages
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message whilst in the foreground!');
+      _handleForegroundMessage(message, context);
+    });
+
+    // Handle when app is opened from background/terminated state via notification tap
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('App opened via notification!');
+      _handleMessageTap(message, context);
+    });
+
+    // Handle when app is opened from terminated state via notification
+    final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      print('App opened from terminated state via notification');
+      // Delay to ensure widget tree is built
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _handleMessageTap(initialMessage, context);
+      });
+    }
+
+    // Get and store FCM token
+    String? token = await FirebaseMessaging.instance.getToken();
+    print('FCM Token: $token');
+
+    // Store token in your database if needed
+    if (token != null && token.isNotEmpty) {
+      // await FirebaseDatabase.instance.ref('users/${userId}/fcmToken').set(token);
+    }
+
+  } catch (e) {
+    print("Error initializing FCM: $e");
   }
 }
+
+void _handleForegroundMessage(RemoteMessage message, BuildContext context) {
+  try {
+    print('Message data: ${message.data}');
+    print('Message notification: ${message.notification?.title}');
+
+    // Show in-app notification
+    if (message.notification != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message.notification?.title ?? 'New notification'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+
+    // Handle the message content
+    _handleMessageTap(message, context);
+  } catch (e) {
+    print("Error handling foreground message: $e");
+  }
+}
+
+void _handleMessageTap(RemoteMessage message, BuildContext context) {
+  try {
+    final messageType = message.data['type'];
+    print("Message type: $messageType");
+
+    // Navigate based on message type
+    if (messageType == 'scheduled') {
+      // Navigate to scheduled request screen or show dialog
+      _showScheduledRequestDialog(message, context);
+    } else if (messageType == 'immediate') {
+      // Handle immediate request
+      final requestId = message.data['request_id'];
+      if (requestId != null && requestId.isNotEmpty) {
+        // Navigate to request details
+        _navigateToRequestDetails(requestId, context);
+      }
+    }
+  } catch (e) {
+    print("Error handling message tap: $e");
+  }
+}
+
+void _showScheduledRequestDialog(RemoteMessage message, BuildContext context) {
+  // Show dialog or navigate to scheduled request screen
+  showDialog(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text('Scheduled Request'),
+      content: Text(message.data['message'] ?? 'You have a new scheduled request'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text('Later'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(ctx);
+            // Navigate to scheduled requests screen
+            Navigator.push(context, MaterialPageRoute(builder: (_) => SubscriptionAndSchedulePage()));
+          },
+          child: Text('View'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _navigateToRequestDetails(String requestId, BuildContext context) {
+  // Navigate to request details screen
+  // Navigator.push(context, MaterialPageRoute(builder: (_) => RequestDetailsScreen(requestId: requestId)));
+}
+
+// Call this from your main app or splash screen
+Future<void> _initNotifications(BuildContext context) async {
+  try {
+    final pushNotificationService = PushNotificationService();
+    await pushNotificationService.initialize(context);
+  } catch (e) {
+    print("Error initializing push notifications: $e");
+  }
+}
+
+
+
+
+
+
+
 
 void setupFCMTokenListener() {
   FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {

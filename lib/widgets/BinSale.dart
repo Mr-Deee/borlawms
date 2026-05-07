@@ -75,10 +75,6 @@ class _SellingBinsWidgetState extends State<SellingBinsWidget> {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
-    // Ensure _bins is initialized and not null
-    if (_bins == null) {
-      _bins = [];
-    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

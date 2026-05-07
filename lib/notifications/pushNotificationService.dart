@@ -22,7 +22,7 @@ class PushNotificationService {
     print("Initializing push notifications...");
 
     try {
-      print("Step 1: Requesting iOS notification permissions...");
+      print("Step 1: Requesting notification permissions...");
       await _requestNotificationPermissions();
       print("Step 1 Complete: Permissions requested.");
     } catch (e) {
@@ -33,7 +33,9 @@ class PushNotificationService {
       print("Step 2: Setting up foreground message listener...");
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         print('Foreground message received: ${message.messageId}');
-        _handleMessage(message, context);
+        if (context.mounted) {
+          _handleMessage(message, context);
+        }
       });
       print("Step 2 Complete: Foreground listener set.");
     } catch (e) {
@@ -44,7 +46,9 @@ class PushNotificationService {
       print("Step 3: Setting up background message tap listener...");
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
         print('App opened from notification: ${message.messageId}');
-        _handleMessage(message, context);
+        if (context.mounted) {
+          _handleMessage(message, context);
+        }
       });
       print("Step 3 Complete: onMessageOpenedApp listener set.");
     } catch (e) {
@@ -56,7 +60,11 @@ class PushNotificationService {
       final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
       if (initialMessage != null) {
         print('Initial notification found: ${initialMessage.messageId}');
-        _handleMessage(initialMessage, context);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            _handleMessage(initialMessage, context);
+          }
+        });
       } else {
         print("No initial notification found.");
       }
@@ -77,10 +85,10 @@ class PushNotificationService {
   }
 
   Future<void> _requestNotificationPermissions() async {
-    if (Platform.isIOS) {
-      print("Requesting iOS notification permissions...");
+    try {
+      if (Platform.isIOS) {
+        print("Requesting iOS notification permissions...");
 
-      try {
         await messaging.setForegroundNotificationPresentationOptions(
           alert: true,
           badge: true,
@@ -96,27 +104,42 @@ class PushNotificationService {
         );
 
         print('iOS Notification permission status: ${settings.authorizationStatus}');
-      } catch (e) {
-        print("Error requesting iOS permissions: $e");
+      } else if (Platform.isAndroid) {
+        // For Android 13+, request permission
+        NotificationSettings settings = await messaging.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+        print('Android Notification permission status: ${settings.authorizationStatus}');
       }
-    } else {
-      print("Notification permissions not required for non-iOS platforms.");
+    } catch (e) {
+      print("Error requesting permissions: $e");
     }
   }
 
   Future<void> getToken() async {
     try {
       String? token = await messaging.getToken();
-      if (token != null) {
+      if (token != null && token.isNotEmpty) {
         print("FCM Token: $token");
-        await WMSDBtoken.child("token").set(token);
 
-        // Subscribe to topics
-        await Future.wait([
-          messaging.subscribeToTopic("alldrivers"),
-          messaging.subscribeToTopic("allusers")
-        ]);
-        print("Subscribed to topics successfully");
+        try {
+          await WMSDBtoken.child("token").set(token);
+          print("Token stored successfully");
+        } catch (e) {
+          print("Error storing token: $e");
+        }
+
+        try {
+          await Future.wait([
+            messaging.subscribeToTopic("alldrivers"),
+            messaging.subscribeToTopic("allusers")
+          ]);
+          print("Subscribed to topics successfully");
+        } catch (e) {
+          print("Error subscribing to topics: $e");
+        }
       } else {
         print("Failed to get FCM token");
       }
@@ -126,9 +149,16 @@ class PushNotificationService {
   }
 
   String getRideRequestId(Map<String, dynamic> message) {
-    String rideRequestId = message['wms_request_id'] ?? "";
-    print("Ride Request ID: $rideRequestId");
-    return rideRequestId;
+    try {
+      String rideRequestId = message['wms_request_id'] ??
+          message['request_id'] ??
+          message['rideRequestId'] ?? "";
+      print("Ride Request ID: $rideRequestId");
+      return rideRequestId;
+    } catch (e) {
+      print("Error getting ride request ID: $e");
+      return "";
+    }
   }
 
   void _handleMessage(RemoteMessage message, BuildContext context) {
@@ -138,15 +168,12 @@ class PushNotificationService {
         return;
       }
 
-      // Extract type safely
       final messageType = message.data['type'] ?? 'immediate';
       print("📩 Message type: $messageType");
 
       if (messageType == 'scheduled') {
-        // 🔹 Call your new scheduled request handler
         _handleScheduledRequest(message, context);
       } else {
-        // 🔹 Default: handle normal ride requests
         final rideRequestId = getRideRequestId(message.data);
         if (rideRequestId.isNotEmpty) {
           retrieveRideRequestInfo(rideRequestId, context);
@@ -162,45 +189,103 @@ class PushNotificationService {
 
 
 
+
+
+
   void _handleScheduledRequest(RemoteMessage message, BuildContext context) async {
+    if (!context.mounted) {
+      print("Context not mounted, cannot show dialog");
+      return;
+    }
+
     try {
-      final String wmsRequestId = message.data['wms_request_id'] ?? '';
+      final String wmsRequestId = message.data['wms_request_id'] ??
+          message.data['request_id'] ??
+          '';
 
       if (wmsRequestId.isEmpty) {
-        print("⚠️ Missing wms_request_id in notification data");
+        print("⚠️ Missing request ID in notification data");
         return;
       }
 
       print("📦 Fetching scheduled request details for ID: $wmsRequestId");
 
-      // 🔹 Correct database path based on your structure
-      final ref = FirebaseDatabase.instance
-          .ref()
-          .child("Request")
-          .child("ScheduledRequest")
-          .child(wmsRequestId);
+      // Try multiple database paths
+      DatabaseEvent? event;
+      DatabaseReference ref;
 
-      final requestSnapshot = await ref.get();
+      // Try the ScheduledRequest path first
+      try {
+        ref = FirebaseDatabase.instance
+            .ref()
+            .child("Request")
+            .child("ScheduledRequest")
+            .child(wmsRequestId);
 
-      if (!requestSnapshot.exists) {
-        print("❌ No scheduled request found for ID $wmsRequestId");
+        event = (await ref.get()) as DatabaseEvent?;
+
+        if (!event!.snapshot.exists) {
+          // Try alternative path
+          ref = FirebaseDatabase.instance
+              .ref()
+              .child("Request")
+              .child(wmsRequestId);
+          event = (await ref.get()) as DatabaseEvent?;
+        }
+      } catch (e) {
+        print("Error accessing database: $e");
         return;
       }
 
-      final data = Map<String, dynamic>.from(requestSnapshot.value as Map);
-      final clientName = data['client_name'] ?? 'Unknown';
-      final requestId = data['Requesterid'] ?? 'Unknown';
-      final requeststreamId = data['request_id'] ?? 'Unknown';
-      final clientPhone = data['client_phone'] ?? 'N/A';
-      final scheduledTime = data['dateTime'] ?? 'Not set';
-      final pickupLat = (data['latitude'] as num).toDouble();
-      final pickupLng = (data['longitude'] as num).toDouble();
-      final locationName = data['location_name'] ?? 'Unknown location';
-      BuildContext parentContext = context;
+      if (event == null || !event.snapshot.exists) {
+        print("❌ No scheduled request found for ID $wmsRequestId");
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Request not found')),
+          );
+        }
+        return;
+      }
 
-      // 🔹 Show the request details in a bottom sheet
+      final data = Map<String, dynamic>.from(event.snapshot.value as Map);
+
+      // Safely extract data with fallbacks
+      final clientName = data['client_name'] ?? data['RequesterName'] ?? 'Unknown';
+      final requestId = data['Requesterid'] ?? data['client_id'] ?? 'Unknown';
+      final requeststreamId = data['request_id'] ?? wmsRequestId;
+      final clientPhone = data['client_phone'] ?? data['phone'] ?? 'N/A';
+      final scheduledTime = data['dateTime'] ?? data['scheduled_time'] ?? 'Not set';
+
+      // Safely parse coordinates
+      double pickupLat = 0.0;
+      double pickupLng = 0.0;
+
+      if (data['latitude'] != null && data['longitude'] != null) {
+        try {
+          pickupLat = (data['latitude'] as num).toDouble();
+          pickupLng = (data['longitude'] as num).toDouble();
+        } catch (e) {
+          print("Error parsing coordinates: $e");
+        }
+      } else if (data['client_Coordinates'] != null) {
+        try {
+          final coords = data['client_Coordinates'] as Map;
+          pickupLat = (coords['latitude'] as num).toDouble();
+          pickupLng = (coords['longitude'] as num).toDouble();
+        } catch (e) {
+          print("Error parsing nested coordinates: $e");
+        }
+      }
+
+      final locationName = data['location_name'] ??
+          data['Client_address'] ??
+          'Unknown location';
+
+      if (!context.mounted) return;
+
+      // Show the request details in a dialog
       showDialog(
-        context: parentContext,
+        context: context,
         barrierDismissible: false,
         builder: (dialogContext) {
           return AlertDialog(
@@ -216,15 +301,24 @@ class PushNotificationService {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Client: $clientName'),
+                const SizedBox(height: 8),
                 Text('Phone: $clientPhone'),
+                const SizedBox(height: 8),
                 Text('Pickup: $locationName'),
+                const SizedBox(height: 8),
                 Text('Scheduled Time: $scheduledTime'),
                 const SizedBox(height: 20),
               ],
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  FirebaseDatabase.instance
+                      .ref('Request/ScheduledRequest/$requeststreamId/status')
+                      .set('declined')
+                      .catchError((e) => print("Error updating status: $e"));
+                  Navigator.pop(dialogContext);
+                },
                 child: const Text(
                   'Decline',
                   style: TextStyle(color: Colors.red),
@@ -232,7 +326,7 @@ class PushNotificationService {
               ),
               ElevatedButton.icon(
                 icon: const Icon(Icons.check_circle, color: Colors.white),
-                label: const Text('Accept & View Route'),
+                label: const Text('Accept'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   shape: RoundedRectangleBorder(
@@ -240,89 +334,100 @@ class PushNotificationService {
                   ),
                 ),
                 onPressed: () async {
-                  final snapshot = await clients.once();
-
-                  final Map<dynamic, dynamic>? clientMap =
-                  snapshot.snapshot.value as Map<dynamic, dynamic>?;
-
-                  if (!snapshot.snapshot.exists) {
-                    print('⚠️ No WMS records found.');
-                    return;
-                  }
-                  for (var entry in clientMap!.entries) {
-                    final ClientKey = entry.key.toString();
-                    final ClientData = entry.value as Map<dynamic, dynamic>?;
-
-                    if (ClientData == null) continue;
-
-                    final token = ClientData["token"];
-                    final username = ClientData["Username"] ?? "Unknown";
-                    final orderID = ClientData["request_id"] ?? "Unknown";
-
-                    if (token != null && token
-                        .toString()
-                        .trim()
-                        .isNotEmpty) {
-                      print(
-                          '📨 Sending notification to $username ($ClientKey)...');
-
-                      print(
-                          '📨 Sending notification to  ($token)...');
-                      Navigator.pop(
-                          dialogContext); // close dialog using its own context
-
-                      // then use parentContext (still mounted)
-                      try {
-                        await FirebaseDatabase.instance
-                            .ref('Request/ScheduledRequest/$requeststreamId/status')
-                            .set('accepted');
-
-                        await AssistantMethod.sendNotificationToClient(
-                          token.toString(),
-                          context,
-                            requeststreamId
-                        );
-
-                        ScaffoldMessenger.of(parentContext).showSnackBar(
-                          const SnackBar(content: Text(
-                              'Client notified of acceptance')),
-                        );
-
-                        Navigator.push(
-                          parentContext,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                ScheduledMapScreen(
-                                  clientName: clientName,
-                                  clientPhone: clientPhone,
-                                  pickupLat: pickupLat,
-                                  pickupLng: pickupLng,
-                                  pickupLocation: locationName,
-                                  scheduledTime: scheduledTime,
-                                ),
-                          ),
-                        );
-                      } catch (e) {
-                        print("Error accepting request: $e");
-                        ScaffoldMessenger.of(parentContext).showSnackBar(
-                          const SnackBar(content: Text(
-                              'Failed to update request.')),
-                        );
-                      };
-                    }
-                  }
-
-                }),
+                  await _acceptScheduledRequest(
+                    dialogContext,
+                    context,
+                    requeststreamId,
+                    clientName,
+                    clientPhone,
+                    pickupLat,
+                    pickupLng,
+                    locationName,
+                    scheduledTime,
+                  );
+                },
+              ),
             ],
           );
         },
       );
-
     } catch (e, stack) {
       print("❌ Error in _handleScheduledRequest: $e");
       print(stack);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading request: $e')),
+        );
+      }
     }
   }
+
+
+
+  Future<void> _acceptScheduledRequest(
+      BuildContext dialogContext,
+      BuildContext parentContext,
+      String requestId,
+      String clientName,
+      String clientPhone,
+      double pickupLat,
+      double pickupLng,
+      String locationName,
+      String scheduledTime,
+      ) async {
+    try {
+      // Update status to accepted
+      await FirebaseDatabase.instance
+          .ref('Request/ScheduledRequest/$requestId/status')
+          .set('accepted');
+
+      // Get client token and send notification
+      final event = await clients.once();
+      final snapshot = event.snapshot;
+
+      if (snapshot.exists) {
+        final Map<dynamic, dynamic>? clientMap =
+        snapshot.value as Map<dynamic, dynamic>?;
+
+        if (clientMap != null) {
+          for (var entry in clientMap.entries) {
+            final clientData = entry.value as Map<dynamic, dynamic>?;
+            if (clientData == null) continue;
+
+            final token = clientData["token"];
+            if (token != null && token.toString().trim().isNotEmpty) {
+              await AssistantMethod.sendNotificationToClient(
+                token.toString(),
+                parentContext,
+                requestId,
+              );
+              break;
+            }
+          }
+        }
+      }
+
+      // Close the dialog
+      if (dialogContext.mounted) {
+        Navigator.pop(dialogContext);
+      }
+
+      // Show success message
+      if (parentContext.mounted) {
+        ScaffoldMessenger.of(parentContext).showSnackBar(
+          const SnackBar(content: Text('Request accepted! Client notified.')),
+        );
+      }
+    } catch (e) {
+      print("Error accepting request: $e");
+      if (parentContext.mounted) {
+        ScaffoldMessenger.of(parentContext).showSnackBar(
+          const SnackBar(content: Text('Failed to accept request.')),
+        );
+      }
+    }
+  }
+
   Future<void> retrieveRideRequestInfo(String artisanRequestId, BuildContext context) async {
     try {
       DatabaseEvent event = await clientRequestRef.child(artisanRequestId).once();
@@ -330,15 +435,23 @@ class PushNotificationService {
       if (event.snapshot.value != null) {
         final map = event.snapshot.value as Map<dynamic, dynamic>;
 
-        double pickUpLocationLat = double.parse(map['client_Coordinates']['latitude'].toString());
-        double pickUpLocationLng = double.parse(map['client_Coordinates']['longitude'].toString());
-        String clientAddress = map['Client_address'].toString();
-        double dropOffLocationLat = double.parse(map['client_Coordinates']['latitude'].toString());
-        double dropOffLocationLng = double.parse(map['client_Coordinates']['longitude'].toString());
-        String finalClientaddress = map['finalClient_address'].toString();
-        String paymentMethod = map['payment_method'].toString();
-        String client_name = map["client_name"].toString();
-        String client_phone = map["client_phone"].toString();
+        double pickUpLocationLat = 0.0;
+        double pickUpLocationLng = 0.0;
+
+        if (map['client_Coordinates'] != null) {
+          final coords = map['client_Coordinates'] as Map;
+          pickUpLocationLat = double.parse(coords['latitude'].toString());
+          pickUpLocationLng = double.parse(coords['longitude'].toString());
+        }
+
+        double dropOffLocationLat = pickUpLocationLat;
+        double dropOffLocationLng = pickUpLocationLng;
+
+        String clientAddress = map['Client_address']?.toString() ?? '';
+        String finalClientaddress = map['finalClient_address']?.toString() ?? '';
+        String paymentMethod = map['payment_method']?.toString() ?? '';
+        String client_name = map["client_name"]?.toString() ?? '';
+        String client_phone = map["client_phone"]?.toString() ?? '';
 
         Clientdetails clientDetails = Clientdetails();
         clientDetails.artisan_request_id = artisanRequestId;
@@ -352,12 +465,13 @@ class PushNotificationService {
 
         print("Client details received: ${clientDetails.client_Address}");
 
-        // Show notification dialog
         if (context.mounted) {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (BuildContext context) => NotificationDialog(clientDetails: clientDetails),
+            builder: (BuildContext dialogContext) => NotificationDialog(
+              clientDetails: clientDetails,
+            ),
           );
         }
       } else {
@@ -366,178 +480,5 @@ class PushNotificationService {
     } catch (e) {
       print("Error retrieving ride request info: $e");
     }
-  }
-}
-class ScheduledMapScreen extends StatefulWidget {
-  final String clientName;
-  final String clientPhone;
-  final String pickupLocation;
-  final double pickupLat;
-  final double pickupLng;
-  final String scheduledTime;
-
-  const ScheduledMapScreen({
-    super.key,
-    required this.clientName,
-    required this.clientPhone,
-    required this.pickupLocation,
-    required this.pickupLat,
-    required this.pickupLng,
-    required this.scheduledTime,
-  });
-
-  @override
-  State<ScheduledMapScreen> createState() => _ScheduledMapScreenState();
-}
-
-class _ScheduledMapScreenState extends State<ScheduledMapScreen> {
-  final Completer<GoogleMapController> _mapController = Completer();
-  LocationData? _currentLocation;
-  Set<Marker> _markers = {};
-  Set<Polyline> _polylines = {};
-  double? _distanceKm;
-
-  @override
-  void initState() {
-    super.initState();
-    _initMap();
-  }
-
-  Future<void> _initMap() async {
-    final location = Location();
-    _currentLocation = await location.getLocation();
-
-    final start = LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!);
-    final destination = LatLng(widget.pickupLat, widget.pickupLng);
-
-    _addMarkers(start, destination);
-    await _drawPolyline(start, destination);
-    _calculateDistance(start, destination);
-
-    // Center camera on route
-    final controller = await _mapController.future;
-    controller.animateCamera(CameraUpdate.newLatLngBounds(
-      LatLngBounds(
-        southwest: LatLng(
-          min(start.latitude, destination.latitude),
-          min(start.longitude, destination.longitude),
-        ),
-        northeast: LatLng(
-          max(start.latitude, destination.latitude),
-          max(start.longitude, destination.longitude),
-        ),
-      ),
-      100.0,
-    ));
-  }
-
-  void _addMarkers(LatLng start, LatLng destination) {
-    _markers = {
-      Marker(markerId: const MarkerId('current'), position: start, infoWindow: const InfoWindow(title: 'You')),
-      Marker(
-          markerId: const MarkerId('client'),
-          position: destination,
-          infoWindow: InfoWindow(title: widget.clientName, snippet: widget.pickupLocation)),
-    };
-  }
-
-  Future<void> _drawPolyline(LatLng start, LatLng destination) async {
-    PolylinePoints polylinePoints = PolylinePoints();
-    // final result = await polylinePoints.getRouteBetweenCoordinates(
-    //   'YOUR_GOOGLE_MAPS_API_KEY',
-    //
-    // );
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-
-        googleApiKey: mapKey,
-        request: PolylineRequest(
-          origin:      PointLatLng(start.latitude, start.longitude),
-
-          destination: PointLatLng(destination.latitude, destination.longitude),
-          mode: TravelMode.driving,
-
-        )
-    );
-    if (result.points.isNotEmpty) {
-      final polylineCoordinates = result.points.map((p) => LatLng(p.latitude, p.longitude)).toList();
-      setState(() {
-        _polylines = {
-          Polyline(
-            polylineId: const PolylineId('route'),
-            color: Colors.blue,
-            width: 6,
-            points: polylineCoordinates,
-          ),
-        };
-      });
-    }
-  }
-
-  void _calculateDistance(LatLng start, LatLng destination) {
-    const R = 6371; // km
-    final dLat = _deg2rad(destination.latitude - start.latitude);
-    final dLon = _deg2rad(destination.longitude - start.longitude);
-    final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_deg2rad(start.latitude)) *
-            cos(_deg2rad(destination.latitude)) *
-            sin(dLon / 2) *
-            sin(dLon / 2);
-    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    setState(() {
-      _distanceKm = R * c;
-    });
-  }
-
-  double _deg2rad(double deg) => deg * pi / 180;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("To ${widget.clientName} (${_distanceKm?.toStringAsFixed(2) ?? '--'} km)")),
-      body: _currentLocation == null
-          ? const Center(child: CircularProgressIndicator())
-          : Stack(
-        children: [
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
-              zoom: 14.5,
-            ),
-            myLocationEnabled: true,
-            markers: _markers,
-            polylines: _polylines,
-            onMapCreated: (controller) => _mapController.complete(controller),
-          ),
-          Positioned(
-            bottom: 20,
-            left: 20,
-            right: 20,
-            child: Container(
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black26)],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('📍 ${widget.pickupLocation}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text('Scheduled: ${widget.scheduledTime}'),
-                  const SizedBox(height: 10),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.navigation),
-                    label: const Text('Arrived'),
-                    onPressed: () {
-                      // You can add external navigation logic here (e.g., Google Maps intent)
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

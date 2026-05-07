@@ -136,17 +136,15 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       updateRideDetails();
 
       String? rideRequestId = widget.clientDetails.artisan_request_id;
-      if (rideRequestId != null) {
-        Map locMap = {
-          "latitude": currentPosition?.latitude.toString(),
-          "longitude": currentPosition?.longitude.toString(),
-        };
-        clientRequestRef
-            .child(rideRequestId)
-            .child("WMS_location")
-            .set(locMap);
-      }
-    });
+      Map locMap = {
+        "latitude": currentPosition?.latitude.toString(),
+        "longitude": currentPosition?.longitude.toString(),
+      };
+      clientRequestRef
+          .child(rideRequestId!)
+          .child("WMS_location")
+          .set(locMap);
+        });
   }
 
   @override
@@ -269,13 +267,11 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                                       status = "arrived";
                                       String? rideRequestId =
                                           widget.clientDetails.artisan_request_id;
-                                      if (rideRequestId != null) {
-                                        clientRequestRef
-                                            .child(rideRequestId)
-                                            .child("status")
-                                            .set(status);
-                                      }
-
+                                      clientRequestRef
+                                          .child(rideRequestId!)
+                                          .child("status")
+                                          .set(status);
+                                    
                                       if (mounted && !_isDisposed) {
                                         setState(() {
                                           btnTitle = "Bin Picked Up";
@@ -308,13 +304,11 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                                       status = "onride";
                                       String? rideRequestId =
                                           widget.clientDetails.artisan_request_id;
-                                      if (rideRequestId != null) {
-                                        clientRequestRef
-                                            .child(rideRequestId)
-                                            .child("status")
-                                            .set(status);
-                                      }
-
+                                      clientRequestRef
+                                          .child(rideRequestId!)
+                                          .child("status")
+                                          .set(status);
+                                    
                                       if (mounted && !_isDisposed) {
                                         setState(() {
                                           btnTitle = "Done";
@@ -485,24 +479,23 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
 
   void acceptRideRequest() {
     String? rideRequestId = widget.clientDetails.artisan_request_id;
-    if (rideRequestId == null) return;
 
-    clientRequestRef.child(rideRequestId).child("status").set("accepted");
+    clientRequestRef.child(rideRequestId!).child("status").set("accepted");
     clientRequestRef
-        .child(rideRequestId)
+        .child(rideRequestId!)
         .child("WMS_name")
         .set(Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "");
     clientRequestRef
-        .child(rideRequestId)
+        .child(rideRequestId!)
         .child("WMS_phone")
         .set(Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "");
     clientRequestRef
-        .child(rideRequestId)
+        .child(rideRequestId!)
         .child("WMS_id")
         .set(WMSDBtoken.key);
 
     clientRequestRef
-        .child(rideRequestId)
+        .child(rideRequestId!)
         .child("profilepicture")
         .set(riderinformation?.profilepicture);
 
@@ -511,14 +504,14 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
         "latitude": currentPosition?.latitude.toString(),
         "longitude": currentPosition?.longitude.toString(),
       };
-      clientRequestRef.child(rideRequestId).child("WMS_location").set(locMap);
+      clientRequestRef.child(rideRequestId!).child("WMS_location").set(locMap);
     }
 
     if (firebaseUser != null) {
       WastemanagementRef
           .child(firebaseUser!.uid)
           .child("history")
-          .child(rideRequestId)
+          .child(rideRequestId!)
           .set(true);
     }
   }
@@ -585,12 +578,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
     try {
       String? rideRequestId = widget.clientDetails.artisan_request_id;
 
-      if (rideRequestId == null) {
-        if (Navigator.canPop(context)) Navigator.pop(context);
-        throw Exception("Ride request ID is null");
-      }
-
-      DatabaseReference rideRef = clientRequestRef.child(rideRequestId);
+      DatabaseReference rideRef = clientRequestRef.child(rideRequestId!);
 
       print('riderefhere$rideRequestId');
       DataSnapshot snapshot = await rideRef.child("fare").get();

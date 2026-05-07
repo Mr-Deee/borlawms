@@ -23,6 +23,8 @@ class Addwmsdetails extends StatefulWidget {
   State<Addwmsdetails> createState() => _AddwmsdetailsState();
 }
 
+// These controllers are used inside the separate forms (WasteManagementForm, etc.)
+// Keeping them as defined originally.
 TextEditingController _landmarkController = TextEditingController();
 TextEditingController _locationController = TextEditingController();
 TextEditingController _employeesController = TextEditingController();
@@ -42,83 +44,96 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
   File? _CompRegFile;
   File? _registrationDocFile;
   Uint8List? _registrationDocBytes;
-  String _selectedType = 'Waste Management';
+  String _selectedType = 'Waste Management Service';
 
-  String dropdownValue = 'Waste Management';
-@override
+  // ✅ NEW: Toggle for scheduled requests (only for Waste Management Service)
+  bool _acceptScheduledRequests = false;
+
+  @override
   void initState() {
-
-
-  if (!['Waste Management Service', 'Recycling','Bin Sale'].contains(_selectedType)) {
-    _selectedType = 'Waste Management Service';
-  }
-    // TODO: implement initState
     super.initState();
+    // Ensure default selected type is valid
+    if (!['Waste Management Service', 'Recycling', 'Bin Sale'].contains(_selectedType)) {
+      _selectedType = 'Waste Management Service';
+    }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Details',style: TextStyle(fontWeight: FontWeight.bold),),
-        ),
-        body: SingleChildScrollView(
-            child: Padding(
-                padding:  EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(13),
-                        color: Colors.green,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.5), // Shadow color with opacity
-                            offset: Offset(5, 5), // Horizontal and Vertical offset
-                            blurRadius: 10, // Blur radius
-                            spreadRadius: 2, // Spread radius
-                          ),
-                        ],
+      appBar: AppBar(
+        title: const Text('Details', style: TextStyle(fontWeight: FontWeight.bold)),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Type selection dropdown
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(13),
+                    color: Colors.green,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.5),
+                        offset: const Offset(5, 5),
+                        blurRadius: 10,
+                        spreadRadius: 2,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left:16.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
-                            labelText: 'Select Type',
-                            border: InputBorder.none,
-                          
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          dropdownColor: Colors.green,
-                          value: _selectedType,
-                          items: ['Waste Management Service','Recycling','Bin Sale']
-                              .map((type) => DropdownMenuItem(
-                                    value: type,
-                                    child: Text(type),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedType = value!;
-                            });
-                          },
-                        ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16.0),
+                    child: DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: 'Select Type',
+                        border: InputBorder.none,
                       ),
+                      borderRadius: BorderRadius.circular(12),
+                      dropdownColor: Colors.green,
+                      value: _selectedType,
+                      items: const [
+                        DropdownMenuItem(value: 'Waste Management Service', child: Text('Waste Management Service')),
+                        DropdownMenuItem(value: 'Recycling', child: Text('Recycling')),
+                        DropdownMenuItem(value: 'Bin Sale', child: Text('Bin Sale')),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedType = value!;
+                        });
+                      },
                     ),
-                    SizedBox(height: 20),
-      SizedBox(height: 20),
-      _selectedType == 'Waste Management Service'
-          ? WasteManagementForm()
-          : _selectedType == 'Recycling'
-          ? RecyclingForm()
-          : _selectedType == 'Bin Sale'
-          ? SellingBinsWidget()
-          : Container(),
-    ]))))
-    ;
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+
+                // Conditional form widgets (existing)
+                _selectedType == 'Waste Management Service'
+                    ? WasteManagementForm()
+                    : _selectedType == 'Recycling'
+                    ? RecyclingForm()
+                    : _selectedType == 'Bin Sale'
+                    ? SellingBinsWidget()
+                    : Container(),
+
+                const SizedBox(height: 20),
+                // submitButton(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
+  // ----------------------------------------------------------------------
+  // Existing helper methods (logo upload, bin cards, etc.)
+  // ----------------------------------------------------------------------
   Widget addButton(String text, VoidCallback onPressed) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -129,7 +144,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
     );
   }
 
-  ImagePicker _imagePicker = ImagePicker();
+  final ImagePicker _imagePicker = ImagePicker();
 
   Widget logoUploadButton() {
     return Column(
@@ -145,15 +160,14 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
           ),
         ElevatedButton(
           onPressed: () async {
-            final pickedFile =
-                await _imagePicker.pickImage(source: ImageSource.gallery);
+            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
             if (pickedFile != null) {
               setState(() {
                 _logoFile = File(pickedFile.path);
               });
             }
           },
-          child: Text('Upload Company Logo'),
+          child: const Text('Upload Company Logo'),
         ),
       ],
     );
@@ -173,15 +187,14 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
           ),
         ElevatedButton(
           onPressed: () async {
-            final pickedFile =
-                await _imagePicker.pickImage(source: ImageSource.gallery);
+            final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
             if (pickedFile != null) {
               setState(() {
                 _CompRegFile = File(pickedFile.path);
               });
             }
           },
-          child: Text('Upload Business Registration'),
+          child: const Text('Upload Business Registration'),
         ),
       ],
     );
@@ -190,8 +203,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
   Widget registrationDocUploadButton() {
     return ElevatedButton(
       onPressed: () async {
-        final typeGroup =
-            XTypeGroup(label: 'documents', extensions: ['pdf', 'doc', 'docx']);
+        const typeGroup = XTypeGroup(label: 'documents', extensions: ['pdf', 'doc', 'docx']);
         final file = await openFile(acceptedTypeGroups: [typeGroup]);
         if (file != null) {
           setState(() {
@@ -199,7 +211,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
           });
         }
       },
-      child: Text('Upload Registration Document'),
+      child: const Text('Upload Registration Document'),
     );
   }
 
@@ -208,13 +220,12 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         title,
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
   }
 
-  Widget binCard(
-      Map<String, dynamic> bin, List<Map<String, dynamic>> binsList) {
+  Widget binCard(Map<String, dynamic> bin, List<Map<String, dynamic>> binsList) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
@@ -228,8 +239,8 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
             ),
             DropdownButtonFormField<String>(
               value: bin['image'],
-              hint: Text('Select Bin Image'),
-              items: [
+              hint: const Text('Select Bin Image'),
+              items: const [
                 DropdownMenuItem(child: Text('Borla Extra -660L'), value: 'assets/images/140.png'),
                 DropdownMenuItem(child: Text('Borla Plus - 360L'), value: 'assets/images/140.png'),
                 DropdownMenuItem(child: Text('Borla Large - 240L'), value: 'assets/images/140.png'),
@@ -250,7 +261,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
               },
             ),
             TextFormField(
-              decoration: InputDecoration(labelText: 'Price for selected bin'),
+              decoration: const InputDecoration(labelText: 'Price for selected bin'),
               keyboardType: TextInputType.number,
               onChanged: (value) {
                 bin['price'] = value;
@@ -268,7 +279,7 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
                   binsList.remove(bin);
                 });
               },
-              child: Icon(Icons.delete),
+              child: const Icon(Icons.delete),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             ),
           ],
@@ -281,9 +292,9 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
     return Center(
       child: ElevatedButton(
         onPressed: _submitForm,
-        child: Text('Submit'),
+        child: const Text('Submit'),
         style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
         ),
       ),
     );
@@ -291,20 +302,19 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
 
   void _submitForm() async {
     showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return ProgressDialog(
-            message: "Adding, Please wait...",
-          );
-        });
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return  ProgressDialog(message: "Adding, Please wait...");
+      },
+    );
 
     if (_formKey.currentState!.validate()) {
       User? user = _auth.currentUser;
       if (user != null) {
         String userId = user.uid;
 
-        // Upload logo and registration document to Firebase Storage
+        // Upload files
         String? logoUrl;
         String? CompRegUrl;
         String? regDocUrl;
@@ -316,10 +326,10 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
           CompRegUrl = await uploadFile(_CompRegFile!, 'Comp_reg');
         }
         if (_registrationDocFile != null) {
-          regDocUrl =
-              await uploadFile(_registrationDocFile!, 'registration_documents');
+          regDocUrl = await uploadFile(_registrationDocFile!, 'registration_documents');
         }
 
+        // ✅ Include the new scheduled requests flag
         Map<String, dynamic> formData = {
           'pickupBins': _pickupBins,
           'sellsBins': _sellsBins,
@@ -332,6 +342,8 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
           'employeesCount': _employeesController.text.toString(),
           'ghMobileNumber': _ghMobileNumberController.text.toString(),
           'ghanaCardNumber': _ghanaCardNumberController.text.toString(),
+          // 👇 Save availability for scheduled requests
+          'availableFor': _acceptScheduledRequests ? 'scheduled' : 'instant',
         };
 
         await _database
@@ -340,22 +352,41 @@ class _AddwmsdetailsState extends State<Addwmsdetails> {
             .child('wasteManagementInfo')
             .set(formData);
 
-        Navigator.of(context).pop();
-        Navigator.of(context).pushNamed("/SignIn");
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Data submitted successfully')));
+        // Also store at the root of the WMS node for easier lookup
+        await _database.child('WMS').child(userId).update({
+          'availableFor': _acceptScheduledRequests ? 'scheduled' : 'instant',
+          'token': await _getDeviceToken(), // You should implement token retrieval
+        });
+
+        if (mounted) {
+          Navigator.of(context).pop(); // close progress dialog
+          Navigator.of(context).pushNamed("/SignIn");
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Data submitted successfully')));
+        }
       } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('User not signed in')));
+        if (mounted) {
+          Navigator.of(context).pop(); // close progress dialog
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text('User not signed in')));
+        }
       }
+    } else {
+      if (mounted) Navigator.of(context).pop(); // close dialog if validation fails
     }
   }
 
   Future<String> uploadFile(File file, String folderName) async {
-    Reference reference =
-        _storage.ref().child('$folderName/${Path.basename(file.path)}');
+    Reference reference = _storage.ref().child('$folderName/${Path.basename(file.path)}');
     UploadTask uploadTask = reference.putFile(file);
     TaskSnapshot snapshot = await uploadTask;
     return await snapshot.ref.getDownloadURL();
+  }
+
+  // Helper to get the device's FCM token – you need to implement this
+  // based on your firebase_messaging setup.
+  Future<String> _getDeviceToken() async {
+    // Example: FirebaseMessaging.instance.getToken()
+    return "dummy_token_please_implement";
   }
 }
