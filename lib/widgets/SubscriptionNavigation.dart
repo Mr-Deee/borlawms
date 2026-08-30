@@ -33,7 +33,7 @@ class _NavigationPageState extends State<NavigationPage> {
   Position? currentPosition;
   final Set<Marker> markers = {};
   final Set<Polyline> polylines = {};
-  final PolylinePoints polylinePoints = PolylinePoints();
+  final PolylinePoints polylinePoints = PolylinePoints(apiKey: mapKey);
   bool arrived = false;
   double distance = 0;
   double duration = 0;
@@ -290,7 +290,7 @@ class _NavigationPageState extends State<NavigationPage> {
   Future<void> _getPolyline() async {
     try {
       final result = await polylinePoints.getRouteBetweenCoordinates(
-        googleApiKey: googleAPIKey,
+        // : googleAPIKey,
         request: PolylineRequest(
           origin: PointLatLng(
             currentPosition!.latitude,

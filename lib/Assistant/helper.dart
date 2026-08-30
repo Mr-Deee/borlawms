@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geolocator/geolocator.dart' as geolocator; // or whatever name you want
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart' as geolocator show LocationAccuracy;
 
 
 class helper extends ChangeNotifier{
@@ -33,9 +34,10 @@ class helper extends ChangeNotifier{
 
   getAddressFromLatLng() async {
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-          _currentPosition!.latitude,
-          _currentPosition!.longitude
+      List<Placemark> placemarks =
+      await GeocodingPlatform.instance!.placemarkFromCoordinates(
+        position!.latitude,
+        position!.longitude,
       );
 
       Placemark place = placemarks[0];

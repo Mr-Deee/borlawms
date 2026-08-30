@@ -18,16 +18,18 @@ class CustomDrawer extends StatefulWidget {
   State<CustomDrawer> createState() => _CustomDrawerState();
 }
 
-class _CustomDrawerState extends State<CustomDrawer> {
+class _CustomDrawerState extends State<CustomDrawer> with SingleTickerProviderStateMixin {
   bool _isDisposed = false;
+  String username = "";
+  String lastname = "";
+  String phoneNumber = "";
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _isDisposed = false;
-    if (mounted && !_isDisposed) {
-      AssistantMethod.getCurrentOnlineUserInfo(context);
-    }
+    _loadUserData();
   }
 
   @override
@@ -36,13 +38,47 @@ class _CustomDrawerState extends State<CustomDrawer> {
     super.dispose();
   }
 
+  Future<void> _loadUserData() async {
+    if (!mounted || _isDisposed) return;
+
+    try {
+      await AssistantMethod.getCurrentOnlineUserInfo(context);
+
+      if (!mounted || _isDisposed) return;
+
+      final wmsProvider = Provider.of<WMS>(context, listen: false);
+      setState(() {
+        username = wmsProvider.riderInfo?.firstname ?? "";
+        lastname = wmsProvider.riderInfo?.lastname ?? "";
+        phoneNumber = wmsProvider.riderInfo?.phone ?? "";
+        _isLoading = false;
+      });
+    } catch (e) {
+      print("Error loading user data: $e");
+      if (mounted && !_isDisposed) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!mounted || _isDisposed) return Container();
 
-    final username = Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "";
-    final lastname = Provider.of<WMS>(context, listen: false).riderInfo?.lastname ?? "";
-    final phoneNumber = Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "";
+    if (!_isLoading) {
+      try {
+        final wmsProvider = Provider.of<WMS>(context, listen: false);
+        if (username.isEmpty && wmsProvider.riderInfo != null) {
+          username = wmsProvider.riderInfo?.firstname ?? "";
+          lastname = wmsProvider.riderInfo?.lastname ?? "";
+          phoneNumber = wmsProvider.riderInfo?.phone ?? "";
+        }
+      } catch (e) {
+        print("Error accessing provider: $e");
+      }
+    }
 
     return Drawer(
       child: Container(
@@ -56,6 +92,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
+            // Header
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
               decoration: const BoxDecoration(
@@ -77,8 +114,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
-                          "$username $lastname",
+                        child: _isLoading
+                            ? Container(
+                          height: 24,
+                          width: 150,
+                          color: Colors.grey[300],
+                        )
+                            : Text(
+                          "$username $lastname".trim(),
                           style: const TextStyle(
                             color: Colors.black87,
                             fontSize: 22,
@@ -96,7 +139,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const FaIcon(
-                            FontAwesomeIcons.arrowRightFromBracket,
+                            FontAwesomeIcons.rightFromBracket,
                             color: Colors.redAccent,
                             size: 18,
                           ),
@@ -105,7 +148,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text(
+                  _isLoading
+                      ? Container(
+                    height: 16,
+                    width: 120,
+                    color: Colors.grey[300],
+                  )
+                      : Text(
                     phoneNumber,
                     style: const TextStyle(
                       color: Colors.black54,
@@ -117,152 +166,363 @@ class _CustomDrawerState extends State<CustomDrawer> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // Menu Items - Using Material Icons
             _buildDrawerTile(
-              icon: FontAwesomeIcons.clipboardList,
+              icon: Icons.request_quote_sharp,
               title: "My Requests",
               color: const Color(0xFF2ECC71),
-              onTap: () {
-                if (!mounted || _isDisposed) return;
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const Requestpage()));
-              },
+              onTap: () => _navigateToPage(context, const Requestpage()),
             ),
             _buildDrawerTile(
-              icon: FontAwesomeIcons.idCard,
+              icon: Icons.supervised_user_circle,
               title: "Profile",
               color: const Color(0xFF27AE60),
-              onTap: () {
-                if (!mounted || _isDisposed) return;
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
-              },
+              onTap: () => _navigateToPage(context, const ProfilePage()),
             ),
             _buildDrawerTile(
-              icon: FontAwesomeIcons.clockRotateLeft,
+              icon: Icons.history,
               title: "Request History",
               color: const Color(0xFF16A085),
-              onTap: () {
-                if (!mounted || _isDisposed) return;
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const Requestpage()));
-              },
+              onTap: () => _navigateToPage(context, const Requestpage()),
             ),
             _buildDrawerTile(
-              icon: FontAwesomeIcons.calendarDays,
+              icon: Icons.schedule_rounded,
               title: "Schedules & Subscriptions",
               color: const Color(0xFF2980B9),
-              onTap: () {
-                if (!mounted || _isDisposed) return;
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const SubscriptionAndSchedulePage()));
-              },
+              onTap: () => _navigateToPage(context, const SubscriptionAndSchedulePage()),
             ),
             _buildDrawerTile(
-              icon: FontAwesomeIcons.circleQuestion,
+              icon: Icons.question_answer_sharp,
               title: "About",
               color: const Color(0xFFF39C12),
-              onTap: () {
-                if (!mounted || _isDisposed) return;
-                Navigator.push(context, MaterialPageRoute(builder: (_) =>  AboutPage()));
-              },
+              onTap: () => _navigateToPage(context,  AboutPage()),
             ),
+
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
               child: Divider(thickness: 1.2),
             ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                LiquidSignatureText(
-                  text: "By DANIEL NARTERH",
-                  gradientColors: [
-                    Color(0x5282B1FF),
-                    Color(0xFFEEF7FA),
-                    Color(0xFFEEF7FA),
+
+            // Footer - Imprint Style
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white.withOpacity(0.6),
+                    Colors.white.withOpacity(0.3),
                   ],
-                  baseOpacity: 0.3,
-                  blurIntensity: 8,
-                  width: 280,
                 ),
-                const SizedBox(height: 8),
-                LiquidSignatureText(
-                  text: "Mlabstech",
-                  gradientColors: [
-                    Color(0x40404),
-                    Color(0xFFEEF7FA),
-                    Color(0xFFEEF7FA),
-                  ],
-                  baseOpacity: 0.35,
-                  blurIntensity: 10,
-                  width: 220,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.3),
+                  width: 1,
                 ),
-              ],
-            ),
-            const SizedBox(height: 15),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                "BorlaGh v1.1",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  // Decorative line
+                  Container(
+                    width: 60,
+                    height: 3,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF19AF5F), Color(0xFF0D7C3F)],
+                      ),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Main imprint text
+                  const Text(
+                    "Built by",
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+
+                  // Developer name with gradient
+                  ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [Color(0xFF19AF5F), Color(0xFF0D7C3F)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ).createShader(bounds),
+                    child: const Text(
+                      "DANIEL NARTERH",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+
+
+                  // Divider with dots
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          color: Colors.grey.shade300,
+                          thickness: 0.5,
+                        ),
+                      ),
+
+                      Expanded(
+                        child: Divider(
+                          color: Colors.grey.shade300,
+                          thickness: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+
+                ],
               ),
             ),
-            const SizedBox(height: 60),
+            const SizedBox(height: 12),
           ],
         ),
       ),
     );
   }
 
+  void _navigateToPage(BuildContext context, Widget page) {
+    if (!mounted || _isDisposed) return;
+    Navigator.pop(context);
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted && !_isDisposed) {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+      }
+    });
+  }
+
+  // ✅ FIXED: Use Icon widget instead of FaIcon for Material Icons
   Widget _buildDrawerTile({
     required IconData icon,
     required String title,
     required Color color,
     required VoidCallback onTap,
+    String? subtitle,
+    Widget? trailing,
+    bool isActive = false,
+    bool isDanger = false,
+    String? badge,
+    double? iconSize,
+    EdgeInsetsGeometry? padding,
   }) {
+    final Color iconColor = isDanger ? Colors.red.shade700 : color;
+    final Color textColor = isDanger ? Colors.red.shade700 : Colors.black87;
+    final Color bgColor = isDanger ? Colors.red.shade50 : Colors.white;
+    final Color borderColor = isDanger ? Colors.red.shade200 : Colors.grey.shade100;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 4,
-                offset: Offset(0, 2),
+      padding: padding ?? const EdgeInsets.symmetric(horizontal: 14.0, vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          splashColor: iconColor.withOpacity(0.1),
+          highlightColor: iconColor.withOpacity(0.05),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            decoration: BoxDecoration(
+              color: isActive ? iconColor.withOpacity(0.08) : bgColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isActive ? iconColor.withOpacity(0.3) : borderColor,
+                width: isActive ? 2 : 1.5,
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
-                  shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-                child: FaIcon(icon, color: color, size: 18),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                if (isActive)
+                  BoxShadow(
+                    color: iconColor.withOpacity(0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Icon Container with Gradient
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        iconColor.withOpacity(0.25),
+                        iconColor.withOpacity(0.05),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: iconColor.withOpacity(0.2),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: iconColor.withOpacity(0.1),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  // ✅ FIX: Use Icon widget for Material Icons
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: iconSize ?? 18,
                   ),
                 ),
-              ),
-              const FaIcon(
-                FontAwesomeIcons.angleRight,
-                size: 14,
-                color: Colors.black45,
-              ),
-            ],
+                const SizedBox(width: 16),
+
+                // Title and Subtitle
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: textColor,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 0.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Badge, Trailing, or Arrow
+                if (badge != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.red.shade500,
+                          Colors.red.shade700,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      badge,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  )
+                else if (trailing != null)
+                  trailing
+                else if (isActive)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            iconColor.withOpacity(0.15),
+                            iconColor.withOpacity(0.05),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: iconColor.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: iconColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            "Active",
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: iconColor,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                  // ✅ FIX: Use Material Icon for arrow
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: Colors.grey.shade400,
+                    ),
+              ],
+            ),
           ),
         ),
       ),
@@ -274,26 +534,77 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Sign Out", style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text("Are you sure you want to sign out?"),
+      barrierDismissible: true,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.logout_rounded,
+                color: Colors.red.shade700,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              "Sign Out",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: const Text(
+          "Are you sure you want to sign out?",
+          style: TextStyle(fontSize: 15),
+        ),
         actions: [
           TextButton(
             onPressed: () {
-              if (!mounted || _isDisposed) return;
-              FirebaseAuth.instance.signOut();
-              if (mounted && !_isDisposed) {
-                Navigator.pushNamedAndRemoveUntil(context, "/SignIn", (_) => false);
-              }
+              if (mounted && !_isDisposed) Navigator.pop(dialogContext);
             },
-            child: const Text("Yes", style: TextStyle(color: Colors.redAccent)),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey.shade700,
+            ),
+            child: const Text("Cancel"),
           ),
           TextButton(
-            onPressed: () {
-              if (mounted && !_isDisposed) Navigator.pop(context);
+            onPressed: () async {
+              if (mounted && !_isDisposed) {
+                Navigator.pop(dialogContext);
+              }
+              try {
+                await FirebaseAuth.instance.signOut();
+                if (mounted && !_isDisposed) {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    "/SignIn",
+                        (route) => false,
+                  );
+                }
+              } catch (e) {
+                print("Error signing out: $e");
+                if (mounted && !_isDisposed) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Error signing out: $e"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
-            child: const Text("Cancel", style: TextStyle(color: Colors.black54)),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red.shade700,
+            ),
+            child: const Text(
+              "Sign Out",
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
@@ -388,7 +699,7 @@ class LiquidSignatureText extends StatelessWidget {
                       height: 8,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [],
+                          colors: gradientColors,
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),

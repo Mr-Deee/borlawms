@@ -1,22 +1,15 @@
-// import 'package:borla_client/pages/smscode.dart';
 import 'dart:ui';
-
 import 'package:borlawms/pages/progressdialog.dart';
 import 'package:borlawms/pages/signup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-import 'package:firebase_auth/firebase_auth.dart';
-
-// import 'package:flutter_sms/flutter_sms.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:math';
 
 import '../Assistant/assistantmethods.dart';
@@ -26,284 +19,546 @@ import 'GuestMode.dart';
 import 'forgotpassword.dart';
 import 'homepage.dart';
 
-class signin extends StatefulWidget {
-  const signin({super.key});
+class SignIn extends StatefulWidget {
+  const SignIn({super.key});
 
   @override
-  State<signin> createState() => _signinState();
+  State<SignIn> createState() => _SignInState();
 }
 
-final FirebaseAuth _auth = FirebaseAuth.instance;
-final DatabaseReference _userRef =
-    FirebaseDatabase.instance.ref().child('users');
-TextEditingController phoneNumberController = TextEditingController();
-TextEditingController emailcontroller = TextEditingController();
-TextEditingController passwordcontroller = TextEditingController();
-// Define googleSignIn here
-
-String? phoneNumber;
-String? verificationId;
-String? smsCode;
-
-Future<void> verifyPhoneNumber() async {
-  await _auth.verifyPhoneNumber(
-    phoneNumber: phoneNumber,
-    verificationCompleted: (PhoneAuthCredential credential) async {
-      await _auth.signInWithCredential(credential);
-      print('Authentication successful');
-    },
-    verificationFailed: (FirebaseAuthException e) {
-      print('Failed to verify phone number: ${e.message}');
-    },
-    codeSent: (String? verificationId, int? resendToken) {
-      // +233
-    },
-    codeAutoRetrievalTimeout: (String verificationId) {
-      // Timeout handling if needed
-    },
-  );
-}
-
-Future<void> writeEmailToDatabase(String userId, String email) async {
-  // Write the email to the database under the user's ID
-  _userRef.child(userId).set({'email': email});
-}
-
-Future<bool> checkIfEmailExistsInDatabase(String email) async {
-  DatabaseEvent snapshot =
-      await _userRef.orderByChild('email').equalTo(email).once();
-  var data = snapshot.snapshot.value;
-
-  return data != null;
-}
-
-class _signinState extends State<signin> {
+class _SignInState extends State<SignIn> with SingleTickerProviderStateMixin {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController emailcontroller = TextEditingController();
+  final TextEditingController passwordcontroller = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  GoogleMapController? newGoogleMapController;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+    _animationController.forward();
     locatePosition();
     requestLocationPermission();
   }
 
   @override
+  void dispose() {
+    emailcontroller.dispose();
+    passwordcontroller.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        // appBar: AppBar(
-        //   title: Text("Login Page"),
-        // ),
-        body: Stack(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/bg4.jpg'),
-              // Replace with your image path
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(
-                Colors.white54.withOpacity(0.5),
-                // Adjust the opacity as needed
-                BlendMode.color, // Try BlendMode.softLight or others too
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bg4.jpg'),
+                fit: BoxFit.cover,
               ),
             ),
           ),
-        ),
 
-        // Blur Filter
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-          child: Container(
-            color: Colors.black.withOpacity(0.1), // Optional: tint overlay
+          // Gradient Overlay
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.3),
+                  Colors.black.withOpacity(0.6),
+                ],
+              ),
+            ),
+          ),
+
+          // Blur Effect
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+              child: Container(
+                color: Colors.black.withOpacity(0.2),
+              ),
+            ),
+          ),
+
+          // Main Content
+          SafeArea(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Center(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Logo
+                      _buildLogo(),
+
+                      const SizedBox(height: 32),
+
+                      // Welcome Text
+                      _buildWelcomeText(),
+
+                      const SizedBox(height: 32),
+
+                      // Login Form
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            _buildEmailField(),
+                            const SizedBox(height: 16),
+                            _buildPasswordField(),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Forgot Password
+                      _buildForgotPassword(),
+
+                      const SizedBox(height: 24),
+
+                      // Login Button
+                      _buildLoginButton(),
+
+                      const SizedBox(height: 20),
+
+                      // Divider
+                      _buildDivider(),
+
+                      const SizedBox(height: 20),
+
+                      // Sign Up
+                      _buildSignUpRow(),
+
+                      const SizedBox(height: 16),
+
+                      // Guest Mode
+                      _buildGuestMode(),
+
+                      const SizedBox(height: 20),
+
+                      // Version Info
+                      _buildVersionInfo(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Loading Overlay
+          if (_isLoading) _buildLoadingOverlay(),
+        ],
+      ),
+    );
+  }
+
+  // ==================== UI Components ====================
+
+  Widget _buildLogo() {
+    return Container(
+      width: 120,
+      height: 120,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withOpacity(0.2),
+            Colors.white.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Image.asset(
+        'assets/images/wms.png',
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+
+  Widget _buildWelcomeText() {
+    return Column(
+      children: [
+        const Text(
+          "Welcome Back!",
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            letterSpacing: 0.5,
           ),
         ),
+        const SizedBox(height: 8),
+        Text(
+          "Sign in to continue managing your waste",
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.white.withOpacity(0.7),
+            letterSpacing: 0.3,
+          ),
+        ),
+      ],
+    );
+  }
 
-        Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo Image
-                Container(
-                  width: 160.0,
-                  height: 120.0,
-                  margin: EdgeInsets.only(bottom: 20.0),
-                  child: Image.asset('assets/images/wms.png'),
-                ),
+  Widget _buildEmailField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: TextFormField(
+        controller: emailcontroller,
+        style: const TextStyle(color: Colors.white),
+        keyboardType: TextInputType.emailAddress,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter your email';
+          }
+          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+            return 'Please enter a valid email';
+          }
+          return null;
+        },
+        decoration: InputDecoration(
+          prefixIcon: Icon(
+            Icons.email_outlined,
+            color: Colors.white.withOpacity(0.6),
+          ),
+          hintText: "Email Address",
+          hintStyle: TextStyle(
+            color: Colors.white.withOpacity(0.5),
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+        ),
+      ),
+    );
+  }
 
-                // Subheader Text
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20.0),
-                      child: Text(
-                        "Login to continue using the app",
-                        style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white60,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
+  Widget _buildPasswordField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: TextFormField(
+        controller: passwordcontroller,
+        style: const TextStyle(color: Colors.white),
+        obscureText: _obscurePassword,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter your password';
+          }
+          if (value.length < 6) {
+            return 'Password must be at least 6 characters';
+          }
+          return null;
+        },
+        decoration: InputDecoration(
+          prefixIcon: Icon(
+            Icons.lock_outline,
+            color: Colors.white.withOpacity(0.6),
+          ),
+          suffixIcon: IconButton(
+            onPressed: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
+            icon: Icon(
+              _obscurePassword
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              color: Colors.white.withOpacity(0.6),
+            ),
+          ),
+          hintText: "Password",
+          hintStyle: TextStyle(
+            color: Colors.white.withOpacity(0.5),
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+        ),
+      ),
+    );
+  }
 
-                SizedBox(height: 24.0),
+  Widget _buildForgotPassword() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) =>  ForgotPasswordPage()),
+          );
+        },
+        style: TextButton.styleFrom(
+          foregroundColor: Colors.white.withOpacity(0.7),
+        ),
+        child: const Text(
+          "Forgot Password?",
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
 
-                // Email Input Field
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: TextFormField(
-                    style: TextStyle(
-                      color: Colors.white70,
-                    ),
-                    controller: emailcontroller,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.email, color: Colors.white70),
-                      filled: true,
-                      fillColor: Colors.black12,
-                      hintText: "Email",
-                      hintStyle: TextStyle(color: Colors.white70),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                ),
+  Widget _buildLoginButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : () => _loginUser(context),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF19AF5F),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          disabledBackgroundColor: Colors.grey.shade600,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Sign In",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.arrow_forward_rounded,
+              size: 20,
+              color: Colors.white.withOpacity(0.8),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-                SizedBox(height: 24.0),
+  Widget _buildDivider() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 1,
+            color: Colors.white.withOpacity(0.2),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            "OR",
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.5),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            height: 1,
+            color: Colors.white.withOpacity(0.2),
+          ),
+        ),
+      ],
+    );
+  }
 
-                // Password Input Field
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: TextFormField(
-                    style: TextStyle(
-                      color: Colors.white70,
-                    ),
-                    obscureText: true,
-                    controller: passwordcontroller,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock, color: Colors.white70),
-                      filled: true,
-                      fillColor: Colors.black12,
-                      hintText: "Password",
-                      hintStyle: TextStyle(color: Colors.white70),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Forgotten Password Link
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 24.0, top: 8.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ForgotPasswordPage()),
-                        );
-                      },
-                      child: Text(
-                        "Forgotten password?",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 20.0),
-
-                // Continue Button
-                SizedBox(
-                  width: 300,
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFF169F00),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                    onPressed: () {
-                      loginAndAuthenticateUser(context);
-                    },
-                    child: Text(
-                      "Continue",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 16.0),
-
-                // Sign-up Prompt
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => signup()),
-                    );
-                  },
-                  child: Text(
-                    "New User? Sign up",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-
-                SizedBox(height: 30.0),
-                SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => GuestModeScreen()));
-                  },
-                  child: Text(
-                    "Guest Mode",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
+  Widget _buildSignUpRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Don't have an account? ",
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.6),
+            fontSize: 14,
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SignUp()),
+            );
+          },
+          child: const Text(
+            "Sign Up",
+            style: TextStyle(
+              color: Color(0xFF19AF5F),
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
       ],
-    ));
+    );
   }
 
-  // final FirebaseAuth _aut= FirebaseAuth.instance;
-
-  final Random random = Random();
-
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
-  void loginAndAuthenticateUser(BuildContext context) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return ProgressDialog(
-          message: "Logging you in, Please wait.",
+  Widget _buildGuestMode() {
+    return TextButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>  GuestModeScreen()),
         );
       },
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.white.withOpacity(0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.person_outline_rounded,
+            size: 16,
+            color: Colors.white.withOpacity(0.5),
+          ),
+          const SizedBox(width: 8),
+          const Text(
+            "Continue as Guest",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  Widget _buildVersionInfo() {
+    return Text(
+      "Version 1.0.0",
+      style: TextStyle(
+        color: Colors.white.withOpacity(0.2),
+        fontSize: 12,
+        letterSpacing: 1,
+      ),
+    );
+  }
+
+  Widget _buildLoadingOverlay() {
+    return Container(
+      color: Colors.black.withOpacity(0.6),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                height: 40,
+                width: 40,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF19AF5F)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Signing you in...",
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ==================== Functions ====================
+
+  void _loginUser(BuildContext context) async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
 
     try {
-      // Attempt to sign in with email and password
-      UserCredential userCredential =
-          await _firebaseAuth.signInWithEmailAndPassword(
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: emailcontroller.text.trim(),
         password: passwordcontroller.text.trim(),
       );
@@ -311,91 +566,118 @@ class _signinState extends State<signin> {
       User? firebaseUser = userCredential.user;
 
       if (firebaseUser != null) {
-        // Get the user ID
         String userId = firebaseUser.uid;
 
-        // Fetch the user's WMSTYPE from Firebase Realtime Database
+        // Check if user exists in database
         DatabaseReference userRef = FirebaseDatabase.instance
             .ref()
             .child("WMS")
-            .child(userId)
-            .child("wasteManagementInfo");
+            .child(userId);
 
-        userRef.once().then((DatabaseEvent event) {
-          if (event.snapshot.exists) {
-            Map<dynamic, dynamic>? userData =
-                event.snapshot.value as Map<dynamic, dynamic>?;
+        DatabaseEvent event = await userRef.once();
 
-            if (userData != null && userData['WMSTYPE'] != null) {
-              String wmstype = userData['WMSTYPE'];
+        if (event.snapshot.exists) {
+          Map<dynamic, dynamic>? userData =
+          event.snapshot.value as Map<dynamic, dynamic>?;
 
-              // Navigate based on WMSTYPE
-              if (wmstype == "BinSale") {
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil("/binsale", (route) => false);
-              } else if (wmstype == "Recycle") {
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil("/recycle", (route) => false);
-              } else {
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil("/Homepage", (route) => false);
-              }
+          if (userData != null) {
+            String? wmstype = userData['WMSTYPE'] as String?;
 
-              displayToast("Logged in successfully", context);
+            // Navigate based on user type
+            if (wmstype == "BinSale") {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  "/binsale",
+                      (route) => false
+              );
+            } else if (wmstype == "Recycle") {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  "/recycle",
+                      (route) => false
+              );
             } else {
-              Navigator.pop(context);
-              displayToast("Error: Unable to retrieve user data", context);
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  "/Homepage",
+                      (route) => false
+              );
             }
-          } else {
-            Navigator.pop(context);
-            displayToast("Error: User does not exist in the database", context);
+
+            _showToast("Welcome back, ${userData['Username'] ?? 'User'}!", context);
           }
-        });
-      } else {
-        Navigator.pop(context);
-        displayToast("Error: Unable to log in", context);
+        } else {
+          // User exists in Auth but not in database
+          await _auth.signOut();
+          _showToast("Account not found in system. Please contact support.", context);
+        }
       }
+    } on FirebaseAuthException catch (e) {
+      String message = _getAuthErrorMessage(e);
+      _showToast(message, context);
     } catch (e) {
-      Navigator.pop(context);
-      displayToast("Error: ${e.toString()}", context);
+      _showToast("An error occurred. Please try again.", context);
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  displayToast(String message, BuildContext context) {
-    Fluttertoast.showToast(msg: message);
-
-// user created
+  String _getAuthErrorMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'user-not-found':
+        return 'No user found with this email.';
+      case 'wrong-password':
+        return 'Incorrect password. Please try again.';
+      case 'invalid-email':
+        return 'Invalid email format.';
+      case 'user-disabled':
+        return 'This account has been disabled.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      default:
+        return 'Login failed: ${e.message}';
+    }
   }
 
-  GoogleMapController? newGoogleMapController;
+  void _showToast(String message, BuildContext context) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.black87,
+      textColor: Colors.white,
+      fontSize: 14,
+    );
+  }
 
   void locatePosition() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.bestForNavigation);
-    currentPosition = position;
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
+      );
+      currentPosition = position;
 
-    LatLng latLatPosition = LatLng(position.latitude, position.longitude);
-
-    CameraPosition cameraPosition =
-        new CameraPosition(target: latLatPosition, zoom: 14);
-    newGoogleMapController
-        ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+      LatLng latLatPosition = LatLng(position.latitude, position.longitude);
+      CameraPosition cameraPosition = CameraPosition(
+        target: latLatPosition,
+        zoom: 14,
+      );
+      newGoogleMapController?.animateCamera(
+        CameraUpdate.newCameraPosition(cameraPosition),
+      );
+    } catch (e) {
+      print('Error getting location: $e');
+    }
   }
 
   Future<void> requestLocationPermission() async {
-    final serviceStatusLocation = await Permission.locationWhenInUse.isGranted;
-
-    bool isLocation =
-        serviceStatusLocation == Permission.location.serviceStatus.isEnabled;
-
     final status = await Permission.locationWhenInUse.request();
 
     if (status == PermissionStatus.granted) {
-      print('Permission Granted');
+      print('Location Permission Granted');
     } else if (status == PermissionStatus.denied) {
-      print('Permission denied');
+      print('Location Permission Denied');
     } else if (status == PermissionStatus.permanentlyDenied) {
-      print('Permission Permanently Denied');
+      print('Location Permission Permanently Denied');
       await openAppSettings();
     }
   }

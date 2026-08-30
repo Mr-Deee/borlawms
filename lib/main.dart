@@ -18,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:shimmer/main.dart';
 import 'Assistant/helper.dart';
 import 'Model/Users.dart';
 import 'Model/WMSDB.dart';
@@ -274,13 +273,13 @@ initializeFCM(context);
             ),
             initialRoute: initialRoute,
             routes: {
-              "/SignUP": (context) => signup(),
-              "/addmoredetails": (context) => Addwmsdetails(),
+              "/SignUP": (context) => SignUp(),
+              "/addmoredetails": (context) => AddWmsDetails(),
               "/Onboarding": (context) => OnBoardingPage(),
               "/About": (context) => AboutPage(),
               "/binsale": (context) => BinSalePage(),
               "/recycle": (context) => RecyclePage(),
-              "/SignIn": (context) => signin(),
+              "/SignIn": (context) => SignIn(),
               "/Profile": (context) => ProfilePage(),
               "/Homepage": (context) =>homepage()
             },

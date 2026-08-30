@@ -22,7 +22,7 @@ if (flutterVersionCode == null) {
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
+    flutterVersionName = '1.0.10'
 }
 
 def keystoreProperties = new Properties()
@@ -53,7 +53,7 @@ android {
         applicationId "com.mlabs.borlawms"
         minSdkVersion flutter.minSdkVersion  // Set a specific minimum SDK instead of flutter.minSdkVersion
         targetSdkVersion 35
-        versionCode 10
+        versionCode 11
         versionName flutterVersionName
         multiDexEnabled true  // Add this for apps with many dependencies
     }

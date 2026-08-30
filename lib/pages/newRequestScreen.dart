@@ -44,7 +44,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   Set<Circle> circleSet = Set<Circle>();
   Set<Polyline> polyLineSet = Set<Polyline>();
   List<LatLng> polylineCoordinates = [];
-  PolylinePoints polylinePoints = PolylinePoints();
+  PolylinePoints polylinePoints = PolylinePoints(apiKey: mapKey);
   double mapPaddingFromBottom = 0;
   var geoLocator = Geolocator();
   var locationOptions =
@@ -379,9 +379,9 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
     print("This is Encoded Points ::");
     print(details.encodedPoints);
 
-    PolylinePoints polylinePoints = PolylinePoints();
+    PolylinePoints polylinePoints = PolylinePoints(apiKey: mapKey);
     List<PointLatLng> decodedPolyLinePointsResult =
-    polylinePoints.decodePolyline(details.encodedPoints!);
+    PolylinePoints.decodePolyline(details.encodedPoints!);
 
     polylineCoordinates.clear();
 

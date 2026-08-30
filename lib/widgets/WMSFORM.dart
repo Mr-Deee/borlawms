@@ -134,7 +134,8 @@ class _WasteManagementFormState extends State<WasteManagementForm> {
       );
 
       // 3. Reverse geocoding to get address
-      List<Placemark> placemarks = await placemarkFromCoordinates(
+      List<Placemark> placemarks =
+      await GeocodingPlatform.instance!.placemarkFromCoordinates(
         position.latitude,
         position.longitude,
       );
