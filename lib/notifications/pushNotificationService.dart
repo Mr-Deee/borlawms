@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -170,7 +172,9 @@ class PushNotificationService {
 
       final messageType = message.data['type'] ?? 'immediate';
       print("📩 Message type: $messageType");
-
+if (messageType == 'recycling') {
+// ✅ Client submitted recycling - Show to WMS
+  _handleRecyclingNotification(message, context);} else
       if (messageType == 'scheduled') {
         _handleScheduledRequest(message, context);
       } else {
@@ -189,8 +193,424 @@ class PushNotificationService {
 
 
 
+  void _handleRecyclingNotification(RemoteMessage message, BuildContext context) {
+    try {
+      final data = message.data;
+      final recycleItemId = data['recycle_item_id'] ?? '';
+      final userName = data['user_name'] ?? 'Someone';
+      final userPhone = data['user_phone'] ?? '';
+      final recycleType = data['recycle_type'] ?? 'Recyclable items';
+      final weight = data['weight'] ?? '';
+      final location = data['location'] ?? '';
+      final description = data['description'] ?? '';
+      final imageUrl = data['image_url'] ?? '';
+
+      print('♻️ Recycling request from $userName');
+      print('📦 Type: $recycleType, Weight: $weight kg');
+      print('📍 Location: $location');
+
+      // Show dialog to WMS
+      if (context.mounted) {
+        _showRecyclingRequestDialog(
+          context,
+          recycleItemId: recycleItemId,
+          userName: userName,
+          userPhone: userPhone,
+          recycleType: recycleType,
+          weight: weight,
+          location: location,
+          description: description,
+          imageUrl: imageUrl,
+        );
+      }
+    } catch (e) {
+      print('❌ Error handling recycling notification: $e');
+    }
+  }
 
 
+
+
+
+  // ==================== RECYCLING REQUEST DIALOG (WMS) ====================
+
+  void _showRecyclingRequestDialog(
+      BuildContext context, {
+        required String recycleItemId,
+        required String userName,
+        required String userPhone,
+        required String recycleType,
+        required String weight,
+        required String location,
+        required String description,
+        required String imageUrl,
+      }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.recycling, color: Colors.green, size: 28),
+              SizedBox(width: 12),
+              Text(
+                '♻️ Recycling Request',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.person, color: Colors.green, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        '👤 Client: $userName',
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.category, color: Colors.blue, size: 20),
+                      SizedBox(width: 8),
+                      Text('📦 Type: $recycleType'),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.line_weight, color: Colors.orange, size: 20),
+                      SizedBox(width: 8),
+                      Text('⚖️ Weight: $weight kg'),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.location_on, color: Colors.purple, size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text('📍 Location: $location'),
+                      ),
+                    ],
+                  ),
+                ),
+                if (description.isNotEmpty) ...[
+                  SizedBox(height: 8),
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.description, color: Colors.grey, size: 20),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text('📝 $description'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                if (userPhone.isNotEmpty) ...[
+                  SizedBox(height: 8),
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.teal.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.phone, color: Colors.teal, size: 20),
+                        SizedBox(width: 8),
+                        Text('📞 Phone: $userPhone'),
+                      ],
+                    ),
+                  ),
+                ],
+                if (imageUrl.isNotEmpty) ...[
+                  SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      imageUrl,
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 150,
+                          color: Colors.grey[200],
+                          child: Icon(Icons.broken_image, size: 50),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        icon: Icon(Icons.check),
+                        label: Text('Accept'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(dialogContext);
+                          _acceptRecyclingRequest(
+                            context,
+                            recycleItemId,
+                            userName,
+                            userPhone,
+                            recycleType,
+                            weight,
+                            location,
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        icon: Icon(Icons.close),
+                        label: Text('Decline'),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(dialogContext);
+                          _declineRecyclingRequest(context, recycleItemId);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
+  void _acceptRecyclingRequest(
+      BuildContext context,
+      String recycleItemId,
+      String userName,
+      String userPhone,
+      String recycleType,
+      String weight,
+      String location,
+      ) async {
+    try {
+      print('✅ Accepting recycling request: $recycleItemId');
+
+      // Update status in Firebase
+      await FirebaseDatabase.instance
+          .ref('recycle_items/$recycleItemId/status')
+          .set('accepted');
+
+      // Update with WMS info
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        await FirebaseDatabase.instance
+            .ref('recycle_items/$recycleItemId')
+            .update({
+          'wms_id': currentUser.uid,
+          'wms_name': await _getWMSName(currentUser.uid),
+          'accepted_at': DateTime.now().millisecondsSinceEpoch,
+        });
+      }
+
+      // Notify client that request was accepted
+      await _notifyClientAboutRecyclingStatus(
+        userPhone: userPhone,
+        recycleItemId: recycleItemId,
+        status: 'accepted',
+        message: 'Your recycling request has been accepted!',
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Recycling request accepted! Client notified.'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ Error accepting recycling request: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // ==================== DECLINE RECYCLING REQUEST (WMS) ====================
+
+  void _declineRecyclingRequest(BuildContext context, String recycleItemId) async {
+    try {
+      print('❌ Declining recycling request: $recycleItemId');
+
+      // Update status in Firebase
+      await FirebaseDatabase.instance
+          .ref('recycle_items/$recycleItemId/status')
+          .set('declined');
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Recycling request declined'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ Error declining recycling request: $e');
+    }
+  }
+
+
+
+
+
+  // ==================== NOTIFY CLIENT ABOUT STATUS (WMS) ====================
+
+  Future<void> _notifyClientAboutRecyclingStatus({
+    required String userPhone,
+    required String recycleItemId,
+    required String status,
+    required String message,
+  }) async {
+    try {
+      // Get client token from Firebase
+      final tokenSnapshot = await FirebaseDatabase.instance
+          .ref('Clients')
+          .orderByChild('phone')
+          .equalTo(userPhone)
+          .once();
+
+      if (tokenSnapshot.snapshot.value != null) {
+        final clients = tokenSnapshot.snapshot.value as Map;
+        clients.forEach((key, value) async {
+          final clientData = value as Map;
+          final token = clientData['token'];
+          if (token != null && token.isNotEmpty) {
+            await _sendRecyclingStatusNotification(
+              token: token,
+              status: status,
+              recycleItemId: recycleItemId,
+              message: message,
+              companyName: await _getWMSName(FirebaseAuth.instance.currentUser?.uid ?? ''),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      print('❌ Error notifying client: $e');
+    }
+  }
+
+  // ==================== SEND RECYCLING STATUS NOTIFICATION (WMS) ====================
+  Future<String> _getWMSName(String uid) async {
+    try {
+      final snapshot = await FirebaseDatabase.instance
+          .ref('WMS/$uid/wasteManagementInfo/FullName')
+          .once();
+
+      if (snapshot.snapshot.value != null) {
+        return snapshot.snapshot.value.toString();
+      }
+    } catch (e) {
+      print('Error getting WMS name: $e');
+    }
+    return 'Recycling Company';
+  }
+
+  Future<void> _sendRecyclingStatusNotification({
+    required String token,
+    required String status,
+    required String recycleItemId,
+    required String message,
+    required String companyName,
+  }) async {
+    try {
+      // This sends notification to the client
+      // You can use the Cloud Function or direct FCM
+      final functions = FirebaseFunctions.instance;
+      final function = functions.httpsCallable('sendRecyclingStatusNotification');
+
+      await function.call({
+        'token': token,
+        'status': status,
+        'recycle_item_id': recycleItemId,
+        'message': message,
+        'companyName': companyName,
+      });
+
+      print('✅ Recycling status notification sent to client');
+    } catch (e) {
+      print('❌ Error sending status notification: $e');
+    }
+  }
 
   void _handleScheduledRequest(RemoteMessage message, BuildContext context) async {
     if (!context.mounted) {
@@ -481,4 +901,7 @@ class PushNotificationService {
       print("Error retrieving ride request info: $e");
     }
   }
+
+
+
 }

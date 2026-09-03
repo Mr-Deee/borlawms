@@ -291,6 +291,8 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:http/http.dart' as http;
 import 'package:borlawms/Assistant/requestAssistant.dart';
@@ -309,8 +311,95 @@ import '../Model/directDetails.dart';
 import '../appData.dart';
 import '../configMaps.dart';
 import '../main.dart';
-
+import 'package:cloud_functions/cloud_functions.dart';
 class AssistantMethod {
+
+  static final FirebaseFunctions _functions = FirebaseFunctions.instance;
+
+
+
+ // Send notification to client
+  static Future<void> sendNotificationToClient(
+  String token,
+  BuildContext context,
+  String rideRequestId,
+  ) async {
+  try {
+
+  final result = await _functions.httpsCallable('sendNotificationToClient').call({
+  'token': token,
+  'title': 'Ride Request Accepted',
+  'body': 'Your ride request has been accepted!',
+  'rideRequestId': rideRequestId,
+  });
+
+  print('✅ Notification sent: ${result.data}');
+  return result.data;
+
+  } catch (e) {
+  print('❌ Error sending notification: $e');
+  throw Exception('Failed to send notification: $e');
+  }
+  }
+
+  // Send scheduled notification
+  static Future<void> sendScheduledNotification({
+  required String token,
+  required String wmsRequestId,
+  required String clientName,
+  required String clientPhone,
+  required String pickupLocation,
+  required String scheduledTime,
+  String? title,
+  String? body,
+  }) async {
+  try {
+  final functions = FirebaseFunctions.instance;
+
+  final result = await functions.httpsCallable('sendScheduledNotification').call({
+  'token': token,
+  'title': title ?? 'Scheduled Pickup Request',
+  'body': body ?? 'You have a scheduled pickup request',
+  'wmsRequestId': wmsRequestId,
+  'clientName': clientName,
+  'clientPhone': clientPhone,
+  'pickupLocation': pickupLocation,
+  'scheduledTime': scheduledTime,
+  });
+
+  print('✅ Scheduled notification sent: ${result.data}');
+  return result.data;
+
+  } catch (e) {
+  print('❌ Error sending scheduled notification: $e');
+  throw Exception('Failed to send scheduled notification: $e');
+  }
+  }
+
+  // Save FCM token
+  static Future<void> saveFCMToken({
+  required String userId,
+  required String fcmToken,
+  String? userType, // 'wms' or 'client'
+  }) async {
+  try {
+  final functions = FirebaseFunctions.instance;
+
+  final result = await functions.httpsCallable('saveFCMToken').call({
+  'userId': userId,
+  'fcmToken': fcmToken,
+  'userType': userType ?? 'wms',
+  });
+
+  print('✅ FCM token saved: ${result.data}');
+  return result.data;
+
+  } catch (e) {
+  print('❌ Error saving FCM token: $e');
+  throw Exception('Failed to save FCM token: $e');
+  }
+  }
+
 
   // FIXED: Properly await and handle the database read
   static Future<void> getCurrentOnlineUserInfo(BuildContext context) async {
@@ -457,49 +546,56 @@ class AssistantMethod {
   static const String projectId = 'borlagh-2cc0d';
   static const String fcmEndpoint = 'https://fcm.googleapis.com/v1/projects/$projectId/messages:send';
 
-  static sendNotificationToClient(String token, context, String wms_request_id) async {
-    print("notistart1");
-    try {
-      final credentials = await _getAccessToken();
-      final accessToken = credentials.accessToken.data;
-      print("notistarted2");
 
-      Map<String, dynamic> notification = {
-        'message': {
-          'token': token,
-          'notification': {
-            'body': 'WMS Address',
-            'title': 'New BIN Request'
-          },
-          'data': {
-            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-            'id': '1',
-            'status': 'done',
-            'type': 'AccepetedSchedule',
-            'wms_request_id': wms_request_id,
-          },
-        }
-      };
-      print("notimap");
 
-      final response = await http.post(
-        Uri.parse(fcmEndpoint),
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $accessToken',
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-        body: jsonEncode(notification),
-      );
 
-      if (response.statusCode == 200) {
-        print('Notification sent successfully.');
-      } else {
-        print('Failed to send notification. Error: ${response.body}');
-      }
-    } catch (e) {
-      print('Error sending notification: $e');
-    }
-  }
+
+
+  // ==================== GET WMS NAME ====================
+
+  // static sendNotificationToClient(String token, context, String wms_request_id) async {
+  //   print("notistart1");
+  //   try {
+  //     final credentials = await _getAccessToken();
+  //     final accessToken = credentials.accessToken.data;
+  //     print("notistarted2");
+  //
+  //     Map<String, dynamic> notification = {
+  //       'message': {
+  //         'token': token,
+  //         'notification': {
+  //           'body': 'WMS Address',
+  //           'title': 'New BIN Request'
+  //         },
+  //         'data': {
+  //           'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+  //           'id': '1',
+  //           'status': 'done',
+  //           'type': 'AccepetedSchedule',
+  //           'wms_request_id': wms_request_id,
+  //         },
+  //       }
+  //     };
+  //     print("notimap");
+  //
+  //     final response = await http.post(
+  //       Uri.parse(fcmEndpoint),
+  //       headers: {
+  //         HttpHeaders.authorizationHeader: 'Bearer $accessToken',
+  //         HttpHeaders.contentTypeHeader: 'application/json',
+  //       },
+  //       body: jsonEncode(notification),
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       print('Notification sent successfully.');
+  //     } else {
+  //       print('Failed to send notification. Error: ${response.body}');
+  //     }
+  //   } catch (e) {
+  //     print('Error sending notification: $e');
+  //   }
+  // }
 
   static void disableHomeTabLiveLocationUpdates() {
     firebaseUser = FirebaseAuth.instance.currentUser;

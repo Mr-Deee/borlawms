@@ -57,7 +57,7 @@ dependencies:
   intl: ^0.20.1
   googleapis_auth:
   shimmer: ^4.0.0
-
+  cloud_functions: ^6.4.0   # or whatever current version
   flutter_polyline_points: ^3.1.0
   introduction_screen: ^4.0.0
   animate_do: ^5.1.0
