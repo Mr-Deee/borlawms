@@ -1,8 +1,6 @@
 plugins {
     id "com.android.application"
-    // START: FlutterFire Configuration
     id 'com.google.gms.google-services'
-    // END: FlutterFire Configuration
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -33,16 +31,17 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "com.mlabs.borlawms"
-    compileSdk flutter.compileSdkVersion
+    compileSdk 37  // Changed from 35 to 36
+
     ndkVersion flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17  // Changed from 11 to 17
+        targetCompatibility JavaVersion.VERSION_17  // Changed from 11 to 17
     }
 
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '17'  // Changed from 11 to 17
     }
 
     sourceSets {
@@ -51,11 +50,11 @@ android {
 
     defaultConfig {
         applicationId "com.mlabs.borlawms"
-        minSdkVersion flutter.minSdkVersion  // Set a specific minimum SDK instead of flutter.minSdkVersion
-        targetSdkVersion 35
-        versionCode 11
+        minSdkVersion flutter.minSdkVersion  // Increased from 21
+        targetSdkVersion 36  // Changed from 24
+        versionCode 12
         versionName flutterVersionName
-        multiDexEnabled true  // Add this for apps with many dependencies
+        multiDexEnabled true
     }
 
     signingConfigs {
@@ -72,8 +71,8 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            minifyEnabled false  // Disable minification for debugging
-            shrinkResources false  // Disable resource shrinking for debugging
+            minifyEnabled false
+            shrinkResources false
         }
         debug {
             debuggable true
@@ -87,5 +86,5 @@ flutter {
 
 dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'com.google.android.play:integrity:1.3.0'  // Updated to latest version
+    implementation 'com.google.android.play:integrity:1.3.0'
 }

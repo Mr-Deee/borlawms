@@ -40,7 +40,7 @@ class NotificationDialog extends StatelessWidget {
             SizedBox(height: 10.0),
             Image.asset("assets/images/wms.png", width: 150.0,),
             SizedBox(height: 0.12,),
-            Text("New WMS Request",
+            Text("New Borla Request",
               style: TextStyle(fontFamily: "Brand Bold", fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.black),),
             SizedBox(height: 20.0),
             Padding(
@@ -109,7 +109,7 @@ class NotificationDialog extends StatelessWidget {
                       onPressed: ()
                       {
                         //assetsAudioPlayer.stop();
-                       checkAvailabilityOfRide(context);
+                        checkAvailabilityOfBorla(context);
                      //  return context;
 
 
@@ -132,43 +132,56 @@ class NotificationDialog extends StatelessWidget {
     );
   }
 
-  void checkAvailabilityOfRide(context)
-  {
-    WastemanagementRef.once().then((event){
+
+
+
+  void checkAvailabilityOfBorla(BuildContext context) {
+    if (clientDetails?.artisan_request_id == null ||
+        clientDetails!.artisan_request_id.toString().isEmpty) {
+      displayToast("Invalid request.", context);
       Navigator.pop(context);
-      String theRideId = "";
-      if(event.snapshot.value != null)
-      {
-        theRideId = event.snapshot.value.toString();
-      }
-      else
-      {
-        displayToast("Ride not exists.", context);
+      return;
+    }
+
+    String requestId = clientDetails!.artisan_request_id.toString();
+    DatabaseReference rideRef = FirebaseDatabase.instance
+        .ref()
+        .child("ClientRequest")
+        .child(requestId);
+
+    rideRef.once().then((event) {
+      // Close the notification dialog
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
       }
 
+      if (event.snapshot.value != null) {
+        // Update status to accepted
+        rideRef.update({"status": "accepted"}).then((_) {
+          AssistantMethod.disableHomeTabLiveLocationUpdates();
 
-      if(theRideId == clientDetails?.artisan_request_id)
-      {
-        WastemanagementRef.set("accepted");
-        AssistantMethod.disableHomeTabLiveLocationUpdates();
-        Navigator.push(context, MaterialPageRoute(builder: (context)=> NewRequestScreen(clientDetails: clientDetails!)));
+          // Use the global navigator key instead of context
+          navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                  builder: (context) => NewRequestScreen(
+                      clientDetails: clientDetails!
+                  )
+              )
+          );
+        }).catchError((error) {
+          displayToast("Error: $error", context);
+        });
+      } else {
+        displayToast("Ride not found.", context);
       }
-      else if(theRideId == "cancelled")
-      {
-        displayToast("Ride has been Cancelled.", context);
+    }).catchError((error) {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
       }
-      else if(theRideId == "timeout")
-      {
-        displayToast("Ride has time out.", context);
-      }
-      else
-      {
-        displayToast("Ride not exists.", context);
-      }
-
-
+      displayToast("Error: $error", context);
     });
   }
+
   displayToast(String message, BuildContext context) {
     Fluttertoast.showToast(msg: message);
   }

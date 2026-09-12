@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import '../Assistant/assistantmethods.dart';
@@ -33,7 +33,7 @@ import 'Requestsfolder.dart';
 class homepage extends StatefulWidget {
   const homepage({Key? key}) : super(key: key);
   static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(5.614818, -0.205874),
+    target: const LatLng(5.614818, -0.205874),
     zoom: 24.4746,
   );
 
@@ -52,7 +52,7 @@ class _homepageState extends State<homepage> {
   Completer<GoogleMapController> _controllerGoogleMap = Completer();
 
   GoogleMapController? newGoogleMapController;
-  GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   var geoLocator = Geolocator();
 
@@ -72,14 +72,6 @@ class _homepageState extends State<homepage> {
 
   double bottomPaddingOfMap = 0;
 
-  //explicit reference to the Location class
-
-  // Future _checkGps() async {
-  //   if (!await location.serviceEnabled()) {
-  //     location.requestService();
-  //   }
-  // }
-
   Future<void> requestLocationPermission() async {
     final serviceStatusLocation = await Permission.locationWhenInUse.isGranted;
 
@@ -98,32 +90,18 @@ class _homepageState extends State<homepage> {
     }
   }
 
-  // List<ReqModel> rModel = [];
   Color _textColor = Colors.black;
 
   Future<void> _initNotifications() async {
     final pushNotificationService = PushNotificationService();
-    // initLocalNotifications();
     await pushNotificationService.initialize(context);
   }
 
-
-
-  // final FlutterLocalNotificationsPlugin localNotifications =
-  // FlutterLocalNotificationsPlugin();
-
-  // Future<void> initLocalNotifications() async {
-  //   const DarwinInitializationSettings iosInit =
-  //   DarwinInitializationSettings();
-  //
-  //   const InitializationSettings initSettings =
-  //   InitializationSettings(iOS: iosInit);
-  //
-  //   await localNotifications.initialize(settings: initSettings);
-  // }
-
   getartisanType() {
-    WastemanagementRef.child(currentfirebaseUser!.uid)
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    WastemanagementRef.child(user.uid)
         .child("WMS_type")
         .once()
         .then((value) {
@@ -133,17 +111,16 @@ class _homepageState extends State<homepage> {
           rideType = value.toString();
         });
       }
+    }).catchError((e) {
+      print('Error getting artisan type: $e');
     });
   }
 
   Future<void> getCurrentWMSInfo() async {
     try {
-
-      // 🔐 AUTH
       currentfirebaseUser = FirebaseAuth.instance.currentUser;
       if (currentfirebaseUser == null) return;
 
-      // 🔐 FIREBASE READ (awaited)
       final event = await WMSDB
           .child(currentfirebaseUser!.uid)
           .once();
@@ -158,8 +135,6 @@ class _homepageState extends State<homepage> {
         print("value:: $riderinformation");
       }
 
-
-      // 🧩 OTHER CALLS
       getartisanType();
 
     } catch (e, stack) {
@@ -168,78 +143,52 @@ class _homepageState extends State<homepage> {
     }
   }
 
-  // Position? _currentPosition;
-  // String? _currentAddress;
   String WMSStatusText = "Go Online ";
-
   Color WMSStatusColor = Colors.white70;
   bool isArtisanAvailable = false;
   bool isArtisanActivated = false;
 
   @override
   void initState() {
-        super.initState();
-_startupSequence();
+    super.initState();
+    _startupSequence();
   }
 
   bool isSwitched = false;
 
-
-
   Future<void> _startupSequence() async {
-    // 🔔 1. Notifications FIRST (iOS critical)
     await _initNotifications();
-
-    // 📍 2. Location permission AFTER notifications
     await requestLocationPermission();
     locatePosition();
-
-    // 🔐 3. Auth / user info
     AssistantMethod.getCurrentOnlineUserInfo(context);
     await getCurrentWMSInfo();
-
-    // 📦 4. Other data (safe now)
     AssistantMethod.getCurrentrequestinfo(context);
     AssistantMethod.obtainTripRequestsHistoryData(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    var searchIng = clientRequestRef.orderByChild("service_type").equalTo(
-        Provider.of<otherUsermodel>(context, listen: false).otherinfo?.Service);
-    String? occupation =
-        Provider.of<otherUsermodel>(context).otherinfo?.Service;
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
-    Size size = MediaQuery.of(context).size; //check the size of device
     var brightness = MediaQuery.of(context).platformBrightness;
-    bool isDarkMode = brightness == Brightness.dark; //
+    bool isDarkMode = brightness == Brightness.dark;
 
     return Scaffold(
       key: scaffoldKey,
       drawer: CustomDrawer(),
       body: Stack(
-
         children: [
-
           GoogleMap(
             mapType: MapType.normal,
             myLocationButtonEnabled: true,
             padding: EdgeInsets.only(top: 24, bottom: bottomPaddingOfMap),
-
             initialCameraPosition: homepage._kGooglePlex,
             myLocationEnabled: true,
             markers: markersSet,
             onMapCreated: (GoogleMapController controller) {
               _controllerGoogleMap.complete(controller);
               newGoogleMapController = controller;
-
-                // bottomPaddingOfMap = 0.0;
-                locatePosition();
-
-              // });
-              // locatePosition();
-
+              locatePosition();
             },
           ),
           //hamburger for drawer
@@ -250,8 +199,6 @@ _startupSequence();
               onTap: () {
                 if (drawerOpen) {
                   scaffoldKey.currentState?.openDrawer();
-                } else {
-                  // resetApp();
                 }
               },
               child: Container(
@@ -263,17 +210,17 @@ _startupSequence();
                       color: Colors.grey,
                       blurRadius: 6.0,
                       spreadRadius: 0.5,
-                      offset: Offset(
+                      offset: const Offset(
                         0.7,
                         0.7,
                       ),
                     ),
                   ],
                 ),
-                child: CircleAvatar(
+                child: const CircleAvatar(
                   backgroundColor: Colors.white,
                   child: Icon(
-                    (drawerOpen) ? Icons.menu : Icons.close,
+                    Icons.menu,
                     color: Colors.black,
                   ),
                   radius: 20.0,
@@ -281,138 +228,127 @@ _startupSequence();
               ),
             ),
           ),
-          // CustomDrawer(),
           Positioned(
             top: 70.0,
             left: 0.0,
             right: 0.0,
             child: Container(
-
-              decoration: BoxDecoration(color: Colors.transparent),
+              decoration: const BoxDecoration(color: Colors.transparent),
               child: Column(children: [
-                    if (Provider.of<WMS>(context).riderInfo?.firstname != null)
+                if (Provider.of<WMS>(context).riderInfo?.firstname != null)
+                  Switch(
+                    value: context.watch<AppState>().isSwitched,
+                    onChanged: (value) async {
+                      final appState = context.read<AppState>();
 
+                      try {
+                        if (value) {
+                          makeArtisanOnlineNow();
+                          getLocationLiveUpdates();
+                          displayToast("Online.", context);
+                        } else {
+                          makeArtisanOfflineNow();
+                          displayToast("Offline.", context);
+                        }
 
-                      Switch(
-                        value: context.watch<AppState>().isSwitched,
-                        onChanged: (value) async {
-                          final appState = context.read<AppState>();
-
-                          try {
-                            if (value) {
-                              // Switching to online
-                              makeArtisanOnlineNow();
-                              getLocationLiveUpdates();
-                              displayToast("Online.", context);
-                            } else {
-                              // Switching to offline
-                              makeArtisanOfflineNow();
-                              displayToast("Offline.", context);
-                            }
-
-                            await appState.toggleSwitch(); // Await if toggleSwitch is async
-                            setState(() {}); // Trigger rebuild for updated switch state
-
-                          } catch (error) {
-                            print("Error: $error");
-                            displayToast("Error occurred.", context);
-                          }
-                        },
-                        activeTrackColor: Colors.green.withOpacity(0.6), // Custom active track color
-                        inactiveTrackColor: Colors.white12.withOpacity(0.3),  // Custom inactive track color
-                        activeColor: Colors.green,                        // Active thumb color
-                        inactiveThumbColor: Colors.black,             // Inactive thumb color
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // Smaller tap target
-                      ),
-
-
-
-
-
+                        await appState.toggleSwitch();
+                        setState(() {});
+                      } catch (error) {
+                        print("Error: $error");
+                        displayToast("Error occurred.", context);
+                      }
+                    },
+                    activeTrackColor: Colors.green.withOpacity(0.6),
+                    inactiveTrackColor: Colors.white12.withOpacity(0.3),
+                    activeColor: Colors.green,
+                    inactiveThumbColor: Colors.black,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                 Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              FadeInDown(
-                                delay: const Duration(milliseconds: 1000),
-                                child: SizedBox(
-                                  height: 160,
-                                  width: 240,
-
-                                ),
-                              ),
-
-                            ]),
-                      ),
-                    ),
-
-                    SizedBox(
-                      height: 30,
-                    ),
-
-                    const SizedBox(
-                      height: 10,
-                    ),
-                  ]),
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          FadeInDown(
+                            delay: const Duration(milliseconds: 1000),
+                            child: SizedBox(
+                              height: 160,
+                              width: 240,
+                            ),
+                          ),
+                        ]),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                const SizedBox(height: 10),
+              ]),
             ),
-
-            ),
-
-
-
+          ),
         ],
-
-
       ),
     );
   }
 
   void locatePosition() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.bestForNavigation);
-    currentPosition = position;
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.bestForNavigation);
+      currentPosition = position;
 
-    LatLng latLatPosition = LatLng(position.latitude, position.longitude);
+      LatLng latLatPosition = LatLng(position.latitude, position.longitude);
 
-    CameraPosition cameraPosition =
-    new CameraPosition(target: latLatPosition, zoom: 14);
-    newGoogleMapController?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+      CameraPosition cameraPosition =
+      CameraPosition(target: latLatPosition, zoom: 14);
+      newGoogleMapController?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    } catch (e) {
+      print('Error locating position: $e');
+    }
   }
-
-
 
   void makeArtisanOnlineNow() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    currentPosition = position;
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        displayToast("Please sign in first", context);
+        return;
+      }
 
-    Map<String, dynamic> artisanMap = {
-      "Profilepicture":
-          Provider.of<Users>(context, listen: false).userInfo?.profilepicture??"",
-      "Username": Provider.of<WMS>(context, listen: false).riderInfo?.firstname??"",
-      "WMS_type":"WMS",
-      "client_phone": Provider.of<WMS>(context, listen: false).riderInfo?.phone!,
-      // "Experience" :Provider.of<otherUsermodel>(context,listen: false).otherinfo!.Experience!,
-      "email": Provider.of<WMS>(context, listen: false).riderInfo?.email!,
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      currentPosition = position;
 
-    };
+      Map<String, dynamic> artisanMap = {
+        "Profilepicture":
+        Provider.of<Users>(context, listen: false).userInfo?.profilepicture ?? "",
+        "Username": Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "",
+        "WMS_type": "WMS",
+        "client_phone": Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "",
+        "email": Provider.of<WMS>(context, listen: false).riderInfo?.email ?? "",
+      };
 
-    WastemanagementRef.set("searching");
-    Geofire.initialize("availableWMS");
-    Geofire.setLocation(
-FirebaseAuth.instance.currentUser!.uid,
-      currentPosition!.latitude,
-      currentPosition!.longitude,
-    );
-   await WMSAvailable.update(artisanMap);
+      WastemanagementRef.set("searching");
+      Geofire.initialize("availableWMS");
+      Geofire.setLocation(
+        user.uid,
+        currentPosition!.latitude,
+        currentPosition!.longitude,
+      );
 
-    WastemanagementRef.onValue.listen((event) {});
+      // ✅ FIX: Get the correct reference for the user
+      DatabaseReference wmsAvailableRef = FirebaseDatabase.instance
+          .ref()
+          .child("availableWMS")
+          .child(user.uid);
+      await wmsAvailableRef.update(artisanMap);
+
+      WastemanagementRef.onValue.listen((event) {});
+    } catch (e) {
+      print('Error making artisan online: $e');
+      displayToast("Error going online", context);
+    }
   }
-
-
 
   void requestNotificationPermission() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -428,25 +364,28 @@ FirebaseAuth.instance.currentUser!.uid,
     } else {
       print('User declined or has not granted permission');
     }
-
-
   }
+
   void getLocationLiveUpdates() {
     homeTabPageStreamSubscription =
         Geolocator.getPositionStream().listen((Position position) {
-      currentPosition = position;
+          currentPosition = position;
 
-      if (isArtisanAvailable == true) {
-        Geofire.setLocation(
-            currentfirebaseUser!.uid, position.latitude, position.longitude);
-      }
-
-
-    });
+          if (isArtisanAvailable == true) {
+            final user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+              Geofire.setLocation(
+                  user.uid, position.latitude, position.longitude);
+            }
+          }
+        });
   }
 
   Future<void> ArtisanActivated() async {
-    Geofire.removeLocation(currentfirebaseUser!.uid);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    Geofire.removeLocation(user.uid);
     WastemanagementRef.onDisconnect();
     WastemanagementRef.remove();
 
@@ -454,12 +393,12 @@ FirebaseAuth.instance.currentUser!.uid,
   }
 
   void makeArtisanOfflineNow() {
-    Geofire.removeLocation(currentfirebaseUser!.uid);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      Geofire.removeLocation(user.uid);
+    }
     WastemanagementRef.onDisconnect();
     WastemanagementRef.remove();
-    //rideRequestRef= null;
-    //return makeDriverOnlineNow();
-    // _restartApp();
   }
 
   displayToast(String message, BuildContext context) {

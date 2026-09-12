@@ -2,6 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- ==================== BASIC APP CONFIG ==================== -->
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -24,52 +25,73 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+
+	<!-- ==================== FIREBASE CONFIG (CRITICAL) ==================== -->
 	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
+	<true/>
+
+	<!-- ==================== NOTIFICATION PERMISSION (FIXED) ==================== -->
+	<!-- ✅ CORRECT KEY: NSNotificationUsageDescription -->
+	<key>NSNotificationUsageDescription</key>
+	<string>We use notifications to inform you about new recycling requests, service updates, and pickup schedules.</string>
+
+	<!-- ❌ REMOVE THIS - It's for macOS, not iOS -->
+	<!-- <key>NSUserNotificationAlertStyle</key>
+	<string>alert</string> -->
+
+	<!-- ==================== URL SCHEMES ==================== -->
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>googlemaps</string>
 		<string>http</string>
 		<string>https</string>
 	</array>
+
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>Your location is used to send notifications about nearby service providers and allow real-time updates, even when the app is in the background.</string>
 
-<key>NSLocationAlwaysUsageDescription</key>
-<string>We use your location to track service status and notify you about nearby updates, even when the app is not actively in use.</string>
+	<!-- ==================== LOCATION PERMISSIONS ==================== -->
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is used to send notifications about nearby service providers and allow real-time updates, even when the app is in the background.</string>
 
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>We use your location to show nearby service providers and calculate distances for accurate pricing and service availability.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We use your location to track service status and notify you about nearby updates, even when the app is not actively in use.</string>
 
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We use your location to show nearby service providers and calculate distances for accurate pricing and service availability.</string>
+
+	<!-- ==================== PHOTO LIBRARY PERMISSIONS ==================== -->
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>This app requires read and write access to the photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app requires access to the photo library.</string>
+
+	<!-- ==================== RECOMMENDED: CAMERA PERMISSION ==================== -->
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to take photos of recycling items.</string>
+
+	<!-- ==================== UI CONFIG ==================== -->
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
 
-	<!-- Permission messages -->
-    <key>NSUserNotificationAlertStyle</key>
-    <string>alert</string>
-
-
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -78,14 +100,11 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 
-
-
+	<!-- ==================== NETWORK SECURITY ==================== -->
 	<key>NSAppTransportSecurity</key>
-    <dict>
-      <key>NSAllowsArbitraryLoads</key>
-      <true/>
-    </dict>
-    <key>NSUserNotificationUsageDescription</key>
-    <string>We use notifications to inform you about requests and updates.</string>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>
