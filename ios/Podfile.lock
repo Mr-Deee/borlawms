@@ -1325,8 +1325,6 @@ PODS:
     - GeoFire (~> 5.0)
   - flutter_keyboard_visibility_temp_fork (0.0.1):
     - Flutter
-  - flutter_local_notifications (0.0.1):
-    - Flutter
   - fluttertoast (0.0.2):
     - Flutter
   - geocoding_ios (1.0.5):
@@ -1504,7 +1502,6 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_geofire (from `.symlinks/plugins/flutter_geofire/ios`)
   - flutter_keyboard_visibility_temp_fork (from `.symlinks/plugins/flutter_keyboard_visibility_temp_fork/ios`)
-  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - GeoFire (from `https://github.com/mrdishant/geofire-objc`)
@@ -1573,8 +1570,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_geofire/ios"
   flutter_keyboard_visibility_temp_fork:
     :path: ".symlinks/plugins/flutter_keyboard_visibility_temp_fork/ios"
-  flutter_local_notifications:
-    :path: ".symlinks/plugins/flutter_local_notifications/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
   geocoding_ios:
@@ -1630,10 +1625,9 @@ SPEC CHECKSUMS:
   FirebaseMessagingInterop: 2bc0ddbf26a3552c61a2efbecc8b8a3b68d383e4
   FirebaseSharedSwift: 9d9404eea60b650d3e549898bfebbb8f665fe601
   FirebaseStorage: 6dc90a86bf2a8f1dc54a6ca659ae9898465e10a0
-  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
   flutter_geofire: 4db95c0e127d63d73f3025575062058c29934018
   flutter_keyboard_visibility_temp_fork: 95b2d534bacf6ac62e7fcbe5c2a9e2c2a17ce06f
-  flutter_local_notifications: 643a3eda1ce1c0599413ca31672536d423dee214
   fluttertoast: fe6790210fdba20801685be946e3a2124b72eef5
   geocoding_ios: 33776c9ebb98d037b5e025bb0e7537f6dd19646e
   GeoFire: 4baa8569936d578ecbdd56ec4ec091017fe80985
@@ -1657,6 +1651,6 @@ SPEC CHECKSUMS:
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
 
-PODFILE CHECKSUM: a6d93d5130dce487f1c23915bc03e149ebd64046
+PODFILE CHECKSUM: ce77dc97c7e9acf2b5034ba35165900b546854a7
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.17.0

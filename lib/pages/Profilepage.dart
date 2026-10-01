@@ -31,8 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
       var email = Provider.of<WMS>(context, listen: false).riderInfo?.email ?? "";
       var fclientname = Provider.of<WMS>(context, listen: false).riderInfo?.firstname ?? "";
       var lclientname = Provider.of<WMS>(context, listen: false).riderInfo?.lastname ?? "";
-      var phoneNumber =
-          Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "";
+      var phoneNumber = Provider.of<WMS>(context, listen: false).riderInfo?.phone ?? "";
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),

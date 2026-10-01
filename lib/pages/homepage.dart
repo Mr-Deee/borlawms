@@ -72,6 +72,10 @@ class _homepageState extends State<homepage> {
 
   double bottomPaddingOfMap = 0;
 
+  // ✅ NEW: subscription that watches availableWMS/<uid>
+  StreamSubscription<DatabaseEvent>? _availabilitySubscription;
+  bool _isUpdatingFromListener = false;
+
   Future<void> requestLocationPermission() async {
     final serviceStatusLocation = await Permission.locationWhenInUse.isGranted;
 
@@ -154,6 +158,14 @@ class _homepageState extends State<homepage> {
     _startupSequence();
   }
 
+  @override
+  void dispose() {
+    // ✅ NEW: clean up listeners
+    _availabilitySubscription?.cancel();
+    homeTabPageStreamSubscription?.cancel();
+    super.dispose();
+  }
+
   bool isSwitched = false;
 
   Future<void> _startupSequence() async {
@@ -164,6 +176,47 @@ class _homepageState extends State<homepage> {
     await getCurrentWMSInfo();
     AssistantMethod.getCurrentrequestinfo(context);
     AssistantMethod.obtainTripRequestsHistoryData(context);
+
+    // ✅ NEW: after we know the user, start watching their availability node
+    await _listenToAvailability();
+  }
+
+  /// ✅ NEW: watches availableWMS/<uid> and syncs the switch
+  Future<void> _listenToAvailability() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // Cancel any previous listener
+    await _availabilitySubscription?.cancel();
+
+    _availabilitySubscription = FirebaseDatabase.instance
+        .ref()
+        .child('availableWMS')
+        .child(user.uid)
+        .onValue
+        .listen((event) {
+      final bool isOnline = event.snapshot.value != null;
+
+      if (!mounted) return;
+
+      final appState = context.read<AppState>();
+
+      // Only update if it actually changed
+      if (appState.isSwitched != isOnline) {
+        _isUpdatingFromListener = true;
+        appState.setSwitch(isOnline);
+        _isUpdatingFromListener = false;
+        setState(() {});
+
+        // Keep geofire in sync when toggled externally
+        if (isOnline) {
+          isArtisanAvailable = true;
+          getLocationLiveUpdates();
+        } else {
+          isArtisanAvailable = false;
+        }
+      }
+    });
   }
 
   @override
@@ -191,7 +244,7 @@ class _homepageState extends State<homepage> {
               locatePosition();
             },
           ),
-          //hamburger for drawer
+          // hamburger for drawer
           Positioned(
             top: 30.0,
             left: 10.0,
@@ -237,22 +290,21 @@ class _homepageState extends State<homepage> {
               child: Column(children: [
                 if (Provider.of<WMS>(context).riderInfo?.firstname != null)
                   Switch(
+                    // ✅ Switch now reflects Firebase state
                     value: context.watch<AppState>().isSwitched,
                     onChanged: (value) async {
-                      final appState = context.read<AppState>();
-
                       try {
                         if (value) {
-                          makeArtisanOnlineNow();
+                          await makeArtisanOnlineNow();
+                          isArtisanAvailable = true;
                           getLocationLiveUpdates();
                           displayToast("Online.", context);
                         } else {
-                          makeArtisanOfflineNow();
+                          await makeArtisanOfflineNow();
+                          isArtisanAvailable = false;
                           displayToast("Offline.", context);
                         }
-
-                        await appState.toggleSwitch();
-                        setState(() {});
+                        // No manual toggle here — the listener updates the UI
                       } catch (error) {
                         print("Error: $error");
                         displayToast("Error occurred.", context);
@@ -273,7 +325,7 @@ class _homepageState extends State<homepage> {
                         children: [
                           FadeInDown(
                             delay: const Duration(milliseconds: 1000),
-                            child: SizedBox(
+                            child: const SizedBox(
                               height: 160,
                               width: 240,
                             ),
@@ -307,7 +359,7 @@ class _homepageState extends State<homepage> {
     }
   }
 
-  void makeArtisanOnlineNow() async {
+  Future<void> makeArtisanOnlineNow() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
@@ -336,12 +388,16 @@ class _homepageState extends State<homepage> {
         currentPosition!.longitude,
       );
 
-      // ✅ FIX: Get the correct reference for the user
+      // ✅ This is what the listener watches
       DatabaseReference wmsAvailableRef = FirebaseDatabase.instance
           .ref()
           .child("availableWMS")
           .child(user.uid);
-      await wmsAvailableRef.update(artisanMap);
+
+      // Auto-remove on disconnect
+      wmsAvailableRef.onDisconnect().remove();
+
+      await wmsAvailableRef.set(artisanMap);
 
       WastemanagementRef.onValue.listen((event) {});
     } catch (e) {
@@ -367,6 +423,7 @@ class _homepageState extends State<homepage> {
   }
 
   void getLocationLiveUpdates() {
+    homeTabPageStreamSubscription?.cancel();
     homeTabPageStreamSubscription =
         Geolocator.getPositionStream().listen((Position position) {
           currentPosition = position;
@@ -392,13 +449,25 @@ class _homepageState extends State<homepage> {
     displayToast("Sorry You are not Activated", context);
   }
 
-  void makeArtisanOfflineNow() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
+  Future<void> makeArtisanOfflineNow() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
       Geofire.removeLocation(user.uid);
+
+      // ✅ Remove from availableWMS → listener flips the switch off
+      await FirebaseDatabase.instance
+          .ref()
+          .child("availableWMS")
+          .child(user.uid)
+          .remove();
+
+      WastemanagementRef.onDisconnect();
+      WastemanagementRef.remove();
+    } catch (e) {
+      print('Error making artisan offline: $e');
     }
-    WastemanagementRef.onDisconnect();
-    WastemanagementRef.remove();
   }
 
   displayToast(String message, BuildContext context) {

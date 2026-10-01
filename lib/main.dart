@@ -76,6 +76,7 @@ void main() async {
     providers: [
       ChangeNotifierProvider<AppData>(create: (context) => AppData()),
       ChangeNotifierProvider<Users>(create: (context) => Users()),
+      ChangeNotifierProvider<Users>(create: (context) => Users()),
       ChangeNotifierProvider<ReqModel>(create: (context) => ReqModel()),
       ChangeNotifierProvider<WMS>(create: (context) => WMS()),
       ChangeNotifierProvider<helper>(create: (context) => helper()),
@@ -319,14 +320,14 @@ void _handleForegroundMessage(RemoteMessage message, BuildContext context) {
     print('Message data: ${message.data}');
     print('Message notification: ${message.notification?.title}');
 
-    if (message.notification != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message.notification?.title ?? 'New notification'),
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
+    // if (message.notification != null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     // SnackBar(
+    //     //   content: Text(message.notification?.title ?? 'New notification'),
+    //     //   duration: const Duration(seconds: 3),
+    //     // ),
+    //   );
+   // }
 
     _handleMessageTap(message, context);
   } catch (e) {

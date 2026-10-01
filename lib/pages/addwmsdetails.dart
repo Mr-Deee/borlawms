@@ -39,7 +39,7 @@ class _AddWmsDetailsState extends State<AddWmsDetails> with SingleTickerProvider
   File? _CompRegFile;
   File? _registrationDocFile;
   Uint8List? _registrationDocBytes;
-  String _selectedType = 'Waste Management Service';
+  String _selectedType = 'WMS';
   bool _acceptScheduledRequests = false;
   int _currentStep = 0;
 
@@ -340,7 +340,7 @@ class _AddWmsDetailsState extends State<AddWmsDetails> with SingleTickerProvider
 
   Widget _buildConditionalForm() {
     switch (_selectedType) {
-      case 'Waste Management Service':
+      case 'WMS':
         return WasteManagementForm();
       case 'Recycling':
         return RecyclingForm();
